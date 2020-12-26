@@ -2657,7 +2657,7 @@ uint16_t WS2812FX::mode_sinelon_dual(void) {
 }
 
 uint16_t WS2812FX::mode_sinelon_rainbow(void) {
-  return sinelon_base(true, true);
+  return sinelon_base(false, true);
 }
 
 
