@@ -776,7 +776,7 @@ function requestJson(command, rinfo = true, verbose = true) {
 	var e1 = d.getElementById('fxlist');
 	var e2 = d.getElementById('selectPalette');
 
-	var url = rinfo ? '/json/si': (command ? '/json/state':'/json');
+	var url = rinfo ? '/json/si': (command ? '/json/state':'/json/si');
 	if (loc) {
 		url = `http://${locip}${url}`;
 	}
