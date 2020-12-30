@@ -537,17 +537,15 @@ function populateInfo(i)
 	if (pwr > 1000) {pwr /= 1000; pwr = pwr.toFixed((pwr > 10) ? 0 : 1); pwru = pwr + " A";}
 	else if (pwr > 0) {pwr = 50 * Math.round(pwr/50); pwru = pwr + " mA";}
 	var urows="";
-	if (i.u)
-		for (const [key, value] of Object.entries(i.u)) {
-			if ( value )
-				for ([k,v] of Object.entries(value)) {
-					if (v[1]) {
-						urows += inforow(k,v[0],v[1]);
-					} else {
-						urows += inforow(k,v);
-					}
-				}
+	if (i.u) {
+		for (const [k, v] of Object.entries(i.u)) {
+			if (v[1]) {
+				urows += inforow(k,v[0],v[1]);
+			} else {
+				urows += inforow(k,v);
+			}
 		}
+	}
 	var vcn = "Kuuhaku";
 	if (i.ver.startsWith("0.11.")) vcn = "Mirai";
 	if (i.cn) vcn = i.cn;
