@@ -538,15 +538,16 @@ function populateInfo(i)
 	else if (pwr > 0) {pwr = 50 * Math.round(pwr/50); pwru = pwr + " mA";}
   var urows="";
   if (i.u) {
-    for (var k = 0; k < i.u.length; k++)
-    {
-      var val = i.u[k];
-      if (val[1]) {
-        urows += inforow(k,val[0],val[1]);
-      } else {
-        urows += inforow(k,val);
-      }
-    }
+	for (const [key, value] of Object.entries(i.u)) {
+		if ( value )
+			for ([k,v] of Object.entries(value)) {
+				if (v[1]) {
+					urows += inforow(k,v[0],v[1]);
+				} else {
+					urows += inforow(k,v);
+				}
+			}
+	}
   }
 	var vcn = "Kuuhaku";
 	if (i.ver.startsWith("0.11.")) vcn = "Mirai";
