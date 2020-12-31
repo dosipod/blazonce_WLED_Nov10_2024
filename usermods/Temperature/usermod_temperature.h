@@ -60,6 +60,7 @@ class UsermodTemperature : public Usermod {
     }
 
     void getTemperature() {
+      if (strip.isUpdating()) return;
       #ifdef USERMOD_DALLASTEMPERATURE_CELSIUS
       temperature = sensor.getTempC(sensorDeviceAddress);
       #else
@@ -93,7 +94,7 @@ class UsermodTemperature : public Usermod {
     }
 
     void loop() {
-      if (disabled) {
+      if (disabled || strip.isUpdating()) {
         return;
       }
       
