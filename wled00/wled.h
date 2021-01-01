@@ -8,7 +8,11 @@
  */
 
 // version code in format yymmddb (b = daily build)
+<<<<<<< HEAD
 #define VERSION 2012300
+=======
+#define VERSION 2012311
+>>>>>>> master
 
 //uncomment this if you have a "my_config.h" file you'd like to use
 //#define WLED_USE_MY_CONFIG
