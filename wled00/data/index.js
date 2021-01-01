@@ -536,18 +536,6 @@ function populateInfo(i)
 	var pwru = "Not calculated";
 	if (pwr > 1000) {pwr /= 1000; pwr = pwr.toFixed((pwr > 10) ? 0 : 1); pwru = pwr + " A";}
 	else if (pwr > 0) {pwr = 50 * Math.round(pwr/50); pwru = pwr + " mA";}
-<<<<<<< HEAD
-	var urows="";
-	if (i.u) {
-		for (const [k, v] of Object.entries(i.u)) {
-			if (v[1]) {
-				urows += inforow(k,v[0],v[1]);
-			} else {
-				urows += inforow(k,v);
-			}
-		}
-	}
-=======
   var urows="";
   if (i.u) {
     for (const [k, val] of Object.entries(i.u))
@@ -559,7 +547,6 @@ function populateInfo(i)
       }
     }
   }
->>>>>>> master
 	var vcn = "Kuuhaku";
 	if (i.ver.startsWith("0.11.")) vcn = "Mirai";
 	if (i.cn) vcn = i.cn;
