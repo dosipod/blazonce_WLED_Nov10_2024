@@ -29,6 +29,8 @@
 
 #ifdef ESP32_MULTISTRIP
   #include "../usermods/esp32_multistrip/NpbWrapper.h"
+#elif defined(ESP8266_MULTISTRIP)
+  #include "../usermods/esp8266_multistrip/NpbWrapper.h"
 #else
   #include "NpbWrapper.h"
 #endif
