@@ -55,10 +55,17 @@
       d.getElementById('ledwarning').style.display = (d.Sf.LC.value > 1000) ? 'inline':'none';
       d.getElementById('ampwarning').style.display = (d.Sf.MA.value > 7200) ? 'inline':'none';
 	  
-	  if (d.Sf.LA.value == 255) laprev = 12;
-	  else if (d.Sf.LA.value > 0) laprev = d.Sf.LA.value;
-			
-			var val = Math.ceil((100 + d.Sf.LC.value * laprev)/500)/2;
+	    if (d.Sf.LA.value == 255) laprev = 12;
+	    else if (d.Sf.LA.value > 0) laprev = d.Sf.LA.value;
+      
+      var LCs = d.getElementsByTagName("input");
+      var sLC = 0;
+      for (i=0; i<LCs.length; i++) {
+        if (LCs[i].name.substring(0,2)!="LC") continue;
+        sLC+=parseInt(LCs[i].value);
+      }
+      //var val = Math.ceil((100 + d.Sf.LC.value * laprev)/500)/2;
+      var val = Math.ceil((100 + sLC * laprev)/500)/2;
 			val = (val > 5) ? Math.ceil(val) : val;
 			var s = "";
       var is12V = (d.Sf.LAsel.value == 30);
@@ -79,11 +86,44 @@
       s2 += "A is enough)<br>";
 			d.getElementById('psu').innerHTML = s;
       d.getElementById('psu2').innerHTML = isWS2815 ? "" : s2;
-		}
+    }
+    
+    function addLEDs(i,n) {
+      if(i>n)return;
+      var f = d.getElementById("mLC");
+      if(i>0){
+        var b = d.getElementById("LB"+(i-1));
+        if (b) b.style.display="none";
+        f.appendChild(d.createElement("br"));
+        f.appendChild(d.createTextNode("Strip "+(i+1)+" pin "));
+        var e = d.createElement("input");
+        e.type = "number";
+        e.value = "";
+        e.name = "LP"+i;
+        e.min=0; e.max=20;
+        f.appendChild(e);
+        f.appendChild(d.createTextNode(" & count: "));
+        e = d.createElement("input");
+        e.type = "number";
+        e.value = "";
+        e.name = "LC"+i;
+        e.min=0; e.max=500;
+        e.oninput = function(){UI()};
+        f.appendChild(e);
+      }
+      if(i<n-1){
+        e = d.createElement("button");
+        e.type = "button";
+        e.id = "LB"+i;
+        e.onclick = function(){addLEDs(i+1,n);};
+        e.innerText = "+";
+        f.appendChild(e);
+      }
+    }
 		function GetV()
 		{
 			//values injected by server while sending HTML
-		}
+    }
 	</script>
 	<style>
 		@import url("style.css");
@@ -94,7 +134,7 @@
 		<div class="helpB"><button type="button" onclick="H()">?</button></div>
 		<button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr>
 		<h2>LED setup</h2>
-		LED count: <input name="LC" type="number" min="1" max="1500" oninput="UI()" required><br>
+    <div id="mLC">LED pin <input name="LP" type="number" min="0" max="20"> &amp; count: <input name="LC" type="number" min="1" max="1500" oninput="UI()" required></div><br>
     <div id="ledwarning" style="color: orange; display: none;">
         &#9888; You might run into stability or lag issues.<br>
         Use less than 1000 LEDs per ESP for the best experience!<br>

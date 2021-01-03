@@ -28,10 +28,13 @@
 #define WS2812FX_h
 
 #ifdef ESP32_MULTISTRIP
+  #define MAX_NUMBER_OF_STRIPS 8
   #include "../usermods/esp32_multistrip/NpbWrapper.h"
 #elif defined(ESP8266_MULTISTRIP)
+  #define MAX_NUMBER_OF_STRIPS 4
   #include "../usermods/esp8266_multistrip/NpbWrapper.h"
 #else
+  #define MAX_NUMBER_OF_STRIPS 1
   #include "NpbWrapper.h"
 #endif
 
@@ -524,6 +527,9 @@ class WS2812FX {
       paletteFade = 0,
       paletteBlend = 0,
       milliampsPerLed = 55,
+      numStrips = 1,
+      setStripPin(uint8_t strip=0, uint8_t pin=LEDPIN),
+      getStripPin(uint8_t strip=0),
       getBrightness(void),
       getMode(void),
       getSpeed(void),
@@ -543,6 +549,8 @@ class WS2812FX {
     uint16_t
       ablMilliampsMax,
       currentMilliamps,
+      setStripLen(uint8_t strip, uint16_t len),
+      getStripLen(uint8_t strip=0),
       triwave16(uint16_t);
 
     uint32_t
@@ -689,6 +697,9 @@ class WS2812FX {
 
   private:
     NeoPixelWrapper *bus;
+
+    uint8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
+    uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
 
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);

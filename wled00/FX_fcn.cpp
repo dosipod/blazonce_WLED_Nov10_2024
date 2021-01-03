@@ -63,12 +63,34 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
     _lengthRaw += LED_SKIP_AMOUNT;
   }
 
+  // we could skip this if we pass "this" pointer to bus->Begin()
+  bus->initStrips(numStrips, _stripPin, _stripLen);
   bus->Begin((NeoPixelType)ty, _lengthRaw);
   
   _segments[0].start = 0;
   _segments[0].stop = _length;
 
   setBrightness(_brightness);
+}
+
+uint8_t WS2812FX::setStripPin(uint8_t strip, uint8_t pin) {
+  if (strip > numStrips ) return 0;
+  return _stripPin[strip] = pin;
+}
+
+uint8_t WS2812FX::getStripPin(uint8_t strip) {
+  if (strip > numStrips ) return 0;
+  return _stripPin[strip];
+}
+
+uint16_t WS2812FX::setStripLen(uint8_t strip, uint16_t len) {
+  if (strip > numStrips ) return 0;
+  return _stripLen[strip] = len;
+}
+
+uint16_t WS2812FX::getStripLen(uint8_t strip) {
+  if (strip > numStrips ) return 0;
+  return _stripLen[strip];
 }
 
 void WS2812FX::service() {

@@ -71,7 +71,34 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   //LED SETTINGS
   if (subPage == 2)
   {
-    int t = request->arg(F("LC")).toInt();
+    String LC=F("LC"), LP=F("LP");
+    int t = strip.setStripLen(0, request->arg(LC).toInt());
+    strip.setStripPin(0, request->arg(LP).toInt());
+    strip.numStrips = 1;
+
+    #if defined(ESP32_MULTISTRIP) || defined(ESP8266_MULTISTRIP)
+    for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
+      DEBUG_PRINT(i);
+      DEBUG_PRINT(F(":"));
+      if ( request->hasArg((LP+i).c_str()) ) {
+        strip.setStripPin(i, request->arg((LP+i).c_str()).toInt());
+        DEBUG_PRINT(F(" LP="));
+        DEBUG_PRINT(request->arg(LP+i));
+      } else {
+        break;
+      }
+      if ( request->hasArg((LC+i).c_str()) && request->arg((LC+i).c_str()).toInt() > 0 ) {
+        t += strip.setStripLen(i, request->arg((LC+i).c_str()).toInt());
+        DEBUG_PRINT(F(" LC="));
+        DEBUG_PRINT(request->arg(LP+i));
+      } else {
+        break;
+      }
+      strip.numStrips++;
+      DEBUG_PRINTLN(F(" Done."));
+    }
+    #endif
+
     if (t > 0 && t <= MAX_LEDS) ledCount = t;
     #ifdef ESP8266
     #if LEDPIN == 3

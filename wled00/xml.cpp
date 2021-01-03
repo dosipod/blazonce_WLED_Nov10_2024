@@ -255,7 +255,30 @@ void getSettingsJS(byte subPage, char* dest)
     oappend(SET_F("d.Sf.LC.max=1500;"));
     #endif
     #endif
-    sappend('v',SET_F("LC"),ledCount);
+    //sappend('v',SET_F("LC"),ledCount);
+    sappend('v',SET_F("LP"),strip.getStripPin(0));
+    sappend('v',SET_F("LC"),strip.getStripLen(0));
+    if (strip.numStrips==1) {
+      char nS[3];
+      oappend(SET_F("addLEDs("));
+      oappend(itoa(0,nS,10));
+      oappend(SET_F(","));
+      oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
+      oappend(SET_F(");"));
+    }
+    for (uint8_t s=1; s<strip.numStrips; s++){
+      String LP = F("LP"), LC = F("LC");
+      LP += s; LC += s;
+      char nS[3];
+      oappend(SET_F("addLEDs("));
+      oappend(itoa(s,nS,10));
+      oappend(SET_F(","));
+      oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
+      oappend(SET_F(");"));
+
+      sappend('v',LP.c_str(),strip.getStripPin(s));
+      sappend('v',LC.c_str(),strip.getStripLen(s));
+    }
     sappend('v',SET_F("MA"),strip.ablMilliampsMax);
     sappend('v',SET_F("LA"),strip.milliampsPerLed);
     if (strip.currentMilliamps)
