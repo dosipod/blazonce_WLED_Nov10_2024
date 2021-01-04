@@ -95,7 +95,8 @@ void handleIO()
     }
   } else if (millis() - lastOnTime > 600)
   {
-     if (!offMode) {
+    if (!offMode) {
+      #ifdef ESP8266
       for (uint8_t s=0; s<strip.numStrips; s++) {
         if (strip.getStripPin(s)==LED_BUILTIN) {
           pinMode(LED_BUILTIN, OUTPUT);
@@ -103,10 +104,11 @@ void handleIO()
           break;
         }
       }
+      #endif
       #if RLYPIN >= 0
        digitalWrite(RLYPIN, !RLYMDE);
       #endif
-     }
+    }
     offMode = true;
   }
 
