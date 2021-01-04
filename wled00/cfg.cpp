@@ -97,7 +97,7 @@ void deserializeConfig() {
   if (strVar.is<JsonObject>()) {
     strip.numStrips = 1;
     strip.setStripLen(0, 30);
-    strip.setStripPin(0, LEDPIN);
+    strip.setStripPin(0, 2); // fail-safe
     DEBUG_PRINTLN(F("Object, not an array."));
   } else {
     JsonArray elms = strVar.as<JsonArray>();

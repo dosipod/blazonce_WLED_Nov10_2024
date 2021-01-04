@@ -528,7 +528,7 @@ class WS2812FX {
       paletteBlend = 0,
       milliampsPerLed = 55,
       numStrips = 1,
-      setStripPin(uint8_t strip=0, uint8_t pin=LEDPIN),
+      setStripPin(uint8_t strip, uint8_t pin),
       getStripPin(uint8_t strip=0),
       getBrightness(void),
       getMode(void),
@@ -699,6 +699,7 @@ class WS2812FX {
     NeoPixelWrapper *bus;
 
     uint8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
+    uint8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
 
     uint32_t crgb_to_col(CRGB fastled);

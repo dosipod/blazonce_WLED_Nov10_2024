@@ -245,8 +245,16 @@ void WLED::setup()
   updateFSInfo();
   deserializeConfig();
 
-#if STATUSLED && STATUSLED != LEDPIN
-  pinMode(STATUSLED, OUTPUT);
+#if STATUSLED
+  bool lStatusLed = false;
+  for (uint8_t i=0; i<strip.numStrips; i++) {
+    if (strip.getStripPin(i)==STATUSLED) {
+      lStatusLed = true;
+      break;
+    }
+  }
+  if (!lStatusLed)
+    pinMode(STATUSLED, OUTPUT);
 #endif
 
   //DEBUG_PRINTLN(F("Load EEPROM"));
@@ -303,12 +311,14 @@ void WLED::setup()
 void WLED::beginStrip()
 {
   // Initialize NeoPixel Strip and button
-  #ifdef ESP8266
-  #if LEDPIN == 3
-    if (ledCount > MAX_LEDS_DMA)
-      ledCount = MAX_LEDS_DMA;        // DMA method uses too much ram
-  #endif
-  #endif
+
+// This should be taken care elsewhere
+//  #ifdef ESP8266
+//  #if LEDPIN == 3
+//    if (ledCount > MAX_LEDS_DMA)
+//      ledCount = MAX_LEDS_DMA;        // DMA method uses too much ram
+//  #endif
+//  #endif
 
   if (ledCount > MAX_LEDS || ledCount == 0)
     ledCount = 30;
@@ -583,7 +593,13 @@ void WLED::handleConnection()
 
 void WLED::handleStatusLED()
 {
-  #if STATUSLED && STATUSLED != LEDPIN
+  #if STATUSLED
+  for (uint8_t s=0; s<strip.numStrips; s++) {
+    if (strip.getStripPin(s)==STATUSLED) {
+      return; // pin used for strip
+    }
+  }
+
   ledStatusType = WLED_CONNECTED ? 0 : 2;
   if (mqttEnabled && ledStatusType != 2) // Wi-Fi takes presendence over MQTT
     ledStatusType = WLED_MQTT_CONNECTED ? 0 : 4;

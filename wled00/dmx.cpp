@@ -14,6 +14,12 @@ void handleDMX()
   // don't act, when in DMX Proxy mode
   if (e131ProxyUniverse != 0) return;
 
+  #ifdef ESP8266
+  for (uint8_t i=0; i<strip.numStrips; i++) {
+    if (strip.getStripPin[i])==2) return; //pin 2 conflicts with DMX
+  }
+  #endif
+
   // TODO: calculate brightness manually if no shutter channel is set
 
   uint8_t brightness = strip.getBrightness();
@@ -61,10 +67,6 @@ void handleDMX()
 void initDMX() {
   dmx.init(512);        // initialize with bus length
 }
-
-#if (LEDPIN == 2)
-  #pragma message "Pin conflict compiling with DMX and LEDs on pin 2. Please set a different LEDPIN."
-#endif
 
 #else
 void handleDMX() {}

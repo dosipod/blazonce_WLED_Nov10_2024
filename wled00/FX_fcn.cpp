@@ -83,6 +83,16 @@ uint8_t WS2812FX::getStripPin(uint8_t strip) {
   return _stripPin[strip];
 }
 
+uint8_t WS2812FX::setStripPinClk(uint8_t strip, uint8_t pin) {
+  if (strip > numStrips ) return 0;
+  return _stripPinClk[strip] = pin;
+}
+
+uint8_t WS2812FX::getStripPinClk(uint8_t strip) {
+  if (strip > numStrips ) return 0;
+  return _stripPinClk[strip];
+}
+
 uint16_t WS2812FX::setStripLen(uint8_t strip, uint16_t len) {
   if (strip > numStrips ) return 0;
   return _stripLen[strip] = len;
@@ -435,17 +445,18 @@ void WS2812FX::setBrightness(uint8_t b) {
     {
       _segments[i].setOption(SEG_OPTION_FREEZE, false);
     }
-    #if LEDPIN == LED_BUILTIN
-      shouldStartBus = true;
-    #endif
-  } else {
-    #if LEDPIN == LED_BUILTIN
-      if (shouldStartBus) {
-        shouldStartBus = false;
-        const uint8_t ty = _useRgbw ? 2 : 1;
-        bus->Begin((NeoPixelType)ty, _lengthRaw);
+    for (uint8_t s=1; s<numStrips; s++) {
+      if (getStripPin(s)==LED_BUILTIN) {
+        shouldStartBus = true;
+        break;
       }
-    #endif
+    }
+  } else {
+    if (shouldStartBus) {
+      shouldStartBus = false;
+      const uint8_t ty = _useRgbw ? 2 : 1;
+      bus->Begin((NeoPixelType)ty, _lengthRaw);
+    }
   }
   if (SEGENV.next_time > millis() + 22 && millis() - _lastShow > MIN_SHOW_DELAY) show();//apply brightness change immediately if no refresh soon
 }

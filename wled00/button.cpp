@@ -96,10 +96,13 @@ void handleIO()
   } else if (millis() - lastOnTime > 600)
   {
      if (!offMode) {
-      #if LEDPIN == LED_BUILTIN
-        pinMode(LED_BUILTIN, OUTPUT);
-        digitalWrite(LED_BUILTIN, HIGH);
-      #endif
+      for (uint8_t s=0; s<strip.numStrips; s++) {
+        if (strip.getStripPin(s)==LED_BUILTIN) {
+          pinMode(LED_BUILTIN, OUTPUT);
+          digitalWrite(LED_BUILTIN, HIGH);
+          break;
+        }
+      }
       #if RLYPIN >= 0
        digitalWrite(RLYPIN, !RLYMDE);
       #endif

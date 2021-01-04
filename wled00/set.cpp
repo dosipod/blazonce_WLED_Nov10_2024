@@ -100,11 +100,12 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     #endif
 
     if (t > 0 && t <= MAX_LEDS) ledCount = t;
-    #ifdef ESP8266
-    #if LEDPIN == 3
-    if (ledCount > MAX_LEDS_DMA) ledCount = MAX_LEDS_DMA; //DMA method uses too much ram
-    #endif
-    #endif
+    // should be taken care elsewhere
+    //#ifdef ESP8266
+    //#if LEDPIN == 3
+    //if (ledCount > MAX_LEDS_DMA) ledCount = MAX_LEDS_DMA; //DMA method uses too much ram
+    //#endif
+    //#endif
     strip.ablMilliampsMax = request->arg(F("MA")).toInt();
     strip.milliampsPerLed = request->arg(F("LA")).toInt();
     

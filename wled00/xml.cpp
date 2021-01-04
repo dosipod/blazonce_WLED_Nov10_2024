@@ -249,11 +249,10 @@ void getSettingsJS(byte subPage, char* dest)
 
   if (subPage == 2) {
     #ifdef ESP8266
-    #if LEDPIN == 3
-    oappend(SET_F("d.Sf.LC.max=500;"));
-    #else
-    oappend(SET_F("d.Sf.LC.max=1500;"));
-    #endif
+    if (strip.getStripPin(0)==3)
+      oappend(SET_F("d.Sf.LC.max=500;"));
+    else
+      oappend(SET_F("d.Sf.LC.max=1500;"));
     #endif
     //sappend('v',SET_F("LC"),ledCount);
     sappend('v',SET_F("LP"),strip.getStripPin(0));
@@ -278,6 +277,17 @@ void getSettingsJS(byte subPage, char* dest)
 
       sappend('v',LP.c_str(),strip.getStripPin(s));
       sappend('v',LC.c_str(),strip.getStripLen(s));
+      #ifdef ESP8266
+      if (strip.getStripPin(s)==3) {
+        oappend(SET_F("d.Sf."));
+        oappend(LC.c_str());
+        oappend(SET_F(".max=500;"));
+      } else {
+        oappend(SET_F("d.Sf."));
+        oappend(LC.c_str());
+        oappend(SET_F(".max=1500;"));
+      }
+      #endif
     }
     sappend('v',SET_F("MA"),strip.ablMilliampsMax);
     sappend('v',SET_F("LA"),strip.milliampsPerLed);
