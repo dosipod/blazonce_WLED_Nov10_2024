@@ -72,43 +72,75 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   if (subPage == 2)
   {
     String LC=F("LC"), LP=F("LP"), LK=F("LK");
-    int t = strip.setStripLen(0, request->arg(LC).toInt());
-    strip.setStripPin(0, request->arg(LP).toInt());
+    uint8_t pin;
+    int t;
+
+    // deallocate all pins
+    for (uint8_t s=0; s<strip.numStrips; s++) {
+      pinManager.deallocatePin(strip.getStripPin(s));
+      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+      pinManager.deallocatePin(strip.getStripPinClk(s));
+      #endif
+    }
+
+    pin = request->arg(LP).toInt();
+    if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+      t = strip.setStripLen(0, request->arg(LC).toInt());
+      pinManager.allocatePin(strip.setStripPin(0, pin));
+    } else {
+      // fallback
+      t = strip.setStripLen(0, 30);
+      pinManager.allocatePin(strip.setStripPin(0, 2));
+    }
+    #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+    if ( request->hasArg(LK.c_str()) ) {
+      pin = request->arg(LK).toInt();
+      if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+        pinManager.allocatePin(strip.setStripPinClk(0, pin));
+      } else {
+        // fallback
+        pinManager.allocatePin(strip.setStripPinClk(0, 0));
+      }
+    }
+    #endif
     strip.numStrips = 1;
 
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
-      DEBUG_PRINT(i);
-      DEBUG_PRINT(F(":"));
       if ( request->hasArg((LP+i).c_str()) ) {
-        strip.setStripPin(i, request->arg((LP+i).c_str()).toInt());
-        DEBUG_PRINT(F(" LP="));
-        DEBUG_PRINT(request->arg(LP+i));
-        #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
-        strip.setStripPinClk(i, request->arg((LK+i).c_str()).toInt());
-        DEBUG_PRINT(F(" LK="));
-        DEBUG_PRINT(request->arg(LK+i));
-        #endif
+        pin = request->arg((LP+i).c_str()).toInt();
+        if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+          pinManager.allocatePin(strip.setStripPin(i, pin));
+        } else {
+          break; // pin not ok
+        }
       } else {
-        break;
+        break;  // no parameter
       }
+      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+      if ( request->hasArg((LK+i).c_str()) ) {
+        pin = request->arg((LK+i).c_str()).toInt();
+        if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+          pinManager.allocatePin(strip.setStripPinClk(i, pin));
+        } else {
+          break;  // pin not ok
+        }
+      } else {
+        break;  // no paramter
+      }
+      #endif
       if ( request->hasArg((LC+i).c_str()) && request->arg((LC+i).c_str()).toInt() > 0 ) {
         t += strip.setStripLen(i, request->arg((LC+i).c_str()).toInt());
-        DEBUG_PRINT(F(" LC="));
-        DEBUG_PRINT(request->arg(LP+i));
       } else {
-        break;
+        break;  // no parameter
       }
       strip.numStrips++;
-      DEBUG_PRINTLN(F(" Done."));
     }
 
     if (t > 0 && t <= MAX_LEDS) ledCount = t;
-    // should be taken care elsewhere
-    //#ifdef ESP8266
-    //#if LEDPIN == 3
-    //if (ledCount > MAX_LEDS_DMA) ledCount = MAX_LEDS_DMA; //DMA method uses too much ram
-    //#endif
-    //#endif
+    #ifdef ESP8266
+    if ( pinManager.isPinAllocated(3) && ledCount > MAX_LEDS_DMA) ledCount = MAX_LEDS_DMA; //DMA method uses too much ram
+    #endif
+
     strip.ablMilliampsMax = request->arg(F("MA")).toInt();
     strip.milliampsPerLed = request->arg(F("LA")).toInt();
     

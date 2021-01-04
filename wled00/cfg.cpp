@@ -97,15 +97,29 @@ void deserializeConfig() {
   if (strVar.is<JsonObject>()) {
     strip.numStrips = 1;
     strip.setStripLen(0, 30);
-    strip.setStripPin(0, 2); // fail-safe
+    pinManager.allocatePin(strip.setStripPin(0, 2), true); // fail-safe
+    pinManager.allocatePin(strip.setStripPinClk(0, 0), true); // fail-safe
     DEBUG_PRINTLN(F("Object, not an array."));
   } else {
     JsonArray elms = strVar.as<JsonArray>();
     uint8_t s=0;
     for ( JsonObject elm : elms ) {
       if (s>MAX_NUMBER_OF_STRIPS) break;
+      uint8_t pin = elm[F("pin")][0];
+      if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+        pinManager.allocatePin(strip.setStripPin(s, pin));
+      } else {
+        break; // pin not ok
+      }
+      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+      pin = elm[F("pin")][1];
+      if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+        pinManager.allocatePin(strip.setStripPinClk(s, pin));
+      } else {
+        break; // pin not ok
+      }
+      #endif
       strip.setStripLen(s, elm[F("len")]);
-      strip.setStripPin(s, elm[F("pin")][0]);
       strip.setColorOrder(elm[F("order")]);
       skipFirstLed = elm[F("skip")]; // 0
       useRGBW = (elm[F("type")] == TYPE_SK6812_RGBW);
@@ -113,6 +127,7 @@ void deserializeConfig() {
       strip.numStrips = ++s;
     }
     if (strip.numStrips<1 || strip.numStrips>MAX_NUMBER_OF_STRIPS) strip.numStrips = 1;
+    if (strip.getStripLen(0)==0) strip.setStripLen(0, 30);
   }
 
   JsonObject hw_btn_ins_0 = hw[F("btn")][F("ins")][0];

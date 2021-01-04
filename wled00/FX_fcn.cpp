@@ -24,6 +24,7 @@
   Modified heavily for WLED
 */
 
+#include "wled.h"
 #include "FX.h"
 #include "palettes.h"
 
@@ -66,7 +67,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
   // we could skip this if we pass "this" pointer to bus->Begin()
   bus->initStrips(numStrips, _stripPin, _stripLen);
   bus->Begin((NeoPixelType)ty, _lengthRaw);
-  
+
   _segments[0].start = 0;
   _segments[0].stop = _length;
 
