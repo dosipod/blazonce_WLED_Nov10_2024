@@ -95,11 +95,18 @@
         var b = d.getElementById("LB"+(i-1));
         if (b) b.style.display="none";
         f.appendChild(d.createElement("br"));
-        f.appendChild(d.createTextNode("Strip "+(i+1)+" pin "));
+        f.appendChild(d.createTextNode("Strip "+(i+1)+" pin D:"));
         var e = d.createElement("input");
         e.type = "number";
         e.value = "";
         e.name = "LP"+i;
+        e.min=0; e.max=20;
+        f.appendChild(e);
+        f.appendChild(d.createTextNode(" C:"));
+        e = d.createElement("input");
+        e.type = "number";
+        e.value = "";
+        e.name = "LK"+i;
         e.min=0; e.max=20;
         f.appendChild(e);
         f.appendChild(d.createTextNode(" & count: "));
@@ -134,7 +141,7 @@
 		<div class="helpB"><button type="button" onclick="H()">?</button></div>
 		<button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr>
 		<h2>LED setup</h2>
-    <div id="mLC">LED pin <input name="LP" type="number" min="0" max="20"> &amp; count: <input name="LC" type="number" min="1" max="1500" oninput="UI()" required></div><br>
+    <div id="mLC">LED pin D:<input name="LP" type="number" min="0" max="20"> C:<input name="LK" type="number" min="0" max="20"> &amp; count: <input name="LC" type="number" min="1" max="1500" oninput="UI()" required></div><br>
     <div id="ledwarning" style="color: orange; display: none;">
         &#9888; You might run into stability or lag issues.<br>
         Use less than 1000 LEDs per ESP for the best experience!<br>

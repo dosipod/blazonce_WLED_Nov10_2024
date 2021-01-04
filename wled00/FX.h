@@ -530,6 +530,8 @@ class WS2812FX {
       numStrips = 1,
       setStripPin(uint8_t strip, uint8_t pin),
       getStripPin(uint8_t strip=0),
+      setStripPinClk(uint8_t strip, uint8_t pin),
+      getStripPinClk(uint8_t strip=0),
       getBrightness(void),
       getMode(void),
       getSpeed(void),

@@ -414,8 +414,8 @@ void serializeConfig() {
     hw_led_ins_0[F("len")] = strip.getStripLen(s);
     JsonArray hw_led_ins_0_pin = hw_led_ins_0.createNestedArray("pin");
     hw_led_ins_0_pin.add(strip.getStripPin(s));
-    #ifdef DATAPIN
-    hw_led_ins_0_pin.add(DATAPIN);
+    #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
+    hw_led_ins_0_pin.add(strip.getStripPinClk(s));
     #endif
     hw_led_ins_0[F("order")] = strip.getColorOrder();
     hw_led_ins_0[F("rev")] = false;

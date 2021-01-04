@@ -51,18 +51,6 @@
 
 //END CONFIGURATION
 
-#if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
- #ifndef CLKPIN
-  #define CLKPIN 0
- #endif
- #ifndef DATAPIN
-  #define DATAPIN 2
- #endif
- #if BTNPIN == CLKPIN || BTNPIN == DATAPIN
-  #undef BTNPIN   // Deactivate button pin if it conflicts with one of the APA102 pins.
- #endif
-#endif
-
 #ifdef WLED_USE_ANALOG_LEDS
   //PWM pins - PINs 15,13,12,14 (W2 = 04)are used with H801 Wifi LED Controller
   #ifdef WLED_USE_H801
@@ -158,10 +146,6 @@
   #define PIXELMETHOD NeoTm1814Method  
  #elif defined(USE_P9813)
   #define PIXELMETHOD P9813Method  
-// #elif LEDPIN == 2
-//  #define PIXELMETHOD NeoEsp8266Uart1Ws2813Method //if you get an error here, try to change to NeoEsp8266UartWs2813Method or update Neopixelbus
-// #elif LEDPIN == 3
-//  #define PIXELMETHOD NeoEsp8266Dma800KbpsMethod
  #else
   #define PIXELMETHOD NeoEsp8266BitBang800KbpsMethod
 //  #pragma message "Software BitBang will be used because of your selected LED pin. This may cause flicker. Use GPIO 2 or 3 for best results."

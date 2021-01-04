@@ -8,18 +8,6 @@ Pass the following variables to the compiler as build flags:
 
  - `ESP8266_MULTISTRIP`
    - Define this to use usermod NpbWrapper.h instead of default one in WLED.
- - `NUM_STRIPS`
-   - Number of strips in use
- - `PIXEL_COUNTS`
-   - List of pixel counts in each strip
- - `LEDPIN0`
-   - GPIO pin for first strip.
- - `LEDPIN1`
-   - GPIO pin for second strip (if NUM_STRIPS>1).
- - `LEDPIN2`
-   - GPIO pin for third strip (if NUM_STRIPS>2).
- - `LEDPIN3`
-   - GPIO pin for fourth strip (if NUM_STRIPS>3).
 
 From the perspective of WLED software, the LEDs are addressed as one long strand. The modified NbpWrapper.h file addresses the appropriate strand from the overall LED index based on the number of LEDs defined in each strand.
 
@@ -29,4 +17,5 @@ Tested on low cost Wemos D1 mini dev boards from Aliexpress or Amazon.
 
 ## TODO:
 
-Implement software definition for pixel counts.
+Implement two-wire pixel protocol and sanity checks (button,IR,...).
+Implement dynamic selection of pixel types (remove compile time dependencies, only for digital pixels).

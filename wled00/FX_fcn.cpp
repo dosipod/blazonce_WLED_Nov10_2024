@@ -445,12 +445,13 @@ void WS2812FX::setBrightness(uint8_t b) {
     {
       _segments[i].setOption(SEG_OPTION_FREEZE, false);
     }
-    for (uint8_t s=1; s<numStrips; s++) {
-      if (getStripPin(s)==LED_BUILTIN) {
+    // why would you want bus to depend on LED_BUILTIN?
+//    for (uint8_t s=0; s<this->numStrips; s++) {
+//      if (getStripPin(s)==LED_BUILTIN) {
         shouldStartBus = true;
-        break;
-      }
-    }
+//        break;
+//      }
+//    }
   } else {
     if (shouldStartBus) {
       shouldStartBus = false;
