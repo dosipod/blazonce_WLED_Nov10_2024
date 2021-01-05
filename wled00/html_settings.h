@@ -130,9 +130,11 @@ Palette blending: <select name="PB"><option value="0">Linear (wrap if moving)
 </option><option value="1">Linear (always wrap)</option><option value="2">
 Linear (never wrap)</option><option value="3">None (not recommended)</option>
 </select><br>Reverse LED order (rotate 180): <input type="checkbox" name="RV">
-<br>Skip first LED: <input type="checkbox" name="SL"><hr><button type="button" 
-onclick="B()">Back</button><button type="submit">Save</button></form></body>
-</html>)=====";
+<br>Skip first LED: <input type="checkbox" name="SL"><hr>Relay pin: <input 
+type="number" min="-1" max="40" name="RL"> Active high? <input type="checkbox" 
+name="RV"><br>IR pin: <input type="number" min="-1" max="40" name="IR"><hr>
+<button type="button" onclick="B()">Back</button><button type="submit">Save
+</button></form></body></html>)=====";
 
 
 #ifdef WLED_ENABLE_DMX
