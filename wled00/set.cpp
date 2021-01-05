@@ -143,7 +143,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
     // upate other pins
     #ifndef WLED_DISABLE_INFRARED
-    int hw_ir_pin = request->hasArg(F("IR")).toInt();
+    int hw_ir_pin = request->arg(F("IR")).toInt();
     if (pinManager.isPinOk(hw_ir_pin) && pinManager.allocatePin(hw_ir_pin,false)) {
       irPin = hw_ir_pin;
     } else {
@@ -151,8 +151,8 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     }
     #endif
 
-    int hw_rly_pin = request->hasArg(F("RL"));
-    if (pinManager.isPinOk(hw_rly_pin) && pinManager.allocatePin(hw_rly_pin,false)) {
+    int hw_rly_pin = request->arg(F("RL")).toInt();
+    if (pinManager.isPinOk(hw_rly_pin) && pinManager.allocatePin(hw_rly_pin,true)) {
       rlyPin = hw_rly_pin;
     } else {
       rlyPin = -1;
