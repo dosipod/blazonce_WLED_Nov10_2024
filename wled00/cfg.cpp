@@ -84,6 +84,7 @@ void deserializeConfig() {
 
   JsonObject hw = doc[F("hw")];
 
+  // initialize LED pins and lengths prior to other HW
   JsonObject hw_led = hw[F("led")];
   CJSON(ledCount, hw_led[F("total")]);
   if (ledCount > MAX_LEDS) ledCount = MAX_LEDS;
@@ -142,11 +143,23 @@ void deserializeConfig() {
 
   //int hw_btn_ins_0_type = hw_btn_ins_0[F("type")]; // 0
 
-  //int hw_ir_pin = hw[F("ir")][F("pin")]; // 4
+  #ifndef WLED_DISABLE_INFRARED
+  int hw_ir_pin = hw[F("ir")][F("pin")]; // 4
+  if (pinManager.isPinOk(hw_ir_pin) && pinManager.allocatePin(hw_ir_pin,false)) {
+    irPin = hw_ir_pin;
+  } else {
+    irPin = -1;
+  }
+  #endif
   CJSON(irEnabled, hw[F("ir")][F("type")]); // 0
 
-  //int hw_relay_pin = hw[F("relay")][F("pin")]; // 12
-  //bool hw_relay_rev = hw[F("relay")][F("rev")]; // false
+  int hw_relay_pin = hw[F("relay")][F("pin")]; // 12
+  if (pinManager.isPinOk(hw_relay_pin) && pinManager.allocatePin(hw_relay_pin,false)) {
+    rlyPin = hw_relay_pin;
+  } else {
+    rlyPin = -1;
+  }
+  rlyMde = (bool)hw[F("relay")][F("rev")]; // false
 
   //int hw_status_pin = hw[F("status")][F("pin")]; // -1
 
@@ -475,19 +488,21 @@ void serializeConfig() {
   hw_btn_ins_0_macros.add(macroDoublePress);
   #endif
 
-  #if defined(IRPIN) && IRPIN > -1
-  JsonObject hw_ir = hw.createNestedObject("ir");
-  hw_ir[F("pin")] = IRPIN;
-  hw_ir[F("type")] = irEnabled;              // the byte 'irEnabled' does contain the IR-Remote Type ( 0=disabled )
+  #ifndef WLED_DISABLE_INFRARED
+  if (irPin>=0) {
+    JsonObject hw_ir = hw.createNestedObject("ir");
+    hw_ir[F("pin")] = irPin;
+    hw_ir[F("type")] = irEnabled;              // the byte 'irEnabled' does contain the IR-Remote Type ( 0=disabled )
+  }
   #endif
 
-  #if defined(RLYPIN) && RLYPIN > -1
-  JsonObject hw_relay = hw.createNestedObject("relay");
-  hw_relay[F("pin")] = RLYPIN;
-  hw_relay[F("rev")] = (RLYMDE) ? false : true;
-  JsonObject hw_status = hw.createNestedObject("status");
-  hw_status[F("pin")] = -1;
-  #endif
+  if (rlyPin>=0) {
+    JsonObject hw_relay = hw.createNestedObject("relay");
+    hw_relay[F("pin")] = rlyPin;
+    hw_relay[F("rev")] = rlyMde;
+    JsonObject hw_status = hw.createNestedObject("status");
+    hw_status[F("pin")] = -1;
+  }
 
   JsonObject light = doc.createNestedObject("light");
   light[F("scale-bri")] = briMultiplier;

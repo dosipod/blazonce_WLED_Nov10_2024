@@ -183,6 +183,26 @@ WLED_GLOBAL char otaPass[33] _INIT(DEFAULT_OTA_PASS);
 
 // Hardware CONFIG (only changeble HERE, not at runtime)
 // LED strip pin, button pin and IR pin changeable in NpbWrapper.h!
+#ifndef BTNPIN
+WLED_GLOBAL int8_t btnPin _INIT(-1);
+#else
+WLED_GLOBAL int8_t btnPin _INIT(BTNPIN);
+#endif
+#ifndef RLYPIN
+WLED_GLOBAL int8_t rlyPin _INIT(-1);
+#else
+WLED_GLOBAL int8_t rlyPin _INIT(RLYPIN);
+#endif
+#ifndef RLYMDE
+WLED_GLOBAL bool rlyMde _INIT(1);
+#else
+WLED_GLOBAL bool rlyMde _INIT(RLYMDE);
+#endif
+#ifndef IRPIN
+WLED_GLOBAL int8_t irPin _INIT(-1);
+#else
+WLED_GLOBAL int8_t irPin _INIT(IRPIN);
+#endif
 
 //WLED_GLOBAL byte presetToApply _INIT(0); 
 
@@ -465,6 +485,7 @@ WLED_GLOBAL char mqttStatusTopic[40] _INIT("");        // this must be global be
 
 #if AUXPIN >= 0
   // auxiliary debug pin
+  WLED_GLOBAL int8_t auxPin _INIT(AUXPIN);
   WLED_GLOBAL byte auxTime _INIT(0);
   WLED_GLOBAL unsigned long auxStartTime _INIT(0);
   WLED_GLOBAL bool auxActive _INIT(false, auxActiveBefore _INIT(false);

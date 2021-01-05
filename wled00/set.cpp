@@ -141,6 +141,23 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     if ( pinManager.isPinAllocated(3) && ledCount > MAX_LEDS_DMA) ledCount = MAX_LEDS_DMA; //DMA method uses too much ram
     #endif
 
+    // upate other pins
+    #ifndef WLED_DISABLE_INFRARED
+    int hw_ir_pin = request->hasArg(F("IR")).toInt();
+    if (pinManager.isPinOk(hw_ir_pin) && pinManager.allocatePin(hw_ir_pin,false)) {
+      irPin = hw_ir_pin;
+    } else {
+      irPin = -1;
+    }
+    #endif
+
+    int hw_rly_pin = request->hasArg(F("RL"));
+    if (pinManager.isPinOk(hw_rly_pin) && pinManager.allocatePin(hw_rly_pin,false)) {
+      rlyPin = hw_rly_pin;
+    } else {
+      rlyPin = -1;
+    }
+
     strip.ablMilliampsMax = request->arg(F("MA")).toInt();
     strip.milliampsPerLed = request->arg(F("LA")).toInt();
     

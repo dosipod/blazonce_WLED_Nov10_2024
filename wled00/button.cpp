@@ -88,9 +88,8 @@ void handleIO()
     lastOnTime = millis();
     if (offMode)
     {
-      #if RLYPIN >= 0
-       digitalWrite(RLYPIN, RLYMDE);
-      #endif
+      if (rlyPin>=0)
+        digitalWrite(rlyPin, RLYMDE);
       offMode = false;
     }
   } else if (millis() - lastOnTime > 600)
@@ -105,9 +104,8 @@ void handleIO()
         }
       }
       #endif
-      #if RLYPIN >= 0
-       digitalWrite(RLYPIN, !RLYMDE);
-      #endif
+      if (rlyPin>=0)
+        digitalWrite(rlyPin, !RLYMDE);
     }
     offMode = true;
   }

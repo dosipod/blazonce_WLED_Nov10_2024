@@ -419,8 +419,10 @@ void serializeInfo(JsonObject root)
   leds[F("rgbw")] = useRGBW;
   leds[F("wv")] = useRGBW && (strip.rgbwMode == RGBW_MODE_MANUAL_ONLY || strip.rgbwMode == RGBW_MODE_DUAL); //should a white channel slider be displayed?
   JsonArray leds_pin = leds.createNestedArray("pin");
+  
   //leds_pin.add(LEDPIN);
-  leds_pin.add(strip.getStripPin(0)); // need to elaborate this for multiple strips
+  for (uint8_t s=0; s<strip.numStrips; s++)
+    leds_pin.add(strip.getStripPin(s)); // need to elaborate this for multipin strips
   
   leds[F("pwr")] = strip.currentMilliamps;
   leds[F("maxpwr")] = (strip.currentMilliamps)? strip.ablMilliampsMax : 0;

@@ -341,7 +341,16 @@ void WLED::beginStrip()
   }
   colorUpdated(NOTIFIER_CALL_MODE_INIT);
 
-// init relay pin
+  // init relay pin
+  if (rlyPin>=0)
+  #if RLYMDE
+    digitalWrite(rlyPin, bri);
+  #else
+    digitalWrite(rlyPin, !bri);
+  #endif
+
+/*
+Pin allocation done in deserializeConfig.
 #if RLYPIN >= 0
   pinManager.allocatePin(RLYPIN);
   pinMode(RLYPIN, OUTPUT);
@@ -351,6 +360,7 @@ void WLED::beginStrip()
   digitalWrite(RLYPIN, !bri);
 #endif
 #endif
+*/
 
   // disable button if it is "pressed" unintentionally
 #if (defined(BTNPIN) && BTNPIN > -1) || defined(TOUCHPIN)
