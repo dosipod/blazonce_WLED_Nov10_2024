@@ -82,11 +82,11 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       pinManager.deallocatePin(strip.getStripPinClk(s));
       #endif
     }
-    if (rlyPin>=0) pinManager.deallocatePin(rlyPin);
+    if (rlyPin>=0 && pinManager.isPinAllocated(rlyPin)) pinManager.deallocatePin(rlyPin);
     #ifndef WLED_DISABLE_INFRARED
-    if (irPin>=0) pinManager.deallocatePin(irPin);
+    if (irPin>=0 && pinManager.isPinAllocated(irPin)) pinManager.deallocatePin(irPin);
     #endif
-    if (btnPin>=0) pinManager.deallocatePin(btnPin);
+    if (btnPin>=0 && pinManager.isPinAllocated(btnPin)) pinManager.deallocatePin(btnPin);
 
     pin = request->arg(LP).toInt();
     if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
@@ -157,7 +157,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     #endif
 
     int hw_rly_pin = request->arg(F("RL")).toInt();
-    if (pinManager.isPinOk(hw_rly_pin) && pinManager.allocatePin(hw_rly_pin,true)) {
+    if (pinManager.allocatePin(hw_rly_pin,true)) {
       rlyPin = hw_rly_pin;
     } else {
       rlyPin = -1;
@@ -165,7 +165,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     rlyMde = (bool)request->hasArg(F("RM"));
 
     int hw_aux_pin = request->arg(F("AX")).toInt();
-    if (pinManager.isPinOk(hw_aux_pin) && pinManager.allocatePin(hw_aux_pin,true)) {
+    if (pinManager.allocatePin(hw_aux_pin,true)) {
       auxPin = hw_aux_pin;
     } else {
       auxPin = -1;

@@ -87,7 +87,9 @@ class UsermodTemperature : public Usermod {
         // set the resolution for this specific device
         sensor.setResolution(sensorDeviceAddress, 9, true);
         // do not block waiting for reading
-        sensor.setWaitForConversion(false); 
+        sensor.setWaitForConversion(false);
+        // allocate pin & prevent other use
+        pinManager.allocatePin(TEMPERATURE_PIN,false);
       } else {
         DEBUG_PRINTLN("Dallas Temperature not found");
       }

@@ -145,7 +145,7 @@ void deserializeConfig() {
 
   #ifndef WLED_DISABLE_INFRARED
   int hw_ir_pin = hw[F("ir")][F("pin")]; // 4
-  if (pinManager.isPinOk(hw_ir_pin) && pinManager.allocatePin(hw_ir_pin,false)) {
+  if (pinManager.allocatePin(hw_ir_pin,false)) {
     irPin = hw_ir_pin;
   } else {
     irPin = -1;
@@ -154,7 +154,7 @@ void deserializeConfig() {
   CJSON(irEnabled, hw[F("ir")][F("type")]);
 
   int hw_relay_pin = hw[F("relay")][F("pin")];
-  if (pinManager.isPinOk(hw_relay_pin) && pinManager.allocatePin(hw_relay_pin,false)) {
+  if (pinManager.allocatePin(hw_relay_pin,true)) {
     rlyPin = hw_relay_pin;
   } else {
     rlyPin = -1;
@@ -498,11 +498,12 @@ void serializeConfig() {
   JsonObject hw_relay = hw.createNestedObject("relay");
   hw_relay[F("pin")] = rlyPin;
   hw_relay[F("rev")] = rlyMde;
-  JsonObject hw_status = hw.createNestedObject("status");
-  hw_status[F("pin")] = -1;
+
+  //JsonObject hw_status = hw.createNestedObject("status");
+  //hw_status[F("pin")] = -1;
 
   JsonObject hw_aux = hw.createNestedObject("aux");
-  hw_relay[F("pin")] = auxPin;
+  hw_aux[F("pin")] = auxPin;
 
   JsonObject light = doc.createNestedObject("light");
   light[F("scale-bri")] = briMultiplier;
