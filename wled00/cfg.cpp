@@ -151,15 +151,15 @@ void deserializeConfig() {
     irPin = -1;
   }
   #endif
-  CJSON(irEnabled, hw[F("ir")][F("type")]); // 0
+  CJSON(irEnabled, hw[F("ir")][F("type")]);
 
-  int hw_relay_pin = hw[F("relay")][F("pin")]; // 12
+  int hw_relay_pin = hw[F("relay")][F("pin")];
   if (pinManager.isPinOk(hw_relay_pin) && pinManager.allocatePin(hw_relay_pin,false)) {
     rlyPin = hw_relay_pin;
   } else {
     rlyPin = -1;
   }
-  rlyMde = (bool)hw[F("relay")][F("rev")]; // false
+  CJSON(rlyMde, hw[F("relay")][F("rev")]);
 
   //int hw_status_pin = hw[F("status")][F("pin")]; // -1
 
@@ -475,18 +475,17 @@ void serializeConfig() {
 
   JsonArray hw_btn_ins = hw_btn.createNestedArray("ins");
 
-  #if defined(BTNPIN) && BTNPIN > -1
+  // button BTNPIN
   JsonObject hw_btn_ins_0 = hw_btn_ins.createNestedObject();
   hw_btn_ins_0[F("type")] = (buttonEnabled) ? BTN_TYPE_PUSH : BTN_TYPE_NONE;
 
   JsonArray hw_btn_ins_0_pin = hw_btn_ins_0.createNestedArray("pin");
-  hw_btn_ins_0_pin.add(BTNPIN);
+  hw_btn_ins_0_pin.add(btnPin);
 
   JsonArray hw_btn_ins_0_macros = hw_btn_ins_0.createNestedArray("macros");
   hw_btn_ins_0_macros.add(macroButton);
   hw_btn_ins_0_macros.add(macroLongPress);
   hw_btn_ins_0_macros.add(macroDoublePress);
-  #endif
 
   #ifndef WLED_DISABLE_INFRARED
   if (irPin>=0) {
@@ -496,13 +495,14 @@ void serializeConfig() {
   }
   #endif
 
-  if (rlyPin>=0) {
-    JsonObject hw_relay = hw.createNestedObject("relay");
-    hw_relay[F("pin")] = rlyPin;
-    hw_relay[F("rev")] = rlyMde;
-    JsonObject hw_status = hw.createNestedObject("status");
-    hw_status[F("pin")] = -1;
-  }
+  JsonObject hw_relay = hw.createNestedObject("relay");
+  hw_relay[F("pin")] = rlyPin;
+  hw_relay[F("rev")] = rlyMde;
+  JsonObject hw_status = hw.createNestedObject("status");
+  hw_status[F("pin")] = -1;
+
+  JsonObject hw_aux = hw.createNestedObject("aux");
+  hw_relay[F("pin")] = auxPin;
 
   JsonObject light = doc.createNestedObject("light");
   light[F("scale-bri")] = briMultiplier;

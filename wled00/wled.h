@@ -206,10 +206,6 @@ WLED_GLOBAL int8_t irPin _INIT(IRPIN);
 
 //WLED_GLOBAL byte presetToApply _INIT(0); 
 
-#if AUXPIN >= 0
-WLED_GLOBAL byte auxDefaultState _INIT(0);                         // 0: input 1: high 2: low
-WLED_GLOBAL byte auxTriggeredState _INIT(0);                       // 0: input 1: high 2: low
-#endif
 WLED_GLOBAL char ntpServerName[33] _INIT("0.wled.pool.ntp.org");   // NTP server to use
 
 // WiFi CONFIG (all these can be changed via web UI, no need to set them here)
@@ -483,13 +479,18 @@ WLED_GLOBAL long lastInterfaceUpdate _INIT(0);
 WLED_GLOBAL byte interfaceUpdateCallMode _INIT(NOTIFIER_CALL_MODE_INIT);
 WLED_GLOBAL char mqttStatusTopic[40] _INIT("");        // this must be global because of async handlers
 
-#if AUXPIN >= 0
-  // auxiliary debug pin
-  WLED_GLOBAL int8_t auxPin _INIT(AUXPIN);
-  WLED_GLOBAL byte auxTime _INIT(0);
-  WLED_GLOBAL unsigned long auxStartTime _INIT(0);
-  WLED_GLOBAL bool auxActive _INIT(false, auxActiveBefore _INIT(false);
+// auxiliary debug pin
+#ifndef AUXPIN
+WLED_GLOBAL int8_t auxPin _INIT(-1);
+#else
+WLED_GLOBAL int8_t auxPin _INIT(AUXPIN);
 #endif
+WLED_GLOBAL byte auxTime _INIT(0);
+WLED_GLOBAL unsigned long auxStartTime _INIT(0);
+WLED_GLOBAL bool auxActive _INIT(false);
+WLED_GLOBAL bool auxActiveBefore _INIT(false);
+WLED_GLOBAL byte auxDefaultState _INIT(0);                         // 0: input 1: high 2: low
+WLED_GLOBAL byte auxTriggeredState _INIT(0);                       // 0: input 1: high 2: low
 
 // alexa udp
 WLED_GLOBAL String escapedMac;

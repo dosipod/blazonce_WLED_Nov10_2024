@@ -17,9 +17,7 @@ void shortPressAction()
 
 bool isButtonPressed()
 {
-  #if defined(BTNPIN) && BTNPIN > -1
-    if (digitalRead(BTNPIN) == LOW) return true;
-  #endif
+  if (btnPin>=0 && digitalRead(btnPin) == LOW) return true;
   #ifdef TOUCHPIN
     if (touchRead(TOUCHPIN) <= TOUCH_THRESHOLD) return true;
   #endif
@@ -29,8 +27,7 @@ bool isButtonPressed()
 
 void handleButton()
 {
-#if (defined(BTNPIN) && BTNPIN > -1) || defined(TOUCHPIN)
-  if (!buttonEnabled) return;
+  if (btnPin<0 || !buttonEnabled) return;
 
   if (isButtonPressed()) //pressed
   {
@@ -75,7 +72,6 @@ void handleButton()
     buttonWaitTime = 0;
     shortPressAction();
   }
-#endif
 }
 
 void handleIO()
@@ -110,18 +106,17 @@ void handleIO()
     offMode = true;
   }
 
-  #if AUXPIN >= 0
   //output
-  if (auxActive || auxActiveBefore)
+  if (auxPin>=1 && (auxActive || auxActiveBefore))
   {
     if (!auxActiveBefore)
     {
       auxActiveBefore = true;
       switch (auxTriggeredState)
       {
-        case 0: pinMode(AUXPIN, INPUT); break;
-        case 1: pinMode(AUXPIN, OUTPUT); digitalWrite(AUXPIN, HIGH); break;
-        case 2: pinMode(AUXPIN, OUTPUT); digitalWrite(AUXPIN, LOW); break;
+        case 0: pinMode(auxPin, INPUT); break;
+        case 1: pinMode(auxPin, OUTPUT); digitalWrite(auxPin, HIGH); break;
+        case 2: pinMode(auxPin, OUTPUT); digitalWrite(auxPin, LOW); break;
       }
       auxStartTime = millis();
     }
@@ -131,11 +126,10 @@ void handleIO()
       auxActiveBefore = false;
       switch (auxDefaultState)
       {
-        case 0: pinMode(AUXPIN, INPUT); break;
-        case 1: pinMode(AUXPIN, OUTPUT); digitalWrite(AUXPIN, HIGH); break;
-        case 2: pinMode(AUXPIN, OUTPUT); digitalWrite(AUXPIN, LOW); break;
+        case 0: pinMode(auxPin, INPUT); break;
+        case 1: pinMode(auxPin, OUTPUT); digitalWrite(auxPin, HIGH); break;
+        case 2: pinMode(auxPin, OUTPUT); digitalWrite(auxPin, LOW); break;
       }
     }
   }
-  #endif
 }

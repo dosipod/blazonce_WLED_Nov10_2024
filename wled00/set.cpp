@@ -82,6 +82,11 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       pinManager.deallocatePin(strip.getStripPinClk(s));
       #endif
     }
+    if (rlyPin>=0) pinManager.deallocatePin(rlyPin);
+    #ifndef WLED_DISABLE_INFRARED
+    if (irPin>=0) pinManager.deallocatePin(irPin);
+    #endif
+    if (btnPin>=0) pinManager.deallocatePin(btnPin);
 
     pin = request->arg(LP).toInt();
     if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
@@ -156,6 +161,14 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       rlyPin = hw_rly_pin;
     } else {
       rlyPin = -1;
+    }
+    rlyMde = (bool)request->hasArg(F("RM"));
+
+    int hw_aux_pin = request->arg(F("AX")).toInt();
+    if (pinManager.isPinOk(hw_aux_pin) && pinManager.allocatePin(hw_aux_pin,true)) {
+      auxPin = hw_aux_pin;
+    } else {
+      auxPin = -1;
     }
 
     strip.ablMilliampsMax = request->arg(F("MA")).toInt();
@@ -712,15 +725,15 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
   }
   if (nightlightMode > NL_MODE_SUN) nightlightMode = NL_MODE_SUN;
 
-  #if AUXPIN >= 0
   //toggle general purpose output
-  pos = req.indexOf(F("AX="));
-  if (pos > 0) {
-    auxTime = getNumVal(&req, pos);
-    auxActive = true;
-    if (auxTime == 0) auxActive = false;
+  if (auxPin>=0) {
+    pos = req.indexOf(F("AX="));
+    if (pos > 0) {
+      auxTime = getNumVal(&req, pos);
+      auxActive = true;
+      if (auxTime == 0) auxActive = false;
+    }
   }
-  #endif
 
   pos = req.indexOf(F("TT="));
   if (pos > 0) transitionDelay = getNumVal(&req, pos);

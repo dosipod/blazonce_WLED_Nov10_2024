@@ -327,10 +327,10 @@ void WLED::beginStrip()
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
 
-#if defined(BTNPIN) && BTNPIN > -1
-  pinManager.allocatePin(BTNPIN, false);
-  pinMode(BTNPIN, INPUT_PULLUP);
-#endif
+  if (btnPin>=0) {
+    pinManager.allocatePin(btnPin, false);
+    pinMode(btnPin, INPUT_PULLUP);
+  }
 
   if (bootPreset > 0) applyPreset(bootPreset);
   if (turnOnAtBoot) {
@@ -343,32 +343,11 @@ void WLED::beginStrip()
 
   // init relay pin
   if (rlyPin>=0)
-  #if RLYMDE
-    digitalWrite(rlyPin, bri);
-  #else
-    digitalWrite(rlyPin, !bri);
-  #endif
-
-/*
-Pin allocation done in deserializeConfig.
-#if RLYPIN >= 0
-  pinManager.allocatePin(RLYPIN);
-  pinMode(RLYPIN, OUTPUT);
-#if RLYMDE
-  digitalWrite(RLYPIN, bri);
-#else
-  digitalWrite(RLYPIN, !bri);
-#endif
-#endif
-*/
+    digitalWrite(rlyPin, (rlyMde ? bri : !bri));
 
   // disable button if it is "pressed" unintentionally
-#if (defined(BTNPIN) && BTNPIN > -1) || defined(TOUCHPIN)
-  if (isButtonPressed())
+  if (btnPin>=0 && isButtonPressed())
     buttonEnabled = false;
-#else
-  buttonEnabled = false;
-#endif
 }
 
 void WLED::initAP(bool resetAP)

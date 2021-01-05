@@ -320,8 +320,9 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('c',SET_F("RV"),strip.reverseMode);
     sappend('c',SET_F("SL"),skipFirstLed);
     sappend('v',SET_F("RL"),rlyPin);
-    sappend('c',SET_F("RV"),rlyMde);
+    sappend('c',SET_F("RM"),rlyMde);
     sappend('v',SET_F("IR"),irPin);
+    sappend('v',SET_F("AX"),auxPin);
   }
 
   if (subPage == 3)
