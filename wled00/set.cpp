@@ -164,6 +164,14 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     }
     rlyMde = (bool)request->hasArg(F("RM"));
 
+    int hw_btn_pin = request->arg(F("BT")).toInt();
+    if (pinManager.allocatePin(hw_btn_pin,false)) {
+      btnPin = hw_btn_pin;
+      pinMode(btnPin, INPUT_PULLUP);
+    } else {
+      btnPin = -1;
+    }
+
     int hw_aux_pin = request->arg(F("AX")).toInt();
     if (pinManager.allocatePin(hw_aux_pin,true)) {
       auxPin = hw_aux_pin;

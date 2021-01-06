@@ -132,9 +132,14 @@ void deserializeConfig() {
   }
 
   JsonObject hw_btn_ins_0 = hw[F("btn")][F("ins")][0];
-  buttonEnabled = hw_btn_ins_0[F("en")] | buttonEnabled;
-
-  //int hw_btn_ins_0_pin_0 = hw_btn_ins_0[F("pin")][0]; // 0
+  CJSON(buttonEnabled, hw_btn_ins_0[F("type")]);
+  int hw_btn_pin = hw_btn_ins_0[F("pin")][0];
+  if (pinManager.allocatePin(hw_btn_pin,false)) {
+    btnPin = hw_btn_pin;
+    pinMode(btnPin, INPUT_PULLUP);
+  } else {
+    btnPin = -1;
+  }
 
   JsonArray hw_btn_ins_0_macros = hw_btn_ins_0[F("macros")];
   CJSON(macroButton, hw_btn_ins_0_macros[0]);

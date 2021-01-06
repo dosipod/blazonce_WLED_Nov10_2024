@@ -132,10 +132,11 @@ Linear (never wrap)</option><option value="3">None (not recommended)</option>
 </select><br>Reverse LED order (rotate 180): <input type="checkbox" name="RV">
 <br>Skip first LED: <input type="checkbox" name="SL"><hr>Relay pin: <input 
 type="number" min="-1" max="40" name="RL"> Active high? <input type="checkbox" 
-name="RM"><br>IR pin: <input type="number" min="-1" max="40" name="IR"><br>
-AUX pin: <input type="number" min="-1" max="40" name="AX"><hr><button 
-type="button" onclick="B()">Back</button><button type="submit">Save</button>
-</form></body></html>)=====";
+name="RM"><br>Button pin: <input type="number" min="-1" max="40" name="BT"><br>
+IR pin: <input type="number" min="-1" max="40" name="IR"><br>AUX pin: <input 
+type="number" min="-1" max="40" name="AX"><hr><button type="button" 
+onclick="B()">Back</button><button type="submit">Save</button></form></body>
+</html>)=====";
 
 
 #ifdef WLED_ENABLE_DMX
@@ -369,10 +370,10 @@ HTTP traffic is unencrypted. An attacker in the same network can intercept form 
 </button><br>Enable ArduinoOTA: <input type="checkbox" name="AO"><br><h3>About
 </h3><a href="https://github.com/Aircoookie/WLED/" target="_blank">WLED</a>
  version 0.11.1<br><br><a 
-href="https://github.com/Aircoookie/WLED/wiki/Contributors-&-About" 
+href="https://github.com/Aircoookie/WLED/wiki/Contributors-and-credits" 
 target="_blank">Contributors, dependencies and special thanks</a><br>
 A huge thank you to everyone who helped me create WLED!<br><br>
-(c) 2016-2020 Christian Schwinne<br><i>Licensed under the <a 
+(c) 2016-2021 Christian Schwinne<br><i>Licensed under the <a 
 href="https://github.com/Aircoookie/WLED/blob/master/LICENSE" target="_blank">
 MIT license</a></i><br><br>Server message: <span class="sip">Response error!
 </span><hr><button type="button" onclick="B()">Back</button><button 
