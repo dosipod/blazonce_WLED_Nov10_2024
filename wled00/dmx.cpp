@@ -16,7 +16,7 @@ void handleDMX()
 
   #ifdef ESP8266
   for (uint8_t i=0; i<strip.numStrips; i++) {
-    if (strip.getStripPin[i])==2) return; //pin 2 conflicts with DMX
+    if (strip.getStripPin(i)==2) return; //pin 2 conflicts with DMX
   }
   #endif
 
