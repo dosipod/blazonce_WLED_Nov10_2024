@@ -483,6 +483,9 @@ class WS2812FX {
       ablMilliampsMax = 850;
       currentMilliamps = 0;
       timebase = 0;
+      for (uint8_t i=0; i<MAX_NUMBER_OF_STRIPS; i++) {
+        _stripPin[i] = _stripPinClk[i] = -1;
+      }
       bus = new NeoPixelWrapper();
       resetSegments();
     }
@@ -528,10 +531,6 @@ class WS2812FX {
       paletteBlend = 0,
       milliampsPerLed = 55,
       numStrips = 1,
-      setStripPin(uint8_t strip, uint8_t pin),
-      getStripPin(uint8_t strip=0),
-      setStripPinClk(uint8_t strip, uint8_t pin),
-      getStripPinClk(uint8_t strip=0),
       getBrightness(void),
       getMode(void),
       getSpeed(void),
@@ -546,6 +545,10 @@ class WS2812FX {
       get_random_wheel_index(uint8_t);
 
     int8_t
+      setStripPin(uint8_t strip, uint8_t pin),
+      getStripPin(uint8_t strip=0),
+      setStripPinClk(uint8_t strip, uint8_t pin),
+      getStripPinClk(uint8_t strip=0),
       tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t attdec);
 
     uint16_t
@@ -700,8 +703,8 @@ class WS2812FX {
   private:
     NeoPixelWrapper *bus;
 
-    uint8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
-    uint8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
+    int8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
+    int8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
 
     uint32_t crgb_to_col(CRGB fastled);

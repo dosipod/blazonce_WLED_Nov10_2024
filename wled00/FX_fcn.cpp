@@ -66,7 +66,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 
   // we could skip this if we pass "this" pointer to bus->Begin()
 #ifdef ESP8266_MULTISTRIP
-  bus->initStrips(numStrips, _stripPin, _stripLen);
+  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen);
 #endif
   bus->Begin((NeoPixelType)ty, _lengthRaw);
 
@@ -76,23 +76,23 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
   setBrightness(_brightness);
 }
 
-uint8_t WS2812FX::setStripPin(uint8_t strip, uint8_t pin) {
-  if (strip > numStrips ) return 0;
+int8_t WS2812FX::setStripPin(uint8_t strip, uint8_t pin) {
+  if (strip > numStrips ) return -1;
   return _stripPin[strip] = pin;
 }
 
-uint8_t WS2812FX::getStripPin(uint8_t strip) {
-  if (strip > numStrips ) return 0;
+int8_t WS2812FX::getStripPin(uint8_t strip) {
+  if (strip > numStrips ) return -1;
   return _stripPin[strip];
 }
 
-uint8_t WS2812FX::setStripPinClk(uint8_t strip, uint8_t pin) {
-  if (strip > numStrips ) return 0;
+int8_t WS2812FX::setStripPinClk(uint8_t strip, uint8_t pin) {
+  if (strip > numStrips ) return -1;
   return _stripPinClk[strip] = pin;
 }
 
-uint8_t WS2812FX::getStripPinClk(uint8_t strip) {
-  if (strip > numStrips ) return 0;
+int8_t WS2812FX::getStripPinClk(uint8_t strip) {
+  if (strip > numStrips ) return -1;
   return _stripPinClk[strip];
 }
 

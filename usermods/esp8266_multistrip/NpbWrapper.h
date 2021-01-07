@@ -211,12 +211,13 @@ public:
     cleanup();
   }
 
-  void initStrips(uint8_t numStrips, uint8_t stripPin[], uint16_t stripLen[])
+  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen)
   {
     uint16_t totalPixels = 0;
     pixelStrips = numStrips;
     pixelCounts = stripLen;
     pixelStripPins = stripPin;
+    pixelStripPinsClk = stripPinClk;
     for (uint8_t idx = 0; idx < numStrips; idx++)
     {
       pixelStripStartIdx[idx] = totalPixels;
@@ -780,7 +781,8 @@ private:
   byte _colorOrder = 0;
 
   uint16_t *pixelCounts;         // number of pixels on each strip
-  uint8_t *pixelStripPins;       // strip GPIO pin
+  int8_t *pixelStripPins;        // strip GPIO pin
+  int8_t *pixelStripPinsClk;     // strip GPIO pin
   uint8_t pixelStrips;                                // number of strips
   uint16_t pixelStripStartIdx[MAX_NUMBER_OF_STRIPS];  // start index in a single virtual strip
 
