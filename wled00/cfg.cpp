@@ -123,7 +123,7 @@ void deserializeConfig() {
       strip.setStripLen(s, elm[F("len")]);
       strip.setColorOrder(elm[F("order")]);
       skipFirstLed = elm[F("skip")]; // 0
-      useRGBW = (elm[F("type")] == TYPE_SK6812_RGBW);
+      useRGBW = ((ledType=elm[F("type")]) == TYPE_SK6812_RGBW);
       if (strip.getStripLen(s)==0) break;
       strip.numStrips = ++s;
     }
@@ -453,7 +453,7 @@ void serializeConfig() {
     hw_led_ins_0[F("order")] = strip.getColorOrder();
     hw_led_ins_0[F("rev")] = false;
     hw_led_ins_0[F("skip")] = skipFirstLed ? 1 : 0;
-
+/*
     //this is very crude and temporary
     byte ledType = TYPE_WS2812_RGB;
     if (useRGBW) ledType = TYPE_SK6812_RGBW;
@@ -472,7 +472,7 @@ void serializeConfig() {
     #ifdef USE_TM1814
       ledType = TYPE_TM1814;
     #endif
-
+*/
     hw_led_ins_0[F("type")] = ledType;
   }
 
