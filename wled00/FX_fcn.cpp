@@ -49,7 +49,7 @@ const uint16_t customMappingSize = sizeof(customMappingTable)/sizeof(uint16_t); 
 #define PWM_INDEX 0
 #endif
 
-void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
+void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst, uint8_t _ledType)
 {
   if (supportWhite == _useRgbw && countPixels == _length && _skipFirstMode == skipFirst) return;
   RESET_RUNTIME;
@@ -66,7 +66,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 
   // we could skip this if we pass "this" pointer to bus->Begin()
 #ifdef ESP8266_MULTISTRIP
-  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen);
+  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _ledType);
 #endif
   bus->Begin((NeoPixelType)ty, _lengthRaw);
 

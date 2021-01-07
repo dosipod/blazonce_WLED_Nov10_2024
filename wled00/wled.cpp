@@ -323,7 +323,7 @@ void WLED::beginStrip()
   if (ledCount > MAX_LEDS || ledCount == 0)
     ledCount = 30;
 
-  strip.init(useRGBW, ledCount, skipFirstLed);
+  strip.init(useRGBW, ledCount, skipFirstLed, ledType);
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
 

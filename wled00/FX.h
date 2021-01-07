@@ -490,7 +490,7 @@ class WS2812FX {
     }
 
     void
-      init(bool supportWhite, uint16_t countPixels, bool skipFirst),
+      init(bool supportWhite, uint16_t countPixels, bool skipFirst, uint8_t _ledType=TYPE_WS2812_RGB),
       service(void),
       blur(uint8_t),
       fill(uint32_t),

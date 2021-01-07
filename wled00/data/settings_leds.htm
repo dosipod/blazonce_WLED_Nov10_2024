@@ -102,11 +102,11 @@
     {
       var s = d.getElementsByName("LTsel")[0];
       var o = d.getElementsByName("iLK");
-      d.getElementById("rgbw").checked = (parseInt(s.value)==30);
+      d.getElementById("rgbw").checked = (parseInt(s.value)==30||parseInt(s.value)==54);
       for (i=0;i<o.length;i++)
       {
         var LK = d.getElementsByName("LK"+(i>0?i:""))[0];
-        if (s.value>49)
+        if (s.value>49 && s.value!=54)
         {
             o[i].style = "display:inline;";
             LK.required = true;
@@ -189,7 +189,7 @@
       <option value="51">SK9822(APA102) (5V)</option><!--TYPE_APA102-->
       <option value="52">LPD8806 (5V)</option><!--TYPE_LPD8806-->
       <option value="53">P9813</option><!--TYPE_P9813-->
-      <option value="54">TM1814</option><!--TYPE_TM1814-->
+      <option value="54">TM1814 (RGBW)</option><!--TYPE_TM1814-->
     </select><button type="button" id="+" onclick="addLEDs(1)" style="display:none;">+</button><button type="button" id="-" onclick="addLEDs(-1)" style="display:none;">-</button><br>
     <div id="mLC">
       <div name="iST">Strip 1 pin: <input name="LP" type="number" min="0" max="40" required onchange="UI()">
