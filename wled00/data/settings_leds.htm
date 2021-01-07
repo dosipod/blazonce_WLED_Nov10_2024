@@ -63,14 +63,14 @@
         var nm = LCs[i].name.substring(0,2);
         if (nm=="LC") sLC+=parseInt(LCs[i].value);
         if (nm=="LP") {var lc=d.getElementsByName("LC"+LCs[i].name.substring(2))[0]; if(LCs[i].value==3) lc.max=500; else lc.max=1500;}
-        if (nm=="LP" || nm=="LK")
-          if (LCs[i].value!="")
+        if (nm=="LP" || nm=="LK" || nm=="RL" || nm=="BT" || nm=="IR" || nm=="AX")
+          if (LCs[i].value!="" && LCs[i].value!="-1")
             for (j=0; j<LCs.length; j++)
             {
               if (i==j) continue;
               var n2 = LCs[j].name.substring(0,2);
-              if (n2=="LP" || n2=="LK")
-                if (LCs[j].value!="" && LCs[i].value==LCs[j].value) LCs[j].value = "";
+              if (n2=="LP" || n2=="LK" || n2=="RL" || n2=="BT" || n2=="IR" || n2=="AX")
+                if (LCs[j].value!="" && LCs[i].value==LCs[j].value) {alert("Pin clash!");LCs[j].value = "";}
             }
       }
       d.getElementById('ledwarning').style.display = (sLC > 1000) ? 'inline':'none';
@@ -180,7 +180,7 @@
 	<form id="form_s" name="Sf" method="post">
 		<div class="helpB"><button type="button" onclick="H()">?</button></div>
 		<button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr>
-		<h2>LED setup</h2>
+		<h2>LED &amp; HW setup</h2>
     LED type:
     <select name="LTsel" onchange="sTY()">
       <option value="22" selected>WS281x (5V/12V)</option><!--TYPE_WS2812_RGB-->
@@ -195,11 +195,15 @@
       <div name="iST">Strip 1 pin: <input name="LP" type="number" min="0" max="40" required onchange="UI()">
       <div name="iLK">clock: <input name="LK" type="number" min="0" max="40" onchange="UI()"></div>
       count: <input name="LC" type="number" min="1" max="1500" oninput="UI()" required></div>
-    </div><br>
+    </div><hr>
+    Relay pin: <input type="number" min="-1" max="40" name="RL" onchange="UI()"> Active high? <input type="checkbox" name="RM"><br>
+    Button pin: <input type="number" min="-1" max="40" name="BT" onchange="UI()"><br>
+    IR pin: <input type="number" min="-1" max="40" name="IR" onchange="UI()"><br>
+    AUX pin: <input type="number" min="-1" max="40" name="AX" onchange="UI()"><hr>
     <div id="ledwarning" style="color: orange; display: none;">
         &#9888; You might run into stability or lag issues.<br>
         Use less than 1000 LEDs per ESP for the best experience!<br>
-      </div>
+    </div>
 		<i>Recommended power supply for brightest white:</i><br>
 		<b><span id="psu">?</span></b><br>
     <span id="psu2"><br></span>
@@ -282,10 +286,6 @@
 		</select><br>
 		Reverse LED order (rotate 180): <input type="checkbox" name="RV"><br>
     Skip first LED: <input type="checkbox" name="SL"><hr>
-    Relay pin: <input type="number" min="-1" max="40" name="RL"> Active high? <input type="checkbox" name="RM"><br>
-    Button pin: <input type="number" min="-1" max="40" name="BT"><br>
-    IR pin: <input type="number" min="-1" max="40" name="IR"><br>
-    AUX pin: <input type="number" min="-1" max="40" name="AX"><hr>
 		<button type="button" onclick="B()">Back</button><button type="submit">Save</button>
 	</form>
 </body>
