@@ -99,7 +99,7 @@ void deserializeConfig() {
     strip.numStrips = 1;
     strip.setStripLen(0, 30);
     pinManager.allocatePin(strip.setStripPin(0, 2), true); // fail-safe
-    pinManager.allocatePin(strip.setStripPinClk(0, 0), true); // fail-safe
+    pinManager.allocatePin(strip.setStripPinClk(0, -1), true); // fail-safe
     DEBUG_PRINTLN(F("Object, not an array."));
   } else {
     JsonArray elms = strVar.as<JsonArray>();
@@ -112,18 +112,19 @@ void deserializeConfig() {
       } else {
         break; // pin not ok
       }
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
-      pin = elm[F("pin")][1];
-      if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
-        pinManager.allocatePin(strip.setStripPinClk(s, pin));
-      } else {
-        break; // pin not ok
+      if (elm[F("pin")].size()==2) {
+        pin = elm[F("pin")][1];
+        if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+          pinManager.allocatePin(strip.setStripPinClk(s, pin));
+        } else {
+          strip.setStripPin(s, -1);
+          break; // pin not ok
+        }
       }
-      #endif
       strip.setStripLen(s, elm[F("len")]);
       strip.setColorOrder(elm[F("order")]);
       skipFirstLed = elm[F("skip")]; // 0
-      useRGBW = ((ledType=elm[F("type")]) == TYPE_SK6812_RGBW);
+      useRGBW = (((ledType=elm[F("type")]) == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);
       if (strip.getStripLen(s)==0) break;
       strip.numStrips = ++s;
     }
@@ -447,32 +448,10 @@ void serializeConfig() {
     hw_led_ins_0[F("len")] = strip.getStripLen(s);
     JsonArray hw_led_ins_0_pin = hw_led_ins_0.createNestedArray("pin");
     hw_led_ins_0_pin.add(strip.getStripPin(s));
-    #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
-    hw_led_ins_0_pin.add(strip.getStripPinClk(s));
-    #endif
+    if (strip.getStripPinClk(s)>=0) hw_led_ins_0_pin.add(strip.getStripPinClk(s));
     hw_led_ins_0[F("order")] = strip.getColorOrder();
     hw_led_ins_0[F("rev")] = false;
     hw_led_ins_0[F("skip")] = skipFirstLed ? 1 : 0;
-/*
-    //this is very crude and temporary
-    byte ledType = TYPE_WS2812_RGB;
-    if (useRGBW) ledType = TYPE_SK6812_RGBW;
-    #ifdef USE_WS2801
-      ledType = TYPE_WS2801;
-    #endif
-    #ifdef USE_APA102
-      ledType = TYPE_APA102;
-    #endif
-    #ifdef USE_LPD8806
-      ledType = TYPE_LPD8806;
-    #endif
-    #ifdef USE_P9813
-      ledType = TYPE_P9813;
-    #endif
-    #ifdef USE_TM1814
-      ledType = TYPE_TM1814;
-    #endif
-*/
     hw_led_ins_0[F("type")] = ledType;
   }
 

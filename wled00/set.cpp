@@ -78,9 +78,9 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     // deallocate all pins
     for (uint8_t s=0; s<strip.numStrips; s++) {
       pinManager.deallocatePin(strip.getStripPin(s));
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
       pinManager.deallocatePin(strip.getStripPinClk(s));
-      #endif
+      strip.setStripPin(s, -1);
+      strip.setStripPinClk(s, -1);
     }
     if (rlyPin>=0 && pinManager.isPinAllocated(rlyPin)) pinManager.deallocatePin(rlyPin);
     #ifndef WLED_DISABLE_INFRARED
@@ -97,17 +97,15 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       t = strip.setStripLen(0, 30);
       pinManager.allocatePin(strip.setStripPin(0, 2));
     }
-    #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
     if ( request->hasArg(LK.c_str()) ) {
       pin = request->arg(LK).toInt();
       if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
         pinManager.allocatePin(strip.setStripPinClk(0, pin));
       } else {
         // fallback
-        pinManager.allocatePin(strip.setStripPinClk(0, 0));
+        pinManager.allocatePin(strip.setStripPinClk(0, -1));
       }
     }
-    #endif
     strip.numStrips = 1;
 
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
@@ -121,21 +119,22 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       } else {
         break;  // no parameter
       }
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
       if ( request->hasArg((LK+i).c_str()) ) {
         pin = request->arg((LK+i).c_str()).toInt();
         if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
           pinManager.allocatePin(strip.setStripPinClk(i, pin));
         } else {
+          strip.setStripPin(i, -1);
           break;  // pin not ok
         }
       } else {
         break;  // no paramter
       }
-      #endif
       if ( request->hasArg((LC+i).c_str()) && request->arg((LC+i).c_str()).toInt() > 0 ) {
         t += strip.setStripLen(i, request->arg((LC+i).c_str()).toInt());
       } else {
+        strip.setStripPin(i, -1);
+        strip.setStripPinClk(i, -1);
         break;  // no parameter
       }
       strip.numStrips++;
