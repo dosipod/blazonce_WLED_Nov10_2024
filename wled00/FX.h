@@ -544,9 +544,9 @@ class WS2812FX {
       get_random_wheel_index(uint8_t);
 
     int8_t
-      setStripPin(uint8_t strip, uint8_t pin),
+      setStripPin(uint8_t strip, int8_t pin),
       getStripPin(uint8_t strip=0),
-      setStripPinClk(uint8_t strip, uint8_t pin),
+      setStripPinClk(uint8_t strip, int8_t pin),
       getStripPinClk(uint8_t strip=0),
       tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t attdec);
 

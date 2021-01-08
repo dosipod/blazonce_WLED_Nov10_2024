@@ -76,7 +76,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst, uin
   setBrightness(_brightness);
 }
 
-int8_t WS2812FX::setStripPin(uint8_t strip, uint8_t pin) {
+int8_t WS2812FX::setStripPin(uint8_t strip, int8_t pin) {
   if (strip > numStrips ) return -1;
   return _stripPin[strip] = pin;
 }
@@ -86,7 +86,7 @@ int8_t WS2812FX::getStripPin(uint8_t strip) {
   return _stripPin[strip];
 }
 
-int8_t WS2812FX::setStripPinClk(uint8_t strip, uint8_t pin) {
+int8_t WS2812FX::setStripPinClk(uint8_t strip, int8_t pin) {
   if (strip > numStrips ) return -1;
   return _stripPinClk[strip] = pin;
 }

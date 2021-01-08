@@ -161,6 +161,8 @@ public:
 
   void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t ledType)
   {
+    cleanup();
+
     uint16_t totalPixels = 0;
     pixelType = ledType;
     pixelStrips = numStrips;

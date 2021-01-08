@@ -86,9 +86,9 @@ void deserializeConfig() {
 
   // initialize LED pins and lengths prior to other HW
   JsonObject hw_led = hw[F("led")];
-  CJSON(ledCount, hw_led[F("total")]);
-  if (ledCount > MAX_LEDS) ledCount = MAX_LEDS;
 
+//  CJSON(ledCount, hw_led[F("total")]);
+  ledCount = 0;
   CJSON(strip.ablMilliampsMax, hw_led[F("maxpwr")]);
   CJSON(strip.milliampsPerLed, hw_led[F("ledma")]);
   CJSON(strip.reverseMode, hw_led[F("rev")]);
@@ -100,26 +100,23 @@ void deserializeConfig() {
     strip.setStripLen(0, 30);
     pinManager.allocatePin(strip.setStripPin(0, 2), true); // fail-safe
     pinManager.allocatePin(strip.setStripPinClk(0, -1), true); // fail-safe
-    DEBUG_PRINTLN(F("Object, not an array."));
   } else {
     JsonArray elms = strVar.as<JsonArray>();
     uint8_t s=0;
     for ( JsonObject elm : elms ) {
-      if (s>MAX_NUMBER_OF_STRIPS) break;
+      if (s>=MAX_NUMBER_OF_STRIPS) break;
       uint8_t pin = elm[F("pin")][0];
-      if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
-        pinManager.allocatePin(strip.setStripPin(s, pin));
+      if (pin>=0 && pinManager.allocatePin(strip.setStripPin(s, pin))) {
+        if (elm[F("pin")].size()==2) {
+          pin = elm[F("pin")][1];
+          if (pin>=0)
+            if (!pinManager.allocatePin(strip.setStripPinClk(s, pin))) {
+              strip.setStripPin(s, -1);
+              break; // pin not ok
+            }
+        }
       } else {
         break; // pin not ok
-      }
-      if (elm[F("pin")].size()==2) {
-        pin = elm[F("pin")][1];
-        if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
-          pinManager.allocatePin(strip.setStripPinClk(s, pin));
-        } else {
-          strip.setStripPin(s, -1);
-          break; // pin not ok
-        }
       }
       strip.setStripLen(s, elm[F("len")]);
       strip.setColorOrder(elm[F("order")]);
@@ -127,11 +124,13 @@ void deserializeConfig() {
       ledType = elm[F("type")];
       useRGBW = ((ledType == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);
       if (strip.getStripLen(s)==0) break;
+      ledCount += strip.getStripLen(s);
       strip.numStrips = ++s;
     }
     if (strip.numStrips<1 || strip.numStrips>MAX_NUMBER_OF_STRIPS) strip.numStrips = 1;
     if (strip.getStripLen(0)==0) strip.setStripLen(0, 30);
   }
+  if (ledCount > MAX_LEDS) ledCount = MAX_LEDS;
 
   JsonObject hw_btn_ins_0 = hw[F("btn")][F("ins")][0];
   CJSON(buttonEnabled, hw_btn_ins_0[F("type")]);
@@ -163,6 +162,7 @@ void deserializeConfig() {
   int hw_relay_pin = hw[F("relay")][F("pin")];
   if (pinManager.allocatePin(hw_relay_pin,true)) {
     rlyPin = hw_relay_pin;
+    pinMode(rlyPin, OUTPUT);
   } else {
     rlyPin = -1;
   }

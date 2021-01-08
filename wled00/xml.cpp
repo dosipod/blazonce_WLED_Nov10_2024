@@ -248,6 +248,10 @@ void getSettingsJS(byte subPage, char* dest)
   }
 
   if (subPage == 2) {
+    char nS[3];
+    oappend(SET_F("addLEDs("));
+    oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
+    oappend(SET_F(");"));
     #ifdef ESP8266
     if (strip.getStripPin(0)==3)
       oappend(SET_F("d.Sf.LC.max=500;"));
@@ -258,13 +262,9 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('v',SET_F("LP"),strip.getStripPin(0));
     if (strip.getStripPinClk(0)>=0) sappend('v',SET_F("LK"),strip.getStripPinClk(0));
     sappend('v',SET_F("LC"),strip.getStripLen(0));
-    char nS[3];
     oappend(SET_F("d.Sf.LTsel.value="));
     oappend(itoa(ledType,nS,10));
     oappend(SET_F(";"));
-    oappend(SET_F("addLEDs("));
-    oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
-    oappend(SET_F(");"));
     for (uint8_t s=1; s<strip.numStrips; s++){
       String LP = F("LP"), LK = F("LK"), LC = F("LC");
       LP += s; LK += s; LC += s;

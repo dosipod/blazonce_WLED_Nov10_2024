@@ -91,46 +91,39 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     ledType = request->arg(F("LTsel")).toInt();
 
     pin = request->arg(LP).toInt();
-    if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
+    if (pinManager.allocatePin(strip.setStripPin(0, pin))) {
       t = strip.setStripLen(0, request->arg(LC).toInt());
-      pinManager.allocatePin(strip.setStripPin(0, pin));
+      if ( request->hasArg(LK.c_str()) ) {
+        pin = (request->arg(LK)).length() > 0 ? request->arg(LK).toInt() : -1;
+        if (pinManager.allocatePin(strip.setStripPinClk(0, pin))) {
+        } else {
+          // fallback
+          pinManager.allocatePin(strip.setStripPinClk(0, -1));
+        }
+      }
     } else {
       // fallback
       t = strip.setStripLen(0, 30);
       pinManager.allocatePin(strip.setStripPin(0, 2));
-    }
-    if ( request->hasArg(LK.c_str()) ) {
-      pin = request->arg(LK).toInt();
-      if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
-        pinManager.allocatePin(strip.setStripPinClk(0, pin));
-      } else {
-        // fallback
-        pinManager.allocatePin(strip.setStripPinClk(0, -1));
-      }
+      strip.setStripPinClk(0, -1);
     }
     strip.numStrips = 1;
 
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
       if ( request->hasArg((LP+i).c_str()) ) {
         pin = request->arg((LP+i).c_str()).toInt();
-        if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
-          pinManager.allocatePin(strip.setStripPin(i, pin));
+        if (pinManager.allocatePin(strip.setStripPin(i, pin))) {
+          if ( request->hasArg((LK+i).c_str()) ) {
+            pin = (request->arg(LK+i)).length() > 0 ? request->arg((LK+i).c_str()).toInt() : -1;
+            if (pin>=0) {
+              pinManager.allocatePin(strip.setStripPinClk(i, pin));
+            }
+          }
         } else {
           break; // pin not ok
         }
       } else {
         break;  // no parameter
-      }
-      if ( request->hasArg((LK+i).c_str()) ) {
-        pin = request->arg((LK+i).c_str()).toInt();
-        if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
-          pinManager.allocatePin(strip.setStripPinClk(i, pin));
-        } else {
-          strip.setStripPin(i, -1);
-          break;  // pin not ok
-        }
-      } else {
-        break;  // no paramter
       }
       if ( request->hasArg((LC+i).c_str()) && request->arg((LC+i).c_str()).toInt() > 0 ) {
         t += strip.setStripLen(i, request->arg((LC+i).c_str()).toInt());
@@ -426,11 +419,11 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       DMXFixtureMap[i] = t;
     }
   }
-  
   #endif
+
   if (subPage != 6 || !doReboot) serializeConfig(); //do not save if factory reset
   if (subPage == 2) {
-    strip.init(useRGBW,ledCount,skipFirstLed);
+    strip.init(useRGBW,ledCount,skipFirstLed,ledType);
   }
   if (subPage == 4) alexaInit();
 }

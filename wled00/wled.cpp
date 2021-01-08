@@ -261,13 +261,16 @@ void WLED::setup()
   //loadSettingsFromEEPROM();
   beginStrip();
   userSetup();
+
+  // usermods setup should happen before initializing strip (possible pin reservaion)
   usermods.setup();
   if (strcmp(clientSSID, DEFAULT_CLIENT_SSID) == 0)
     showWelcomePage = true;
   WiFi.persistent(false);
   WiFi.onEvent(WiFiEvent);
 
-  Serial.println(F("Ada"));
+  // Serial.println(F("Ada"));
+  DEBUG_PRINTLN(F("Ada"));
 
   // generate module IDs
   escapedMac = WiFi.macAddress();
@@ -312,25 +315,12 @@ void WLED::beginStrip()
 {
   // Initialize NeoPixel Strip and button
 
-// This should be taken care elsewhere
-//  #ifdef ESP8266
-//  #if LEDPIN == 3
-//    if (ledCount > MAX_LEDS_DMA)
-//      ledCount = MAX_LEDS_DMA;        // DMA method uses too much ram
-//  #endif
-//  #endif
-
   if (ledCount > MAX_LEDS || ledCount == 0)
     ledCount = 30;
 
   strip.init(useRGBW, ledCount, skipFirstLed, ledType);
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
-
-  if (btnPin>=0) {
-    pinManager.allocatePin(btnPin, false);
-    pinMode(btnPin, INPUT_PULLUP);
-  }
 
   if (bootPreset > 0) applyPreset(bootPreset);
   if (turnOnAtBoot) {
