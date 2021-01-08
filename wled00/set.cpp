@@ -88,6 +88,8 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     #endif
     if (btnPin>=0 && pinManager.isPinAllocated(btnPin)) pinManager.deallocatePin(btnPin);
 
+    ledType = request->arg(F("LTsel")).toInt();
+
     pin = request->arg(LP).toInt();
     if (pinManager.isPinOk(pin) && !pinManager.isPinAllocated(pin)) {
       t = strip.setStripLen(0, request->arg(LC).toInt());

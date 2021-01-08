@@ -259,6 +259,9 @@ void getSettingsJS(byte subPage, char* dest)
     if (strip.getStripPinClk(0)>=0) sappend('v',SET_F("LK"),strip.getStripPinClk(0));
     sappend('v',SET_F("LC"),strip.getStripLen(0));
     char nS[3];
+    oappend(SET_F("d.Sf.LTsel.value="));
+    oappend(itoa(ledType,nS,10));
+    oappend(SET_F(";"));
     oappend(SET_F("addLEDs("));
     oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
     oappend(SET_F(");"));

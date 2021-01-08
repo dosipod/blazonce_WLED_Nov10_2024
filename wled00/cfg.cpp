@@ -124,7 +124,8 @@ void deserializeConfig() {
       strip.setStripLen(s, elm[F("len")]);
       strip.setColorOrder(elm[F("order")]);
       skipFirstLed = elm[F("skip")]; // 0
-      useRGBW = (((ledType=elm[F("type")]) == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);
+      ledType = elm[F("type")];
+      useRGBW = ((ledType == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);
       if (strip.getStripLen(s)==0) break;
       strip.numStrips = ++s;
     }
