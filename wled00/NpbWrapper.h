@@ -25,8 +25,12 @@
 //#define TOUCHPIN T0 //touch pin. Behaves the same as button. ESP32 only.
 #endif
 
+#ifndef WLED_DISABLE_INFRARED
 #ifndef IRPIN
 #define IRPIN  4  //infrared pin (-1 to disable)  MagicHome: 4, H801 Wifi: 0
+#endif
+#else
+#define IRPIN -1
 #endif
 
 #ifndef RLYPIN

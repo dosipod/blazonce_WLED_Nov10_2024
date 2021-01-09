@@ -249,9 +249,11 @@ void getSettingsJS(byte subPage, char* dest)
 
   if (subPage == 2) {
     char nS[3];
-    oappend(SET_F("addLEDs("));
-    oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
-    oappend(SET_F(");"));
+    #if defined(MAX_NUMBER_OF_STRIPS) && MAX_NUMBER_OF_STRIPS>1
+      oappend(SET_F("addLEDs("));
+      oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
+      oappend(SET_F(");"));
+    #endif
     #ifdef ESP8266
     if (strip.getStripPin(0)==3)
       oappend(SET_F("d.Sf.LC.max=500;"));
