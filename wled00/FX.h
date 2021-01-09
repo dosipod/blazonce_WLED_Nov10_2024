@@ -485,6 +485,12 @@ class WS2812FX {
       for (uint8_t i=0; i<MAX_NUMBER_OF_STRIPS; i++) {
         _stripPin[i] = _stripPinClk[i] = -1;
       }
+      #if defined(DATAPIN) && defined(CLOCKPIN) && DATAPIN>-1 && CLOCKPIN>-1
+        /*pinManager.allocatePin(*/_stripPin[0] = DATAPIN/*, true)*/;
+        /*pinManager.allocatePin(*/_stripPinClk[0] = CLOCKPIN/*, true)*/;
+      #elif defined(LEDPIN) && LEDPIN>-1
+        /*pinManager.allocatePin(*/_stripPin[0] = LEDPIN/*, true)*/;
+      #endif
       bus = new NeoPixelWrapper();
       resetSegments();
     }

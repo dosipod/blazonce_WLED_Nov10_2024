@@ -64,6 +64,20 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst, uin
     _lengthRaw += LED_SKIP_AMOUNT;
   }
 
+  #ifdef WLED_DEBUG
+  for (int i=0; i<numStrips; i++) {
+    DEBUG_PRINT(F("Added strip "));
+    DEBUG_PRINT(i);
+    DEBUG_PRINT(F(": data pin="));
+    DEBUG_PRINT(_stripPin[i]);
+    DEBUG_PRINT(F(" clock pin="));
+    DEBUG_PRINT(_stripPinClk[i]);
+    DEBUG_PRINT(F("; LED count="));
+    DEBUG_PRINT(_stripLen[i]);
+    DEBUG_PRINT(F("; LED type="));
+    DEBUG_PRINTLN(_ledType);
+  }
+  #endif
   // we could skip this if we pass "this" pointer to bus->Begin()
 #ifdef ESP8266_MULTISTRIP
   bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _ledType);

@@ -12,30 +12,6 @@
 //#define WLED_USE_BWLT11
 //#define WLED_USE_SHOJO_PCB
 
-#ifndef BTNPIN
-#define BTNPIN  -1  //button pin. Needs to have pullup (gpio0 recommended)
-#endif
-
-#ifndef TOUCHPIN
-//#define TOUCHPIN T0 //touch pin. Behaves the same as button. ESP32 only.
-#endif
-
-#ifndef IRPIN
-#define IRPIN -1  //infrared pin (-1 to disable)  MagicHome: 4, H801 Wifi: 0
-#endif
-
-#ifndef RLYPIN
-#define RLYPIN -1  //pin for relay, will be set HIGH if LEDs are on (-1 to disable). Also usable for standby leds, triggers,...
-#endif
-
-#ifndef AUXPIN
-#define AUXPIN -1  //debug auxiliary output pin (-1 to disable)
-#endif
-
-#ifndef RLYMDE
-#define RLYMDE 1  //mode for relay, 0: LOW if LEDs are on 1: HIGH if LEDs are on
-#endif
-
 //enable color order override for a specific range of the strip
 //This can be useful if you want to chain multiple strings with incompatible color order
 //#define COLOR_ORDER_OVERRIDE
