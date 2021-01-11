@@ -629,7 +629,7 @@ function populateEffects()
 
 	effects.shift(); //remove solid
 	for (let i = 0; i < effects.length; i++) {
-		effects[i] = {id: parseInt(i)+1, name:effects[i]};
+		effects[i] = {id: effects[i][0], name:effects[i][1]};
 	}
 	effects.sort(compare);
 
@@ -639,7 +639,6 @@ function populateEffects()
 	});
 
 	for (let i = 0; i < effects.length; i++) {
-		//x += `<button class="btn${(i==0)?" first":""}" id="fxb${effects[i].id}" onclick="setX(${effects[i].id});">${effects[i].name}</button><br>`;
 		html += generateListItemHtml(
 			'fx',
 			effects[i].id,
@@ -657,8 +656,8 @@ function populatePalettes()
 	palettes.shift(); //remove default
 	for (let i = 0; i < palettes.length; i++) {
 		palettes[i] = {
-			"id": parseInt(i)+1,
-			"name": palettes[i]
+			"id": palettes[i][0],
+			"name": palettes[i][1]
 		};
 	}
 	palettes.sort(compare);
@@ -958,24 +957,35 @@ function requestJson(command, rinfo = true, verbose = true) {
 		d.getElementById('sliderIntensity').value = i.ix;
 
 		// Effects
-		e1.querySelector(`input[name="fx"][value="${i.fx}"]`).checked = true;
+		var selectedEffectInput = e1.querySelector(`input[name="fx"][value="${i.fx}"]`);
+		if (selectedEffectInput) {
+			e1.querySelector(`input[name="fx"][value="${i.fx}"]`).checked = true;
+		}
 		var selElement = e1.querySelector('.selected');
 		if (selElement) {
 			selElement.classList.remove('selected')
 		}
 		var selectedEffect = e1.querySelector(`.lstI[data-id="${i.fx}"]`);
-		selectedEffect.classList.add('selected');
+		if (selectedEffect) {
+			selectedEffect.classList.add('selected');
+		}
 		selectedFx = i.fx;
 
 		// Palettes
-		e2.querySelector(`input[name="palette"][value="${i.pal}"]`).checked = true;
+		var selectedPalette = e2.querySelector(`input[name="palette"][value="${i.pal}"]`);
+		if (selectedPalette) {
+			selectedPalette.checked = true;
+		}
 		selElement = e2.querySelector('.selected');
 		if (selElement) {
 			selElement.classList.remove('selected')
 		}
-		e2.querySelector(`.lstI[data-id="${i.pal}"]`).classList.add('selected');
+		var selectedPalette = e2.querySelector(`.lstI[data-id="${i.pal}"]`);
+		if (selectedPalette) {
+			e2.querySelector(`.lstI[data-id="${i.pal}"]`).classList.add('selected');
+		}
 
-		if (!command) {
+		if (!command && selectedEffect) {
 			d.getElementById('Effects').scrollTop = selectedEffect.offsetTop - d.getElementById('Effects').clientHeight/1.8;
 		}
 
