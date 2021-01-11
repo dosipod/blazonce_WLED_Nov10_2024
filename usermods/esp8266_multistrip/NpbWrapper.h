@@ -127,7 +127,11 @@ public:
     _type(NeoPixelType_None),
     pixelStrips(0)
   {
-    for (uint8_t i=0; i < MAX_NUMBER_OF_STRIPS; i++ ) _pGRB[i] = NULL;
+    for (uint8_t i=0; i < MAX_NUMBER_OF_STRIPS; i++ )
+    {
+      _pGRB[i] = NULL;
+      _colorOrder[i]=0;
+    }
   }
 
   ~NeoPixelWrapper()
@@ -135,18 +139,18 @@ public:
     cleanup();
   }
 
-  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t ledType)
+  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType)
   {
     cleanup();
 
     uint16_t totalPixels = 0;
-    pixelType = ledType;
     pixelStrips = numStrips;
-    pixelCounts = stripLen;
-    pixelStripPins = stripPin;
-    pixelStripPinsClk = stripPinClk;
     for (uint8_t idx = 0; idx < numStrips; idx++)
     {
+      pixelType[idx] = ledType[idx];
+      pixelCounts[idx] = stripLen[idx];
+      pixelStripPins[idx] = stripPin[idx];
+      pixelStripPinsClk[idx] = stripPinClk[idx];
       pixelStripStartIdx[idx] = totalPixels;
       totalPixels += pixelCounts[idx];
     }
@@ -158,7 +162,7 @@ public:
 
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      switch (pixelType) {
+      switch (pixelType[idx]) {
         case TYPE_WS2812_RGB:
         {
           #ifdef ARDUINO_ARCH_ESP32
@@ -334,7 +338,7 @@ public:
   {
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      switch (pixelType) {
+      switch (pixelType[idx]) {
         case TYPE_WS2812_RGB:
         {
           #ifdef ARDUINO_ARCH_ESP32
@@ -418,7 +422,7 @@ public:
     bool canShow = true;
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      switch (pixelType) {
+      switch (pixelType[idx]) {
         case TYPE_WS2812_RGB:
         {
           #ifdef ARDUINO_ARCH_ESP32
@@ -498,26 +502,28 @@ public:
     return canShow;
   }
 
-  void SetPixelColorRaw(uint16_t indexPixel, RgbwColor c)
+  uint8_t GetStripFromPixel(uint16_t indexPixel)
   {
     // figure out which strip this pixel index is on
     uint8_t stripIdx = 0;
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
-    {
       if (indexPixel >= pixelStripStartIdx[idx])
-      {
         stripIdx = idx;
-      }
       else
-      {
         break;
-      }
-    }
+    return stripIdx;
+  }
+
+  void SetPixelColorRaw(uint16_t indexPixel, RgbwColor c)
+  {
+    // figure out which strip this pixel index is on
+    uint8_t stripIdx = GetStripFromPixel(indexPixel);
+
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
     RgbColor rgb = RgbColor(c.R, c.G, c.B);
 
-    switch (pixelType) {
+    switch (pixelType[stripIdx]) {
       case TYPE_WS2812_RGB:
       {
         #ifdef ARDUINO_ARCH_ESP32
@@ -603,7 +609,7 @@ public:
 
     RgbwColor col;
 
-    uint8_t co = _colorOrder;
+    uint8_t co = _colorOrder[GetStripFromPixel(indexPixel)];
     #ifdef COLOR_ORDER_OVERRIDE
     if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
     #endif
@@ -627,7 +633,7 @@ public:
   {
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      switch (pixelType) {
+      switch (pixelType[idx]) {
         case TYPE_WS2812_RGB:
         {
           #ifdef ARDUINO_ARCH_ESP32
@@ -706,35 +712,27 @@ public:
     }
   }
 
-  void SetColorOrder(byte colorOrder)
+  void SetColorOrder(byte colorOrder, uint8_t strip=0)
   {
-    _colorOrder = colorOrder;
+    if (strip>pixelStrips) return;
+    _colorOrder[strip] = colorOrder;
   }
 
-  uint8_t GetColorOrder()
+  uint8_t GetColorOrder(uint8_t strip=0)
   {
-    return _colorOrder;
+    if (strip>pixelStrips) return 0;
+    return _colorOrder[strip];
   }
 
-  RgbwColor GetPixelColorRaw(uint16_t indexPixel) const
+  RgbwColor GetPixelColorRaw(uint16_t indexPixel)
   {
     // figure out which strip this pixel index is on
-    uint8_t stripIdx = 0;
-    for (uint8_t idx = 0; idx < pixelStrips; idx++)
-    {
-      if (indexPixel >= pixelStripStartIdx[idx])
-      {
-        stripIdx = idx;
-      }
-      else
-      {
-        break;
-      }
-    }
+    uint8_t stripIdx = GetStripFromPixel(indexPixel);
+
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
 
-    switch (pixelType) {
+    switch (pixelType[stripIdx]) {
       case TYPE_WS2812_RGB:
       {
         #ifdef ARDUINO_ARCH_ESP32
@@ -815,10 +813,10 @@ public:
 
   // NOTE: Due to feature differences, some support RGBW but the method name
   // here needs to be unique, thus GetPixeColorRgbw
-  uint32_t GetPixelColorRgbw(uint16_t indexPixel) const
+  uint32_t GetPixelColorRgbw(uint16_t indexPixel)
   {
     RgbwColor col = GetPixelColorRaw(indexPixel);
-    uint8_t co = _colorOrder;
+    uint8_t co = _colorOrder[GetStripFromPixel(indexPixel)];
     #ifdef COLOR_ORDER_OVERRIDE
     if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
     #endif
@@ -839,13 +837,12 @@ public:
   
 private:
   NeoPixelType _type;
-  byte _colorOrder = 0;
-
-  uint8_t   pixelType;          // LED pixel type
-  uint16_t *pixelCounts;        // number of pixels on each strip
-  int8_t   *pixelStripPins;     // strip GPIO pin
-  int8_t   *pixelStripPinsClk;  // strip GPIO pin
+  byte      _colorOrder[MAX_NUMBER_OF_STRIPS];
   uint8_t   pixelStrips;                              // number of strips
+  uint8_t   pixelType[MAX_NUMBER_OF_STRIPS];          // LED pixel type
+  uint16_t  pixelCounts[MAX_NUMBER_OF_STRIPS];        // number of pixels on each strip
+  int8_t    pixelStripPins[MAX_NUMBER_OF_STRIPS];     // strip GPIO pin
+  int8_t    pixelStripPinsClk[MAX_NUMBER_OF_STRIPS];  // strip GPIO pin
   uint16_t  pixelStripStartIdx[MAX_NUMBER_OF_STRIPS]; // start index in a single virtual strip
 
   void *_pGRB[MAX_NUMBER_OF_STRIPS];
@@ -854,7 +851,7 @@ private:
   {
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      switch (pixelType) {
+      switch (pixelType[idx]) {
         case TYPE_WS2812_RGB:
         {
           #ifdef ARDUINO_ARCH_ESP32

@@ -119,9 +119,9 @@ void deserializeConfig() {
         break; // pin not ok
       }
       strip.setStripLen(s, elm[F("len")]);
-      strip.setColorOrder(elm[F("order")]);
+      strip.setColorOrder(elm[F("order")], s);
       skipFirstLed = elm[F("skip")]; // 0
-      ledType = elm[F("type")];
+      ledType = strip.setStripType(elm[F("type")], s);
       useRGBW = ((ledType == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);
       if (strip.getStripLen(s)==0) break;
       ledCount += strip.getStripLen(s);
@@ -450,10 +450,10 @@ void serializeConfig() {
     JsonArray hw_led_ins_0_pin = hw_led_ins_0.createNestedArray("pin");
     hw_led_ins_0_pin.add(strip.getStripPin(s));
     if (strip.getStripPinClk(s)>=0) hw_led_ins_0_pin.add(strip.getStripPinClk(s));
-    hw_led_ins_0[F("order")] = strip.getColorOrder();
+    hw_led_ins_0[F("order")] = strip.getColorOrder(s);
     hw_led_ins_0[F("rev")] = false;
     hw_led_ins_0[F("skip")] = skipFirstLed ? 1 : 0;
-    hw_led_ins_0[F("type")] = ledType;
+    hw_led_ins_0[F("type")] = strip.getStripType(s);
   }
 
   JsonObject hw_btn = hw.createNestedObject("btn");
