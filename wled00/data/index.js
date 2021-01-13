@@ -636,7 +636,7 @@ function populateEffects()
 
 	effects.unshift({
 		"id": 0,
-		"name": "Default",
+		"name": "Solid",
 	});
 
 	for (let i = 0; i < effects.length; i++) {
@@ -899,8 +899,8 @@ function requestJson(command, rinfo = true, verbose = true) {
 	var type = command ? 'post':'get';
 	if (command)
 	{
-    command.v = verbose;
-    command.time = Math.floor(Date.now() / 1000);
+    	command.v = verbose;
+    	command.time = Math.floor(Date.now() / 1000);
 		req = JSON.stringify(command);
 		//console.log(req);
 	}
@@ -1067,7 +1067,7 @@ function requestJson(command, rinfo = true, verbose = true) {
       		}
       		showToast('Error ' + s.error + ": " + errstr, true);
     	}
-        setTimeout(function(){updateUI(true)},500);
+        setTimeout(function(){updateUI(true)},750);
 	})
 	.catch(function (error) {
 		showToast(error, true);
