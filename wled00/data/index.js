@@ -718,7 +718,9 @@ function populatePalettes()
 
 function redrawPalPrev()
 {
+	let palettes = d.querySelectorAll('#selectPalette .lstI');
 	for (let i = 0; i < palettes.length; i++) {
+		let id = palettes[i].dataset.id;
 		let lstPrev = palettes[i].querySelector('.lstIprev');
 		if (lstPrev) {
 			lstPrev.style = genPalPrevCss(id);
@@ -972,8 +974,8 @@ function requestJson(command, rinfo = true, verbose = true, callback = null) {
 	var type = command ? 'post':'get';
 	if (command)
 	{
-    	command.v = verbose;
-    	command.time = Math.floor(Date.now() / 1000);
+		command.v = verbose;
+		command.time = Math.floor(Date.now() / 1000);
 		req = JSON.stringify(command);
 		//console.log(req);
 	}
