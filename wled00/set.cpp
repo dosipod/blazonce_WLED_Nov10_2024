@@ -71,8 +71,8 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   //LED SETTINGS
   if (subPage == 2)
   {
-    String LC=F("LC"), LP=F("LP"), LK=F("LK");
-    uint8_t pin;
+    String LC=F("LC"), LP=F("LP"), LK=F("LK"), CO=F("CO"), LTsel=F("LTsel");
+    int8_t pin;
     int t;
 
     // deallocate all pins
@@ -88,7 +88,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     #endif
     if (btnPin>=0 && pinManager.isPinAllocated(btnPin)) pinManager.deallocatePin(btnPin);
 
-    ledType = request->arg(F("LTsel")).toInt();
+    ledType = request->arg(LTsel).toInt();
 
     pin = request->arg(LP).toInt();
     if (pinManager.allocatePin(strip.setStripPin(0, pin))) {
@@ -101,6 +101,8 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
           pinManager.allocatePin(strip.setStripPinClk(0, -1));
         }
       }
+      strip.setColorOrder(request->arg(CO).toInt(), 0);
+      strip.setStripType(request->arg(LTsel).toInt(), 0);
     } else {
       // fallback
       t = strip.setStripLen(0, 30);
@@ -110,28 +112,45 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     strip.numStrips = 1;
 
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
+      DEBUG_PRINTLN(F("Adding strip "));
+      DEBUG_PRINTLN(i);
       if ( request->hasArg((LP+i).c_str()) ) {
         pin = request->arg((LP+i).c_str()).toInt();
+        DEBUG_PRINT(F("Pin "));
+        DEBUG_PRINTLN(pin);
         if (pinManager.allocatePin(strip.setStripPin(i, pin))) {
           if ( request->hasArg((LK+i).c_str()) ) {
             pin = (request->arg(LK+i)).length() > 0 ? request->arg((LK+i).c_str()).toInt() : -1;
+            DEBUG_PRINT(F("Clock "));
+            DEBUG_PRINTLN(pin);
             if (pin>=0) {
               pinManager.allocatePin(strip.setStripPinClk(i, pin));
             }
           }
         } else {
+          DEBUG_PRINTLN(F("Pin not ok."));
+          strip.setStripType(TYPE_NONE, i);
           break; // pin not ok
         }
+        strip.setStripType(request->arg((LTsel+i).c_str()).toInt(), i);
+        DEBUG_PRINT(F("Type "));
+        DEBUG_PRINTLN(strip.getStripType(i));
       } else {
+        DEBUG_PRINTLN("No data.");
+        strip.setStripType(TYPE_NONE, i);
         break;  // no parameter
       }
       if ( request->hasArg((LC+i).c_str()) && request->arg((LC+i).c_str()).toInt() > 0 ) {
         t += strip.setStripLen(i, request->arg((LC+i).c_str()).toInt());
       } else {
+        strip.setStripType(TYPE_NONE, i);
         strip.setStripPin(i, -1);
         strip.setStripPinClk(i, -1);
         break;  // no parameter
       }
+      DEBUG_PRINT(F("Count "));
+      DEBUG_PRINTLN(strip.getStripLen(i));
+      strip.setColorOrder(request->arg((CO+i).c_str()).toInt(), i);
       strip.numStrips++;
     }
 
@@ -423,7 +442,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
   if (subPage != 6 || !doReboot) serializeConfig(); //do not save if factory reset
   if (subPage == 2) {
-    strip.init(useRGBW,ledCount,skipFirstLed,ledType);
+    strip.init(useRGBW,ledCount,skipFirstLed);
   }
   if (subPage == 4) alexaInit();
 }

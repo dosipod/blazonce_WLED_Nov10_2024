@@ -49,9 +49,9 @@ const uint16_t customMappingSize = sizeof(customMappingTable)/sizeof(uint16_t); 
 #define PWM_INDEX 0
 #endif
 
-void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst, uint8_t _ledType)
+void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 {
-  if (supportWhite == _useRgbw && countPixels == _length && _skipFirstMode == skipFirst) return;
+  //if (supportWhite == _useRgbw && countPixels == _length && _skipFirstMode == skipFirst) return;
   RESET_RUNTIME;
   _useRgbw = supportWhite;
   _length = countPixels;
@@ -75,19 +75,30 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst, uin
     DEBUG_PRINT(F("; LED count="));
     DEBUG_PRINT(_stripLen[i]);
     DEBUG_PRINT(F("; LED type="));
-    DEBUG_PRINTLN(_ledType);
+    DEBUG_PRINTLN(_stripType[i]);
   }
   #endif
+
   // we could skip this if we pass "this" pointer to bus->Begin()
-#ifdef ESP8266_MULTISTRIP
-  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _ledType);
-#endif
+  #ifdef ESP8266_MULTISTRIP
+  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType);
+  #endif
   bus->Begin((NeoPixelType)ty, _lengthRaw);
 
   _segments[0].start = 0;
   _segments[0].stop = _length;
 
   setBrightness(_brightness);
+}
+
+uint8_t WS2812FX::setStripType(uint8_t type, uint8_t strip) {
+  if (strip > numStrips ) return TYPE_NONE;
+  return _stripType[strip] = type;
+}
+
+uint8_t WS2812FX::getStripType(uint8_t strip) {
+  if (strip > numStrips ) return TYPE_NONE;
+  return _stripType[strip];
 }
 
 int8_t WS2812FX::setStripPin(uint8_t strip, int8_t pin) {
@@ -557,12 +568,20 @@ uint32_t WS2812FX::getLastShow(void) {
   return _lastShow;
 }
 
-uint8_t WS2812FX::getColorOrder(void) {
+uint8_t WS2812FX::getColorOrder(uint8_t strip) {
+  #ifdef ESP8266_MULTISTRIP
+  return bus->GetColorOrder(strip);
+  #else
   return bus->GetColorOrder();
+  #endif
 }
 
-void WS2812FX::setColorOrder(uint8_t co) {
+void WS2812FX::setColorOrder(uint8_t co, uint8_t strip) {
+  #ifdef ESP8266_MULTISTRIP
+  bus->SetColorOrder(co, strip);
+  #else
   bus->SetColorOrder(co);
+  #endif
 }
 
 void WS2812FX::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t grouping, uint8_t spacing) {

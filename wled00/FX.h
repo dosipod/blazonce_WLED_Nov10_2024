@@ -484,6 +484,7 @@ class WS2812FX {
       timebase = 0;
       for (uint8_t i=0; i<MAX_NUMBER_OF_STRIPS; i++) {
         _stripPin[i] = _stripPinClk[i] = -1;
+        _stripType[i] = TYPE_NONE;
       }
       #if defined(DATAPIN) && defined(CLOCKPIN) && DATAPIN>-1 && CLOCKPIN>-1
         /*pinManager.allocatePin(*/_stripPin[0] = DATAPIN/*, true)*/;
@@ -496,7 +497,7 @@ class WS2812FX {
     }
 
     void
-      init(bool supportWhite, uint16_t countPixels, bool skipFirst, uint8_t _ledType=TYPE_WS2812_RGB),
+      init(bool supportWhite, uint16_t countPixels, bool skipFirst),
       service(void),
       blur(uint8_t),
       fill(uint32_t),
@@ -516,7 +517,7 @@ class WS2812FX {
       setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0),
       show(void),
       setRgbwPwm(void),
-      setColorOrder(uint8_t co),
+      setColorOrder(uint8_t co, uint8_t strip=0),
       setPixelSegment(uint8_t n);
 
     bool
@@ -536,6 +537,8 @@ class WS2812FX {
       paletteBlend = 0,
       milliampsPerLed = 55,
       numStrips = 1,
+      getStripType(uint8_t strip=0),
+      setStripType(uint8_t type, uint8_t strip=0),
       getBrightness(void),
       getMode(void),
       getSpeed(void),
@@ -544,7 +547,7 @@ class WS2812FX {
       getMaxSegments(void),
       //getFirstSelectedSegment(void),
       getMainSegmentId(void),
-      getColorOrder(void),
+      getColorOrder(uint8_t strip=0),
       gamma8(uint8_t),
       gamma8_cal(uint8_t, float),
       get_random_wheel_index(uint8_t);
@@ -708,6 +711,7 @@ class WS2812FX {
   private:
     NeoPixelWrapper *bus;
 
+    uint8_t _stripType[MAX_NUMBER_OF_STRIPS];
     int8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
     int8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];

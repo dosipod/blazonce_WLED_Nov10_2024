@@ -264,12 +264,11 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('v',SET_F("LP"),strip.getStripPin(0));
     if (strip.getStripPinClk(0)>=0) sappend('v',SET_F("LK"),strip.getStripPinClk(0));
     sappend('v',SET_F("LC"),strip.getStripLen(0));
-    oappend(SET_F("d.Sf.LTsel.value="));
-    oappend(itoa(ledType,nS,10));
-    oappend(SET_F(";"));
+    sappend('v',SET_F("LTsel"),strip.getStripType(0));
+    sappend('v',SET_F("CO"),strip.getColorOrder(0));
     for (uint8_t s=1; s<strip.numStrips; s++){
-      String LP = F("LP"), LK = F("LK"), LC = F("LC");
-      LP += s; LK += s; LC += s;
+      String LP = F("LP"), LK = F("LK"), LC = F("LC"), CO = F("CO"), LTsel = F("LTsel");
+      LP += s; LK += s; LC += s; CO += s; LTsel += s;
       oappend(SET_F("addLEDs(1);"));
       sappend('v',LP.c_str(),strip.getStripPin(s));
       if (strip.getStripPinClk(s)>=0) sappend('v',LK.c_str(),strip.getStripPinClk(s));
@@ -285,6 +284,8 @@ void getSettingsJS(byte subPage, char* dest)
         oappend(SET_F(".max=1500;"));
       }
       #endif
+      sappend('v',LTsel.c_str(),strip.getStripType(s));
+      sappend('v',CO.c_str(),strip.getColorOrder(s));
     }
     sappend('v',SET_F("MA"),strip.ablMilliampsMax);
     sappend('v',SET_F("LA"),strip.milliampsPerLed);
