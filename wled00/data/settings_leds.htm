@@ -61,7 +61,7 @@
       var sLC = 0;
       for (i=0; i<LCs.length; i++) {
         var nm = LCs[i].name.substring(0,2);
-        if (nm=="LC") sLC+=parseInt(LCs[i].value);
+        if (nm=="LC") {sLC+=parseInt(LCs[i].value,10);continue;}
         if (nm=="LP") {var lc=d.getElementsByName("LC"+LCs[i].name.substring(2))[0]; if(LCs[i].value==3) lc.max=500; else lc.max=1500;}
         if (nm=="LP" || nm=="LK" || nm=="RL" || nm=="BT" || nm=="IR" || nm=="AX")
           if (LCs[i].value!="" && LCs[i].value!="-1")
@@ -70,7 +70,7 @@
               if (i==j) continue;
               var n2 = LCs[j].name.substring(0,2);
               if (n2=="LP" || n2=="LK" || n2=="RL" || n2=="BT" || n2=="IR" || n2=="AX")
-                if (LCs[j].value!="" && LCs[i].value==LCs[j].value) {alert("Pin clash!");LCs[j].value = "";}
+                if (LCs[j].value!="" && LCs[i].value==LCs[j].value) {alert("Pin clash!");LCs[j].value = "";LCs[j].focus();}
             }
       }
       d.getElementById('ledwarning').style.display = (sLC > 1000) ? 'inline':'none';
@@ -100,7 +100,6 @@
     }
     function sTY(n)
     {
-      console.log(n);
       var s = d.getElementsByTagName("select");
       for (i=0; i<s.length; i++) {
         if (s[i].name.substring(0,5)=="LTsel" && s[i].name.substring(5)==n) {
