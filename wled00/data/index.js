@@ -3,6 +3,7 @@ var loc = false, locip;
 var noNewSegs = false;
 var isOn = false, nlA = false, isLv = false, isInfo = false, syncSend = false, syncTglRecv = true, isRgbw = false;
 var whites = [0,0,0];
+var selColors;
 var expanded = [false];
 var powered = [true];
 var nlDur = 60, nlTar = 0;
@@ -666,20 +667,10 @@ function populatePalettes()
 		"id": 0,
 		"name": "Default",
 	});
+	
 	var paletteHtml = `<input type="text" class="search" placeholder="Search" oninput="search(this)" />`;
 	for (let i = 0; i < palettes.length; i++) {
-		var paletteData = palettesData[palettes[i].id];
-		var previewCss = "";
-		if (paletteData) {
-			var gradient = [];
-			paletteData.forEach(element => {
-				gradient.push(`rgb(${element[1]},${element[2]},${element[3]}) ${element[0]/255*100}%`);
-			});
-
-			previewCss = `background: linear-gradient(to right,${gradient.join()});`;
-		} else {
-			previewCss = 'display: none';
-		}
+		let previewCss = genPalPrevCss();
 		paletteHtml += generateListItemHtml(
 			'palette',
 		    palettes[i].id,
@@ -690,6 +681,72 @@ function populatePalettes()
 	}
 
 	d.getElementById('selectPalette').innerHTML=paletteHtml;
+}
+
+function redrawPalPrev()
+{
+	let palettes = d.querySelectorAll('#selectPalette .lstI');
+	for (let i = 0; i < palettes.length; i++) {
+		let id = palettes[i].dataset.id;
+		let lstPrev = palettes[i].querySelector('.lstIprev');
+		if (lstPrev) {
+			lstPrev.style = genPalPrevCss(id);
+		}
+	}
+}
+
+function genPalPrevCss(id)
+{
+	if (!palettesData) {
+		return;
+	}
+	var paletteData = palettesData[id];
+	var previewCss = "";
+
+	if (!paletteData) {
+		return 'display: none';
+	}
+
+	// We need at least two colors for a gradient
+	if (paletteData.length == 1) {
+		paletteData[1] = paletteData[0];
+		if (Array.isArray(paletteData[1])) {
+			paletteData[1][0] = 255;
+		}
+	}
+
+	var gradient = [];
+	for (let j = 0; j < paletteData.length; j++) {
+		const element = paletteData[j];
+		let r;
+		let g;
+		let b;
+		let index = false;
+		if (Array.isArray(element)) {
+			index = element[0]/255*100;
+			r = element[1];
+			g = element[2];
+			b = element[3];
+		} else if (element == 'r') {
+			r = Math.random() * 255;
+			g = Math.random() * 255;
+			b = Math.random() * 255;
+		} else {
+			if (selColors) {
+				let pos = element[1] - 1;
+				r = selColors[pos][0];
+				g = selColors[pos][1];
+				b = selColors[pos][2];
+			}
+		}
+		if (index === false) {
+			index = j / paletteData.length * 100;
+		}
+		
+		gradient.push(`rgb(${r},${g},${b}) ${index}%`);
+	}
+
+	return `background: linear-gradient(to right,${gradient.join()});`;
 }
 
 function generateListItemHtml(listName, id, name, clickAction, extraHtml = '')
@@ -873,6 +930,7 @@ function requestJson(command, rinfo = true, verbose = true) {
 			return;
 		}
 		var s = json;
+		
 		if (!command || rinfo) {
 			if (!rinfo) {
 				pmt = json.info.fs.pmt;
@@ -944,6 +1002,8 @@ function requestJson(command, rinfo = true, verbose = true) {
 			updateUI(false);
 			return;
 		}
+		
+		selColors = i.col;
 		var cd = d.getElementById('csl').children;
 		for (let e = 2; e >= 0; e--)
 		{
@@ -1362,6 +1422,7 @@ function selectSlot(b) {
 	updateTrail(d.getElementById('sliderW'));
 	updateHex();
 	updateRgb();
+	redrawPalPrev();
 }
 
 var lasth = 0;
@@ -1497,16 +1558,21 @@ function loadPalettesData()
 	var palettesDataJson = localStorage.getItem(lsKey);
 	if (palettesDataJson) {
 		try {
-			palettesData = JSON.parse(palettesDataJson);
-			if (palettesData) {
+			palettesDataJson = JSON.parse(palettesDataJson);
+			var d = new Date();
+			if (palettesDataJson && palettesDataJson.expiration && palettesDataJson.expiration > d.getTime()) {
+				palettesData = palettesDataJson.p;
 				return;
 			}
 		} catch (e) {}
 	}
+	var dateExpiration = new Date();
 	palettesData = {};
 	getPalettesData(1, function() {
-		console.log("done palettes X");
-		localStorage.setItem(lsKey, JSON.stringify(palettesData));
+		localStorage.setItem(lsKey, JSON.stringify({
+			p: palettesData,
+			expiration: dateExpiration.getTime() + 86400
+		}));
 		requestJson(null, false);
 	});
 }
@@ -1531,7 +1597,6 @@ function getPalettesData(page, callback)
 		return res.json();
 	})
 	.then(json => {
-		console.log(json);
 		palettesData = Object.assign({}, palettesData, json.p);
 		if (page < json.m) {
 			getPalettesData(page + 1, callback);
