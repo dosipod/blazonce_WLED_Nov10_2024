@@ -669,7 +669,7 @@ function populateEffects()
 
 	effects.unshift({
 		"id": 0,
-		"name": "Default",
+		"name": "Solid",
 	});
 
 	for (let i = 0; i < effects.length; i++) {
@@ -937,7 +937,10 @@ function updateSelectedFx(scrollto=false)
 	}
 	
 	if (scrollto && selectedEffect) {
-		d.getElementById('Effects').scrollTop = selectedEffect.offsetTop - d.getElementById('Effects').clientHeight/1.8;
+		selectedEffect.scrollIntoView({
+			behavior: 'smooth',
+			block: 'nearest',
+		});
 	}	
 }
 
