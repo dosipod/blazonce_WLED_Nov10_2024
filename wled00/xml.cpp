@@ -286,6 +286,9 @@ void getSettingsJS(byte subPage, char* dest)
       #endif
       sappend('v',LTsel.c_str(),strip.getStripType(s));
       sappend('v',CO.c_str(),strip.getColorOrder(s));
+      oappend(SET_F("sTY("));
+      oappend(itoa(s,nS,10));
+      oappend(SET_F(");"));
     }
     sappend('v',SET_F("MA"),strip.ablMilliampsMax);
     sappend('v',SET_F("LA"),strip.milliampsPerLed);
