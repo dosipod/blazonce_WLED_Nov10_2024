@@ -936,7 +936,7 @@ function updateSelectedFx(scrollto=false)
 	}
 	
 	if (scrollto && selectedEffect) {
-		d.getElementById('Effects').scrollTop = selectedEffect.offsetTop - d.getElementById('Effects').clientHeight/1.8;
+		d.getElementById('Effects').scrollTop = selectedEffect.offsetTop;
 	}	
 }
 
@@ -1431,14 +1431,14 @@ function saveP(i) {
 	var pQN = d.getElementById(`p${i}ql`).value;
 	if (pQN.length > 0) obj.ql = pQN;
 
-  showToast("Saving " + pN +" (" + pI + ")");
+	showToast("Saving " + pN +" (" + pI + ")");
 	requestJson(obj);
 	if (obj.o) {
 		pJson[pI] = obj;
-    delete pJson[pI].psave;
-    delete pJson[pI].o;
-    delete pJson[pI].v;
-    delete pJson[pI].time;
+		delete pJson[pI].psave;
+		delete pJson[pI].o;
+		delete pJson[pI].v;
+		delete pJson[pI].time;
 	} else {
 		pJson[pI] = {"n":pN, "win":"Please refresh the page to see this newly saved command."};
 		if (obj.win) pJson[pI].win = obj.win;
