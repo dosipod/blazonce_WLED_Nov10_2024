@@ -94,9 +94,9 @@ void deserializeConfig() {
   CJSON(strip.reverseMode, hw_led[F("rev")]);
   CJSON(strip.rgbwMode, hw_led[F("rgbwm")]);
 
+  strip.numStrips = 1;
   JsonVariant strVar = hw_led["ins"];
   if (strVar.is<JsonObject>()) {
-    strip.numStrips = 1;
     strip.setStripLen(0, 30);
     pinManager.allocatePin(strip.setStripPin(0, 2), true); // fail-safe
     pinManager.allocatePin(strip.setStripPinClk(0, -1), true); // fail-safe
@@ -119,7 +119,7 @@ void deserializeConfig() {
         break; // pin not ok
       }
       strip.setStripLen(s, elm[F("len")]);
-      strip.setColorOrder(elm[F("order")], s);
+      strip.setColorOrder((int)elm[F("order")], s);
       skipFirstLed = elm[F("skip")]; // 0
       ledType = strip.setStripType(elm[F("type")], s);
       useRGBW = ((ledType == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);

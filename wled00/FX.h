@@ -485,6 +485,7 @@ class WS2812FX {
       for (uint8_t i=0; i<MAX_NUMBER_OF_STRIPS; i++) {
         _stripPin[i] = _stripPinClk[i] = -1;
         _stripType[i] = TYPE_NONE;
+        _stripCO[i] = -1;
       }
       #if defined(DATAPIN) && defined(CLOCKPIN) && DATAPIN>-1 && CLOCKPIN>-1
         /*pinManager.allocatePin(*/_stripPin[0] = DATAPIN/*, true)*/;
@@ -715,6 +716,7 @@ class WS2812FX {
     int8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
     int8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
+    uint8_t _stripCO[MAX_NUMBER_OF_STRIPS];
 
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);

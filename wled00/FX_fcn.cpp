@@ -75,13 +75,17 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
     DEBUG_PRINT(F("; LED count="));
     DEBUG_PRINT(_stripLen[i]);
     DEBUG_PRINT(F("; LED type="));
-    DEBUG_PRINTLN(_stripType[i]);
+    DEBUG_PRINT(_stripType[i]);
+    DEBUG_PRINT(F("; CO="));
+    DEBUG_PRINTLN(_stripCO[i]);
   }
   #endif
 
   // we could skip this if we pass "this" pointer to bus->Begin()
   #ifdef ESP8266_MULTISTRIP
   bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType);
+  for (int i=0; i<numStrips; i++)
+    bus->SetColorOrder(_stripCO[i], i);
   #endif
   bus->Begin((NeoPixelType)ty, _lengthRaw);
 
@@ -92,42 +96,42 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 }
 
 uint8_t WS2812FX::setStripType(uint8_t type, uint8_t strip) {
-  if (strip > numStrips ) return TYPE_NONE;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return TYPE_NONE;
   return _stripType[strip] = type;
 }
 
 uint8_t WS2812FX::getStripType(uint8_t strip) {
-  if (strip > numStrips ) return TYPE_NONE;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return TYPE_NONE;
   return _stripType[strip];
 }
 
 int8_t WS2812FX::setStripPin(uint8_t strip, int8_t pin) {
-  if (strip > numStrips ) return -1;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripPin[strip] = pin;
 }
 
 int8_t WS2812FX::getStripPin(uint8_t strip) {
-  if (strip > numStrips ) return -1;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripPin[strip];
 }
 
 int8_t WS2812FX::setStripPinClk(uint8_t strip, int8_t pin) {
-  if (strip > numStrips ) return -1;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripPinClk[strip] = pin;
 }
 
 int8_t WS2812FX::getStripPinClk(uint8_t strip) {
-  if (strip > numStrips ) return -1;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripPinClk[strip];
 }
 
 uint16_t WS2812FX::setStripLen(uint8_t strip, uint16_t len) {
-  if (strip > numStrips ) return 0;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return 0;
   return _stripLen[strip] = len;
 }
 
 uint16_t WS2812FX::getStripLen(uint8_t strip) {
-  if (strip > numStrips ) return 0;
+  if (strip >= MAX_NUMBER_OF_STRIPS) return 0;
   return _stripLen[strip];
 }
 
@@ -568,17 +572,19 @@ uint32_t WS2812FX::getLastShow(void) {
   return _lastShow;
 }
 
-uint8_t WS2812FX::getColorOrder(uint8_t strip) {
+uint8_t WS2812FX::getColorOrder(uint8_t s) {
   #ifdef ESP8266_MULTISTRIP
-  return bus->GetColorOrder(strip);
+  if (s >= MAX_NUMBER_OF_STRIPS) return -1;
+  return _stripCO[s]; //bus->GetColorOrder(s);
   #else
   return bus->GetColorOrder();
   #endif
 }
 
-void WS2812FX::setColorOrder(uint8_t co, uint8_t strip) {
+void WS2812FX::setColorOrder(uint8_t co, uint8_t s) {
   #ifdef ESP8266_MULTISTRIP
-  bus->SetColorOrder(co, strip);
+  if (s >= MAX_NUMBER_OF_STRIPS) return;
+  bus->SetColorOrder(_stripCO[s]=co, s);
   #else
   bus->SetColorOrder(co);
   #endif

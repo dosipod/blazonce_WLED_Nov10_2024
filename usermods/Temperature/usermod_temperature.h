@@ -170,6 +170,9 @@ class UsermodTemperature : public Usermod {
       #else
       temp.add("°F");
       #endif
+
+      JsonArray cfg = user.createNestedArray("pin");
+      cfg.add(TEMPERATURE_PIN);
     }
 
     uint16_t getId()
