@@ -61,11 +61,11 @@
       for (i=0; i<s.length; i++) {
         if (s[i].name.substring(0,5)=="LTsel") {
           n=s[i].name.substring(5);
-          d.getElementsByName("EW"+n)[0].checked = (parseInt(s[i].value)==30||parseInt(s[i].value)==54);
+          d.getElementsByName("EW"+n)[0].checked = (parseInt(s[i].value)==30||parseInt(s[i].value)==54); // TYPE_xxxx values from const.h
           var LK = d.getElementsByName("LK"+n)[0];
           var o = d.getElementsByName("iLK");
           n=(n==""?0:parseInt(n,10));
-          if (s[i].value>49 && s[i].value!=54)
+          if (s[i].value>49 && s[i].value!=54) // TYPE_xxxx values from const.h
           {
               o[n].style = "display:inline;";
               LK.required = true;
@@ -85,13 +85,13 @@
         if (nm=="LP") {var lc=d.getElementsByName("LC"+LCs[i].name.substring(2))[0]; if(LCs[i].value==3) lc.max=500; else lc.max=1500;}
         if (nm=="LP" || nm=="LK" || nm=="RL" || nm=="BT" || nm=="IR" || nm=="AX")
           if (LCs[i].value!="" && LCs[i].value!="-1") {
-            if (d.um_p && parseInt(LCs[i].value,10) == d.um_p) {alert("Usermod pin clash!");LCs[i].value = "";LCs[i].focus();continue;}
+            if (d.um_p && d.um_p.some((e)=>e==parseInt(LCs[i].value,10))) {alert("Usermod pin clash!");LCs[i].value="";LCs[i].focus();continue;}
             for (j=0; j<LCs.length; j++)
             {
               if (i==j) continue;
               var n2 = LCs[j].name.substring(0,2);
               if (n2=="LP" || n2=="LK" || n2=="RL" || n2=="BT" || n2=="IR" || n2=="AX")
-                if (LCs[j].value!="" && LCs[i].value==LCs[j].value) {alert("Pin clash!");LCs[j].value = "";LCs[j].focus();}
+                if (LCs[j].value!="" && LCs[i].value==LCs[j].value) {alert("Pin clash!");LCs[i].value="";LCs[i].focus();break;}
             }
           }
       }

@@ -250,17 +250,20 @@ void getSettingsJS(byte subPage, char* dest)
   if (subPage == 2) {
     char nS[3];
 
-    // add usermod pin if exests as d.um_p variable/obect
+    // add usermod pins as d.um_p array
     DynamicJsonDocument doc(JSON_BUFFER_SIZE);
-    JsonObject mods = doc.createNestedObject("mods");
-    usermods.addToJsonInfo(mods);
-    JsonObject mods_u = mods[F("u")];
-    if (!mods_u.isNull()) {
-      if (mods_u[F("pin")]) {
-        oappend(SET_F("d.um_p="));
-        oappend(itoa((int)mods_u[F("pin")][0],nS,10));
-        oappend(SET_F(";"));
+    JsonObject mods = doc.createNestedObject(F("mods"));
+    usermods.addToJsonState(mods);
+    if (!mods.isNull()) {
+      uint8_t i=0;
+      oappend(SET_F("d.um_p=["));
+      for (JsonPair kv : mods) {
+        if (strncmp_P(kv.key().c_str(),PSTR("pin_"),4) == 0) {
+          if (i++) oappend(SET_F(","));
+          oappend(itoa((int)kv.value(),nS,10));
+        }
       }
+      oappend(SET_F("];"));
     }
 
     #if defined(MAX_NUMBER_OF_STRIPS) && MAX_NUMBER_OF_STRIPS>1
