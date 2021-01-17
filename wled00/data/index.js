@@ -936,7 +936,10 @@ function updateSelectedFx(scrollto=false)
 	}
 	
 	if (scrollto && selectedEffect) {
-		d.getElementById('Effects').scrollTop = selectedEffect.offsetTop;
+		selectedEffect.scrollIntoView({
+			behavior: 'smooth',
+			block: 'nearest',
+		});
 	}	
 }
 
