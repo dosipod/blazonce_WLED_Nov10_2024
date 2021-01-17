@@ -93,9 +93,15 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
   setBrightness(_brightness);
 }
 
-uint8_t WS2812FX::setStripType(uint8_t type, uint8_t strip) {
-  if (strip >= MAX_NUMBER_OF_STRIPS) return TYPE_NONE;
-  return _stripType[strip] = type;
+void WS2812FX::addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder) {
+  if (numStrips >= MAX_NUMBER_OF_STRIPS) return;
+
+  uint8_t strip = numStrips++;
+  _stripType[strip]   = type;
+  _stripPin[strip]    = pins[0];
+  _stripPinClk[strip] = pins[1];
+  _stripLen[strip]    = len;
+  _stripCO[strip]     = colorOrder;
 }
 
 uint8_t WS2812FX::getStripType(uint8_t strip) {
@@ -103,29 +109,14 @@ uint8_t WS2812FX::getStripType(uint8_t strip) {
   return _stripType[strip];
 }
 
-int8_t WS2812FX::setStripPin(uint8_t strip, int8_t pin) {
-  if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
-  return _stripPin[strip] = pin;
-}
-
 int8_t WS2812FX::getStripPin(uint8_t strip) {
   if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripPin[strip];
 }
 
-int8_t WS2812FX::setStripPinClk(uint8_t strip, int8_t pin) {
-  if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
-  return _stripPinClk[strip] = pin;
-}
-
 int8_t WS2812FX::getStripPinClk(uint8_t strip) {
   if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripPinClk[strip];
-}
-
-uint16_t WS2812FX::setStripLen(uint8_t strip, uint16_t len) {
-  if (strip >= MAX_NUMBER_OF_STRIPS) return 0;
-  return _stripLen[strip] = len;
 }
 
 uint16_t WS2812FX::getStripLen(uint8_t strip) {

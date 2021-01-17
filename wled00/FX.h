@@ -606,6 +606,7 @@ class WS2812FX {
 
     void
       init(bool supportWhite, uint16_t countPixels, bool skipFirst),
+      addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder),
       service(void),
       blur(uint8_t),
       fill(uint32_t),
@@ -647,7 +648,6 @@ class WS2812FX {
       milliampsPerLed = 55,
       numStrips = 1,
       getStripType(uint8_t strip=0),
-      setStripType(uint8_t type, uint8_t strip=0),
       getBrightness(void),
       getMode(void),
       getSpeed(void),
@@ -662,16 +662,13 @@ class WS2812FX {
       get_random_wheel_index(uint8_t);
 
     int8_t
-      setStripPin(uint8_t strip, int8_t pin),
       getStripPin(uint8_t strip=0),
-      setStripPinClk(uint8_t strip, int8_t pin),
       getStripPinClk(uint8_t strip=0),
       tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t attdec);
 
     uint16_t
       ablMilliampsMax,
       currentMilliamps,
-      setStripLen(uint8_t strip, uint16_t len),
       getStripLen(uint8_t strip=0),
       triwave16(uint16_t);
 

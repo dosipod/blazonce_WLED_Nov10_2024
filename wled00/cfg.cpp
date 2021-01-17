@@ -99,41 +99,45 @@ void deserializeConfig() {
   CJSON(strip.reverseMode, hw_led[F("rev")]);
   CJSON(strip.rgbwMode, hw_led[F("rgbwm")]);
 
-  strip.numStrips = 1;
+  strip.numStrips = 0;
+  int8_t pins[2] = {-1,-1};
   JsonVariant strVar = hw_led["ins"];
   if (strVar.is<JsonObject>()) {
-    strip.setStripLen(0, 30);
-    pinManager.allocatePin(strip.setStripPin(0, 2), true); // fail-safe
-    pinManager.allocatePin(strip.setStripPinClk(0, -1), true); // fail-safe
+    pins[0] = LEDPIN;
+    pinManager.allocatePin(pins[0], true); // fail-safe
+    strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
   } else {
     JsonArray elms = strVar.as<JsonArray>();
     uint8_t s=0;
     for ( JsonObject elm : elms ) {
       if (s>=MAX_NUMBER_OF_STRIPS) break;
-      uint8_t pin = elm[F("pin")][0];
-      if (pin>=0 && pinManager.allocatePin(strip.setStripPin(s, pin))) {
+      pins[0] = elm[F("pin")][0];
+      if (pins[0]>=0 && pinManager.allocatePin(pins[0])) {
         if (elm[F("pin")].size()==2) {
-          pin = elm[F("pin")][1];
-          if (pin>=0)
-            if (!pinManager.allocatePin(strip.setStripPinClk(s, pin))) {
-              strip.setStripPin(s, -1);
+          pins[1] = elm[F("pin")][1];
+          if (pins[1]>=0)
+            if (!pinManager.allocatePin(pins[1])) {
               break; // pin not ok
             }
         }
       } else {
         break; // pin not ok
       }
-      strip.setStripLen(s, elm[F("len")]);
-      strip.setColorOrder((int)elm[F("order")], s);
+      uint16_t len = elm[F("len")];
+      uint8_t co = elm[F("order")];
       skipFirstLed = elm[F("skip")]; // 0
-      ledType = strip.setStripType(elm[F("type")], s);
-      useRGBW = ((ledType == TYPE_SK6812_RGBW) || ledType == TYPE_TM1814);
-      if (strip.getStripLen(s)==0) break;
-      ledCount += strip.getStripLen(s);
-      strip.numStrips = ++s;
+      uint8_t type = elm[F("type")];
+      useRGBW = ((type == TYPE_SK6812_RGBW) || type == TYPE_TM1814);
+      if (len==0) break;
+      ledCount += len;
+      strip.addLEDs(type, pins, len, co);
+      s++;
     }
-    if (strip.numStrips<1 || strip.numStrips>MAX_NUMBER_OF_STRIPS) strip.numStrips = 1;
-    if (strip.getStripLen(0)==0) strip.setStripLen(0, 30);
+    if (s==0) {
+      pins[0] = LEDPIN; pins[1] = -1;
+      pinManager.allocatePin(pins[0], true); // fail-safe
+      strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
+    }
   }
   if (ledCount > MAX_LEDS) ledCount = MAX_LEDS;
 
