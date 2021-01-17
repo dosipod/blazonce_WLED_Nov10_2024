@@ -89,7 +89,8 @@ class UsermodTemperature : public Usermod {
         // do not block waiting for reading
         sensor.setWaitForConversion(false);
         // allocate pin & prevent other use
-        pinManager.allocatePin(TEMPERATURE_PIN,false);
+        if (!pinManager.allocatePin(TEMPERATURE_PIN,false))
+          disabled = true;
       } else {
         DEBUG_PRINTLN(F("Dallas Temperature not found"));
       }

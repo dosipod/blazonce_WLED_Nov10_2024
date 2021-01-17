@@ -263,6 +263,12 @@ void getSettingsJS(byte subPage, char* dest)
           oappend(itoa((int)kv.value(),nS,10));
         }
       }
+      #ifdef WLED_DEBUG
+      if (i=0)
+        oappend(SET_F("1"));
+      else
+        oappend(SET_F(",1"));
+      #endif
       oappend(SET_F("];"));
     }
 

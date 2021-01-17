@@ -218,6 +218,9 @@ void WLED::setup()
 #else
   DEBUG_PRINT("esp8266 ");
   DEBUG_PRINTLN(ESP.getCoreVersion());
+  #ifdef WLED_DEBUG
+  pinManager.allocatePin(1,true); // GPIO1 reserved for debug output
+  #endif
 #endif
   int heapPreAlloc = ESP.getFreeHeap();
   DEBUG_PRINT("heap ");
