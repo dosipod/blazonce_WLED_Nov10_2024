@@ -130,7 +130,7 @@ public:
     for (uint8_t i=0; i < MAX_NUMBER_OF_STRIPS; i++ )
     {
       _pGRB[i] = NULL;
-      _colorOrder[i]=0;
+      pixelColorOrder[i]=0;
     }
   }
 
@@ -139,7 +139,7 @@ public:
     cleanup();
   }
 
-  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType)
+  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType, uint8_t *colorOrder)
   {
     cleanup();
 
@@ -152,6 +152,7 @@ public:
       pixelStripPins[idx] = stripPin[idx];
       pixelStripPinsClk[idx] = stripPinClk[idx];
       pixelStripStartIdx[idx] = totalPixels;
+      pixelColorOrder[idx] = colorOrder[idx];
       totalPixels += pixelCounts[idx];
     }
   }
@@ -609,7 +610,7 @@ public:
 
     RgbwColor col;
 
-    uint8_t co = _colorOrder[GetStripFromPixel(indexPixel)];
+    uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
     #ifdef COLOR_ORDER_OVERRIDE
     if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
     #endif
@@ -715,13 +716,13 @@ public:
   void SetColorOrder(byte colorOrder, uint8_t strip=0)
   {
     if (strip>pixelStrips) return;
-    _colorOrder[strip] = colorOrder;
+    pixelColorOrder[strip] = colorOrder;
   }
 
   uint8_t GetColorOrder(uint8_t strip=0)
   {
     if (strip>pixelStrips) return 0;
-    return _colorOrder[strip];
+    return pixelColorOrder[strip];
   }
 
   RgbwColor GetPixelColorRaw(uint16_t indexPixel)
@@ -816,7 +817,7 @@ public:
   uint32_t GetPixelColorRgbw(uint16_t indexPixel)
   {
     RgbwColor col = GetPixelColorRaw(indexPixel);
-    uint8_t co = _colorOrder[GetStripFromPixel(indexPixel)];
+    uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
     #ifdef COLOR_ORDER_OVERRIDE
     if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
     #endif
@@ -837,7 +838,7 @@ public:
   
 private:
   NeoPixelType _type;
-  byte      _colorOrder[MAX_NUMBER_OF_STRIPS];
+  byte      pixelColorOrder[MAX_NUMBER_OF_STRIPS];
   uint8_t   pixelStrips;                              // number of strips
   uint8_t   pixelType[MAX_NUMBER_OF_STRIPS];          // LED pixel type
   uint16_t  pixelCounts[MAX_NUMBER_OF_STRIPS];        // number of pixels on each strip

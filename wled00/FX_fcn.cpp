@@ -83,9 +83,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 
   // we could skip this if we pass "this" pointer to bus->Begin()
   #ifdef ESP8266_MULTISTRIP
-  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType);
-  for (int i=0; i<numStrips; i++)
-    bus->SetColorOrder(_stripCO[i], i);
+  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType, _stripCO);
   #endif
   bus->Begin((NeoPixelType)ty, _lengthRaw);
 
