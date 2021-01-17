@@ -52,6 +52,10 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
     noWifiSleep = request->hasArg(F("WS"));
 
+    #ifdef WLED_USE_ETHERNET
+    ethernetType = request->arg(F("ETH")).toInt();
+    #endif
+
     char k[3]; k[2] = 0;
     for (int i = 0; i<4; i++)
     {
@@ -72,15 +76,13 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   if (subPage == 2)
   {
     String LC=F("LC"), LP=F("LP"), LK=F("LK"), CO=F("CO"), LTsel=F("LTsel");
-    int8_t pin;
-    int t;
+    int8_t type, co, pins[2] = {-1,-1};
+    uint16_t t, len;
 
     // deallocate all pins
     for (uint8_t s=0; s<strip.numStrips; s++) {
       pinManager.deallocatePin(strip.getStripPin(s));
       pinManager.deallocatePin(strip.getStripPinClk(s));
-      strip.setStripPin(s, -1);
-      strip.setStripPinClk(s, -1);
     }
     if (rlyPin>=0 && pinManager.isPinAllocated(rlyPin)) pinManager.deallocatePin(rlyPin);
     #ifndef WLED_DISABLE_INFRARED
@@ -90,68 +92,49 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
     ledType = request->arg(LTsel).toInt();
 
-    pin = request->arg(LP).toInt();
-    if (pinManager.allocatePin(strip.setStripPin(0, pin))) {
-      t = strip.setStripLen(0, request->arg(LC).toInt());
+    strip.numStrips = 0;
+    pins[0] = request->arg(LP).toInt();
+    t = len = request->arg(LC).toInt();
+    if (len>0 && pinManager.allocatePin(pins[0])) {
       if ( request->hasArg(LK.c_str()) ) {
-        pin = (request->arg(LK)).length() > 0 ? request->arg(LK).toInt() : -1;
-        if (pinManager.allocatePin(strip.setStripPinClk(0, pin))) {
-        } else {
-          // fallback
-          pinManager.allocatePin(strip.setStripPinClk(0, -1));
+        pins[1] = (request->arg(LK)).length() > 0 ? request->arg(LK).toInt() : -1;
+        if (!(pins[1]>=0 && pinManager.allocatePin(pins[1]))) {
+          pins[1] = -1;
+          DEBUG_PRINTLN(F("Unable to allocate clock pin."));
         }
       }
-      strip.setColorOrder(request->arg(CO).toInt(), 0);
-      strip.setStripType(request->arg(LTsel).toInt(), 0);
+      co = request->arg(CO).toInt();
+      type = request->arg(LTsel).toInt();
+      strip.addLEDs(type, pins, len, co);
     } else {
-      // fallback
-      t = strip.setStripLen(0, 30);
-      pinManager.allocatePin(strip.setStripPin(0, 2));
-      strip.setStripPinClk(0, -1);
+      pins[0] = LEDPIN; pins[1] = -1;
+      pinManager.allocatePin(pins[0], true); // fail-safe
+      strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
     }
-    strip.numStrips = 1;
 
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
-      DEBUG_PRINTLN(F("Adding strip "));
-      DEBUG_PRINTLN(i);
-      if ( request->hasArg((LP+i).c_str()) ) {
-        pin = request->arg((LP+i).c_str()).toInt();
-        DEBUG_PRINT(F("Pin "));
-        DEBUG_PRINTLN(pin);
-        if (pinManager.allocatePin(strip.setStripPin(i, pin))) {
+      if (request->hasArg((LP+i).c_str()) && request->hasArg((LC+i).c_str()) && request->hasArg((CO+i).c_str()) && request->hasArg((LTsel+i).c_str())) {
+        pins[0] = request->arg((LP+i).c_str()).toInt();
+        t += len = request->arg((LC+i).c_str()).toInt();
+        if (len>0 && pinManager.allocatePin(pins[0])) {
           if ( request->hasArg((LK+i).c_str()) ) {
-            pin = (request->arg(LK+i)).length() > 0 ? request->arg((LK+i).c_str()).toInt() : -1;
-            DEBUG_PRINT(F("Clock "));
-            DEBUG_PRINTLN(pin);
-            if (pin>=0) {
-              pinManager.allocatePin(strip.setStripPinClk(i, pin));
+            pins[1] = (request->arg((LK+i).c_str())).length() > 0 ? request->arg((LK+i).c_str()).toInt() : -1;
+            if (!(pins[1]>=0 && pinManager.allocatePin(pins[1]))) {
+              pins[1] = -1;
+              DEBUG_PRINTLN(F("Unable to allocate clock pin."));
             }
           }
+          co = request->arg((CO+i).c_str()).toInt();
+          type = request->arg((LTsel+i).c_str()).toInt();
         } else {
-          DEBUG_PRINTLN(F("Pin not ok."));
-          strip.setStripType(TYPE_NONE, i);
-          break; // pin not ok
+          DEBUG_PRINTLN(F("Unable to allocate pin or length 0."));
+          break;
         }
-        strip.setStripType(request->arg((LTsel+i).c_str()).toInt(), i);
-        DEBUG_PRINT(F("Type "));
-        DEBUG_PRINTLN(strip.getStripType(i));
+        co = request->arg((CO+i).c_str()).toInt();
+        strip.addLEDs(type, pins, len, co);
       } else {
-        DEBUG_PRINTLN("No data.");
-        strip.setStripType(TYPE_NONE, i);
         break;  // no parameter
       }
-      if ( request->hasArg((LC+i).c_str()) && request->arg((LC+i).c_str()).toInt() > 0 ) {
-        t += strip.setStripLen(i, request->arg((LC+i).c_str()).toInt());
-      } else {
-        strip.setStripType(TYPE_NONE, i);
-        strip.setStripPin(i, -1);
-        strip.setStripPinClk(i, -1);
-        break;  // no parameter
-      }
-      DEBUG_PRINT(F("Count "));
-      DEBUG_PRINTLN(strip.getStripLen(i));
-      strip.setColorOrder(request->arg((CO+i).c_str()).toInt(), i);
-      strip.numStrips++;
     }
 
     if (t > 0 && t <= MAX_LEDS) ledCount = t;
@@ -196,7 +179,6 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     strip.milliampsPerLed = request->arg(F("LA")).toInt();
     
     useRGBW = request->hasArg(F("EW"));
-    strip.setColorOrder(request->arg(F("CO")).toInt());
     strip.rgbwMode = request->arg(F("AW")).toInt();
 
     briS = request->arg(F("CA")).toInt();
@@ -204,7 +186,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     saveCurrPresetCycConf = request->hasArg(F("PC"));
     turnOnAtBoot = request->hasArg(F("BO"));
     t = request->arg(F("BP")).toInt();
-    if (t <= 25) bootPreset = t;
+    if (t <= 250) bootPreset = t;
     strip.gammaCorrectBri = request->hasArg(F("GB"));
     strip.gammaCorrectCol = request->hasArg(F("GC"));
 
@@ -655,7 +637,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
       strip.applyToAllSelected = true;
       strip.setColor(2, t[0], t[1], t[2], t[3]);
     } else {
-      strip.getSegment(selectedSeg).colors[2] = ((t[0] << 16) + (t[1] << 8) + t[2] + (t[3] << 24));
+      strip.getSegment(selectedSeg).setColor(2,((t[0] << 16) + (t[1] << 8) + t[2] + (t[3] << 24)), selectedSeg);
     }
   }
 
@@ -781,9 +763,9 @@ bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply)
   pos = req.indexOf(F("SB="));
   if (pos > 0) {
     byte segbri = getNumVal(&req, pos);
-    strip.getSegment(selectedSeg).setOption(SEG_OPTION_ON, segbri);
+    strip.getSegment(selectedSeg).setOption(SEG_OPTION_ON, segbri, selectedSeg);
     if (segbri) {
-      strip.getSegment(selectedSeg).opacity = segbri;
+      strip.getSegment(selectedSeg).setOpacity(segbri, selectedSeg);
     }
   }
 

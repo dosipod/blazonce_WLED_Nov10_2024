@@ -25,14 +25,14 @@ void deserializeSegment(JsonObject elem, byte it)
 
     int segbri = elem["bri"] | -1;
     if (segbri == 0) {
-      seg.setOption(SEG_OPTION_ON, 0);
+      seg.setOption(SEG_OPTION_ON, 0, id);
     } else if (segbri > 0) {
-      seg.opacity = segbri;
-      seg.setOption(SEG_OPTION_ON, 1);
+      seg.setOpacity(segbri, id);
+      seg.setOption(SEG_OPTION_ON, 1, id);
     }
-
-    seg.setOption(SEG_OPTION_ON, elem["on"] | seg.getOption(SEG_OPTION_ON));
-
+  
+    seg.setOption(SEG_OPTION_ON, elem["on"] | seg.getOption(SEG_OPTION_ON), id);
+    
     JsonArray colarr = elem[F("col")];
     if (!colarr.isNull())
     {
@@ -47,7 +47,7 @@ void deserializeSegment(JsonObject elem, byte it)
           if (hexCol == nullptr) { //Kelvin color temperature (or invalid), e.g 2400
             int kelvin = colarr[i] | -1;
             if (kelvin <  0) continue;
-            if (kelvin == 0) seg.colors[i] = 0;
+            if (kelvin == 0) seg.setColor(i, 0, id);
             if (kelvin >  0) colorKtoRGB(kelvin, brgbw);
             colValid = true;
           } else { //HEX string, e.g. "FFAA00"
@@ -58,8 +58,8 @@ void deserializeSegment(JsonObject elem, byte it)
           byte sz = colX.size();
           if (sz == 0) continue; //do nothing on empty array
 
-          byte cp = copyArray(colX, rgbw, 4);
-          if (cp == 1 && rgbw[0] == 0) seg.colors[i] = 0;
+          byte cp = copyArray(colX, rgbw, 4);      
+          if (cp == 1 && rgbw[0] == 0) seg.setColor(i, 0, id);
           colValid = true;
         }
 
@@ -68,8 +68,8 @@ void deserializeSegment(JsonObject elem, byte it)
         {
           if (i == 0) {col[0] = rgbw[0]; col[1] = rgbw[1]; col[2] = rgbw[2]; col[3] = rgbw[3];}
           if (i == 1) {colSec[0] = rgbw[0]; colSec[1] = rgbw[1]; colSec[2] = rgbw[2]; colSec[3] = rgbw[3];}
-        } else { //normal case, apply directly to segment (=> no transition!)
-          seg.colors[i] = ((rgbw[3] << 24) | ((rgbw[0]&0xFF) << 16) | ((rgbw[1]&0xFF) << 8) | ((rgbw[2]&0xFF)));
+        } else { //normal case, apply directly to segment
+          seg.setColor(i, ((rgbw[3] << 24) | ((rgbw[0]&0xFF) << 16) | ((rgbw[1]&0xFF) << 8) | ((rgbw[2]&0xFF))), id);
           if (seg.mode == FX_MODE_STATIC) strip.trigger(); //instant refresh
         }
       }
@@ -170,6 +170,7 @@ bool deserializeState(JsonObject root)
   {
     transitionDelay = tr;
     transitionDelay *= 100;
+    transitionDelayTemp = transitionDelay;
   }
 
   tr = root[F("tt")] | -1;
@@ -179,7 +180,8 @@ bool deserializeState(JsonObject root)
     transitionDelayTemp *= 100;
     jsonTransitionOnce = true;
   }
-
+  strip.setTransition(transitionDelayTemp);
+  
   int cy = root[F("pl")] | -2;
   if (cy > -2) presetCyclingEnabled = (cy >= 0);
   JsonObject ccnf = root["ccnf"];
@@ -702,6 +704,8 @@ void serializePalettes(JsonObject root, AsyncWebServerRequest* request)
 
 void serveJson(AsyncWebServerRequest* request)
 {
+  DEBUG_PRINT(F("serveJSON start heap: "));
+  DEBUG_PRINTLN(ESP.getFreeHeap());
   byte subJson = 0;
   const String& url = request->url();
   if      (url.indexOf("state") > 0) subJson = 1;
@@ -710,18 +714,26 @@ void serveJson(AsyncWebServerRequest* request)
   else if (url.indexOf("palx") > 0) subJson = 4;
   else if (url.indexOf("live")  > 0) {
     serveLiveLeds(request);
+    DEBUG_PRINT(F("serveJSON end heap: "));
+    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
   else if (url.indexOf(F("eff"))   > 0) {
     request->send_P(200, "application/json", JSON_mode_names);
+    DEBUG_PRINT(F("serveJSON end heap: "));
+    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
   else if (url.indexOf(F("pal"))   > 0) {
     request->send_P(200, "application/json", JSON_palette_names);
+    DEBUG_PRINT(F("serveJSON end heap: "));
+    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
   else if (url.length() > 6) { //not just /json
     request->send(  501, "application/json", F("{\"error\":\"Not implemented\"}"));
+    DEBUG_PRINT(F("serveJSON end heap: "));
+    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
 
@@ -750,6 +762,9 @@ void serveJson(AsyncWebServerRequest* request)
 
   response->setLength();
   request->send(response);
+
+  DEBUG_PRINT(F("serveJSON end heap: "));
+  DEBUG_PRINTLN(ESP.getFreeHeap());
 }
 
 #define MAX_LIVE_LEDS 180

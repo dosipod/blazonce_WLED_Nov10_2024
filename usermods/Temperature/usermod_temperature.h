@@ -83,15 +83,16 @@ class UsermodTemperature : public Usermod {
       disabled = !sensor.getAddress(sensorDeviceAddress, 0);
 
       if (!disabled) {
-        DEBUG_PRINTLN("Dallas Temperature found");
+        DEBUG_PRINTLN(F("Dallas Temperature found"));
         // set the resolution for this specific device
         sensor.setResolution(sensorDeviceAddress, 9, true);
         // do not block waiting for reading
         sensor.setWaitForConversion(false);
         // allocate pin & prevent other use
-        pinManager.allocatePin(TEMPERATURE_PIN,false);
+        if (!pinManager.allocatePin(TEMPERATURE_PIN,false))
+          disabled = true;
       } else {
-        DEBUG_PRINTLN("Dallas Temperature not found");
+        DEBUG_PRINTLN(F("Dallas Temperature not found"));
       }
     }
 
@@ -130,7 +131,7 @@ class UsermodTemperature : public Usermod {
             // dont publish super low temperature as the graph will get messed up
             // the DallasTemperature library returns -127C or -196.6F when problem
             // reading the sensor
-            strcat(subuf, "/temperature");
+            strcat_P(subuf, PSTR("/temperature"));
             mqtt->publish(subuf, 0, true, String(temperature).c_str());
           } else {
             // publish something else to indicate status?
@@ -145,31 +146,57 @@ class UsermodTemperature : public Usermod {
         return;
       }
 
-      JsonObject user = root["u"];
-      if (user.isNull()) user = root.createNestedObject("u");
+      JsonObject user = root[F("u")];
+      if (user.isNull()) user = root.createNestedObject(F("u"));
 
-      JsonArray temp = user.createNestedArray("Temperature");
+      JsonArray temp = user.createNestedArray(F("Temperature"));
 
       if (!getTemperatureComplete) {
         // if we haven't read the sensor yet, let the user know
         // that we are still waiting for the first measurement
         temp.add((USERMOD_DALLASTEMPERATURE_FIRST_MEASUREMENT_AT - millis()) / 1000);
-        temp.add(" sec until read");
+        temp.add(F(" sec until read"));
         return;
       }
 
       if (temperature <= -100) {
         temp.add(0);
-        temp.add(" Sensor Error!");
+        temp.add(F(" Sensor Error!"));
         return;
       }
 
       temp.add(temperature);
       #ifdef USERMOD_DALLASTEMPERATURE_CELSIUS
-      temp.add("°C");
+      temp.add(F("°C"));
       #else
-      temp.add("°F");
+      temp.add(F("°F"));
       #endif
+    }
+
+    /**
+     * addToJsonState() can be used to add custom entries to the /json/state part of the JSON API (state object).
+     * Values in the state object may be modified by connected clients
+     * Add "pin_Temperature" to json state. This can be used to check which GPIO pin usermod uses.
+     */
+    void addToJsonState(JsonObject &root)
+    {
+      root[F("pin_Temperature")] = TEMPERATURE_PIN;
+    }
+
+    /**
+     * readFromJsonState() can be used to receive data clients send to the /json/state part of the JSON API (state object).
+     * Values in the state object may be modified by connected clients
+     * Read "pin_Temperature" from json state and and change GPIO pin used.
+     */
+    void readFromJsonState(JsonObject &root)
+    {
+      /*
+      if (root[F("pin_Temperature")] != nullptr)
+      {
+        if (pinManager.allocatePin((int)root[F("pin_Temperature")],false))
+          temperaturePin = (int)root["PIRenabled"];
+      }
+      */
     }
 
     uint16_t getId()

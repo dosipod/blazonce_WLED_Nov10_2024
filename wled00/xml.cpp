@@ -219,6 +219,12 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('v',SET_F("AC"),apChannel);
     sappend('c',SET_F("WS"),noWifiSleep);
 
+    #ifdef WLED_USE_ETHERNET
+    sappend('i',SET_F("ETH"),ethernetType);
+    #else
+    //hide ethernet setting if not compiled in
+    oappend(SET_F("document.getElementById('ethd').style.display='none';"));
+    #endif
 
     if (Network.isConnected()) //is connected
     {
@@ -249,6 +255,29 @@ void getSettingsJS(byte subPage, char* dest)
 
   if (subPage == 2) {
     char nS[3];
+
+    // add usermod pins as d.um_p array
+    DynamicJsonDocument doc(JSON_BUFFER_SIZE);
+    JsonObject mods = doc.createNestedObject(F("mods"));
+    usermods.addToJsonState(mods);
+    if (!mods.isNull()) {
+      uint8_t i=0;
+      oappend(SET_F("d.um_p=["));
+      for (JsonPair kv : mods) {
+        if (strncmp_P(kv.key().c_str(),PSTR("pin_"),4) == 0) {
+          if (i++) oappend(SET_F(","));
+          oappend(itoa((int)kv.value(),nS,10));
+        }
+      }
+      #ifdef WLED_DEBUG
+      if (i==0)
+        oappend(SET_F("1"));
+      else
+        oappend(SET_F(",1"));
+      #endif
+      oappend(SET_F("];"));
+    }
+
     #if defined(MAX_NUMBER_OF_STRIPS) && MAX_NUMBER_OF_STRIPS>1
       oappend(SET_F("addLEDs("));
       oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));

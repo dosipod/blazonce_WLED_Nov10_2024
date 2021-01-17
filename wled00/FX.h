@@ -67,16 +67,15 @@
 /* each segment uses 52 bytes of SRAM memory, so if you're application fails because of
   insufficient memory, decreasing MAX_NUM_SEGMENTS may help */
 #ifdef ESP8266
-  #define MAX_NUM_SEGMENTS 13
+  #define MAX_NUM_SEGMENTS    13
+  /* How many color transitions can run at once */
+  #define MAX_NUM_TRANSITIONS  8
+  /* How much data bytes all segments combined may allocate */
+  #define MAX_SEGMENT_DATA  2048
 #else
-  #define MAX_NUM_SEGMENTS 16
-#endif
-
-/* How much data bytes all segments combined may allocate */
-#ifdef ESP8266
-#define MAX_SEGMENT_DATA 2048
-#else
-#define MAX_SEGMENT_DATA 8192
+  #define MAX_NUM_SEGMENTS    16
+  #define MAX_NUM_TRANSITIONS 16
+  #define MAX_SEGMENT_DATA  8192
 #endif
 
 #define LED_SKIP_AMOUNT  1
@@ -84,7 +83,7 @@
 
 #define NUM_COLORS       3 /* number of colors per segment */
 #define SEGMENT          _segments[_segment_index]
-#define SEGCOLOR(x)      gamma32(_segments[_segment_index].colors[x])
+#define SEGCOLOR(x)      _colors_t[x]
 #define SEGENV           _segment_runtimes[_segment_index]
 #define SEGLEN           _virtualSegmentLength
 #define SEGACT           SEGMENT.stop
@@ -245,11 +244,14 @@
 #define FX_MODE_TV_SIMULATOR           116
 #define FX_MODE_DYNAMIC_SMOOTH         117
 
+
 class WS2812FX {
   typedef uint16_t (WS2812FX::*mode_ptr)(void);
 
   // pre show callback
   typedef void (*show_callback) (void);
+
+  static WS2812FX* instance;
   
   // segment parameters
   public:
@@ -264,14 +266,40 @@ class WS2812FX {
       uint8_t grouping, spacing;
       uint8_t opacity;
       uint32_t colors[NUM_COLORS];
-      void setOption(uint8_t n, bool val)
+      bool setColor(uint8_t slot, uint32_t c, uint8_t segn) { //returns true if changed
+        if (slot >= NUM_COLORS || segn >= MAX_NUM_SEGMENTS) return false;
+        if (c == colors[slot]) return false;
+        ColorTransition::startTransition(opacity, colors[slot], instance->_transitionDur, segn, slot);
+        colors[slot] = c; return true;
+      }
+      void setOpacity(uint8_t o, uint8_t segn) {
+        if (segn >= MAX_NUM_SEGMENTS) return;
+        if (opacity == o) return;
+        ColorTransition::startTransition(opacity, colors[0], instance->_transitionDur, segn, 0);
+        opacity = o;
+      }
+      /*uint8_t actualOpacity() { //respects On/Off state
+        if (!getOption(SEG_OPTION_ON)) return 0;
+        return opacity;
+      }*/
+      void setOption(uint8_t n, bool val, uint8_t segn = 255)
       {
+        //bool prevOn = false;
+        //if (n == SEG_OPTION_ON) prevOn = getOption(SEG_OPTION_ON);
         if (val) {
           options |= 0x01 << n;
         } else
         {
           options &= ~(0x01 << n);
         }
+        //transitions on segment on/off don't work correctly at this point
+        /*if (n == SEG_OPTION_ON && segn < MAX_NUM_SEGMENTS && getOption(SEG_OPTION_ON) != prevOn) {
+          if (getOption(SEG_OPTION_ON)) {
+            ColorTransition::startTransition(0, colors[0], instance->_transitionDur, segn, 0);
+          } else {
+            ColorTransition::startTransition(opacity, colors[0], instance->_transitionDur, segn, 0);
+          }
+        }*/
       }
       bool getOption(uint8_t n)
       {
@@ -314,10 +342,10 @@ class WS2812FX {
       bool allocateData(uint16_t len){
         if (data && _dataLen == len) return true; //already allocated
         deallocateData();
-        if (WS2812FX::_usedSegmentData + len > MAX_SEGMENT_DATA) return false; //not enough memory
+        if (WS2812FX::instance->_usedSegmentData + len > MAX_SEGMENT_DATA) return false; //not enough memory
         data = new (std::nothrow) byte[len];
         if (!data) return false; //allocation failed
-        WS2812FX::_usedSegmentData += len;
+        WS2812FX::instance->_usedSegmentData += len;
         _dataLen = len;
         memset(data, 0, len);
         return true;
@@ -325,7 +353,7 @@ class WS2812FX {
       void deallocateData(){
         delete[] data;
         data = nullptr;
-        WS2812FX::_usedSegmentData -= _dataLen;
+        WS2812FX::instance->_usedSegmentData -= _dataLen;
         _dataLen = 0;
       }
 
@@ -355,7 +383,86 @@ class WS2812FX {
         bool _requiresReset = false;
     } segment_runtime;
 
+    typedef struct ColorTransition { // 12 bytes
+      uint32_t colorOld = 0;
+      uint32_t transitionStart;
+      uint16_t transitionDur;
+      uint8_t segment = 0xFF; //lower 6 bits: the segment this transition is for (255 indicates transition not in use/available) upper 2 bits: color channel
+      uint8_t briOld = 0;
+      static void startTransition(uint8_t oldBri, uint32_t oldCol, uint16_t dur, uint8_t segn, uint8_t slot) {
+        if (segn >= MAX_NUM_SEGMENTS || slot >= NUM_COLORS || dur == 0) return;
+        if (instance->_brightness == 0) return; //do not need transitions if master bri is off
+        uint8_t tIndex = 0xFF; //none found
+        uint16_t tProgression = 0;
+        uint8_t s = segn + (slot << 6); //merge slot and segment into one byte
+
+        for (uint8_t i = 0; i < MAX_NUM_TRANSITIONS; i++) {
+          uint8_t tSeg = instance->transitions[i].segment;
+          //see if this segment + color already has a running transition
+          if (tSeg == s) {
+            tIndex = i; break;
+          }
+          if (tSeg == 0xFF) { //free transition
+            tIndex = i; tProgression = 0xFFFF;
+          }
+        }
+
+        if (tIndex == 0xFF) { //no slot found yet
+          for (uint8_t i = 0; i < MAX_NUM_TRANSITIONS; i++) {
+            //find most progressed transition to overwrite
+            uint16_t prog = instance->transitions[i].progress();
+            if (prog > tProgression) {
+              tIndex = i; tProgression = prog;
+            }
+          }
+        }
+
+        ColorTransition& t = instance->transitions[tIndex];
+        if (t.segment == s) //this is an active transition on the same segment+color
+        {
+          t.briOld = t.currentBri();
+          t.colorOld = t.currentColor(oldCol);
+        } else {
+          t.briOld = oldBri;
+          t.colorOld = oldCol;
+          uint8_t prevSeg = t.segment & 0x3F;
+          if (prevSeg < MAX_NUM_SEGMENTS) instance->_segments[prevSeg].setOption(SEG_OPTION_TRANSITIONAL, false);
+        }
+        t.transitionDur = dur;
+        t.transitionStart = millis();
+        t.segment = s;
+        instance->_segments[segn].setOption(SEG_OPTION_TRANSITIONAL, true);
+        //refresh immediately, required for Solid mode
+        if (instance->_segment_runtimes[segn].next_time > t.transitionStart + 22) instance->_segment_runtimes[segn].next_time = t.transitionStart;
+      }
+      uint16_t progress(bool allowEnd = false) { //transition progression between 0-65535
+        uint32_t timeNow = millis();
+        if (timeNow - transitionStart > transitionDur) {
+          if (allowEnd) {
+            uint8_t segn = segment & 0x3F;
+            if (segn < MAX_NUM_SEGMENTS) instance->_segments[segn].setOption(SEG_OPTION_TRANSITIONAL, false);
+            segment = 0xFF;
+          }
+          return 0xFFFF;
+        }
+        uint32_t elapsed = timeNow - transitionStart;
+        uint32_t prog = elapsed * 0xFFFF / transitionDur;
+        return (prog > 0xFFFF) ? 0xFFFF : prog;
+      }
+      uint32_t currentColor(uint32_t colorNew) {
+        return instance->color_blend(colorOld, colorNew, progress(true), true);
+      }
+      uint8_t currentBri() {
+        uint8_t segn = segment & 0x3F;
+        if (segn >= MAX_NUM_SEGMENTS) return 0;
+        uint8_t briNew = instance->_segments[segn].opacity;
+        uint32_t prog = progress() + 1;
+        return ((briNew * prog) + (briOld * (0x10000 - prog))) >> 16;
+      }
+    } color_transition;
+
     WS2812FX() {
+      WS2812FX::instance = this;
       //assign each member of the _mode[] array to its respective function reference 
       _mode[FX_MODE_STATIC]                  = &WS2812FX::mode_static;
       _mode[FX_MODE_BLINK]                   = &WS2812FX::mode_blink;
@@ -485,6 +592,7 @@ class WS2812FX {
       for (uint8_t i=0; i<MAX_NUMBER_OF_STRIPS; i++) {
         _stripPin[i] = _stripPinClk[i] = -1;
         _stripType[i] = TYPE_NONE;
+        _stripCO[i] = -1;
       }
       #if defined(DATAPIN) && defined(CLOCKPIN) && DATAPIN>-1 && CLOCKPIN>-1
         /*pinManager.allocatePin(*/_stripPin[0] = DATAPIN/*, true)*/;
@@ -498,6 +606,7 @@ class WS2812FX {
 
     void
       init(bool supportWhite, uint16_t countPixels, bool skipFirst),
+      addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder),
       service(void),
       blur(uint8_t),
       fill(uint32_t),
@@ -508,6 +617,7 @@ class WS2812FX {
       setBrightness(uint8_t b),
       setRange(uint16_t i, uint16_t i2, uint32_t col),
       setShowCallback(show_callback cb),
+      setTransition(uint16_t t),
       setTransitionMode(bool t),
       calcGammaTable(float),
       trigger(void),
@@ -538,7 +648,6 @@ class WS2812FX {
       milliampsPerLed = 55,
       numStrips = 1,
       getStripType(uint8_t strip=0),
-      setStripType(uint8_t type, uint8_t strip=0),
       getBrightness(void),
       getMode(void),
       getSpeed(void),
@@ -553,16 +662,13 @@ class WS2812FX {
       get_random_wheel_index(uint8_t);
 
     int8_t
-      setStripPin(uint8_t strip, int8_t pin),
       getStripPin(uint8_t strip=0),
-      setStripPinClk(uint8_t strip, int8_t pin),
       getStripPinClk(uint8_t strip=0),
       tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t attdec);
 
     uint16_t
       ablMilliampsMax,
       currentMilliamps,
-      setStripLen(uint8_t strip, uint16_t len),
       getStripLen(uint8_t strip=0),
       triwave16(uint16_t);
 
@@ -571,7 +677,8 @@ class WS2812FX {
       timebase,
       color_wheel(uint8_t),
       color_from_palette(uint16_t, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255),
-      color_blend(uint32_t,uint32_t,uint8_t),
+      color_blend(uint32_t,uint32_t,uint16_t,bool b16=false),
+      currentColor(uint32_t colorNew, uint8_t tNr),
       gamma32(uint32_t),
       getLastShow(void),
       getPixelColor(uint16_t),
@@ -715,6 +822,7 @@ class WS2812FX {
     int8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
     int8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
+    uint8_t _stripCO[MAX_NUMBER_OF_STRIPS];
 
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);
@@ -724,7 +832,8 @@ class WS2812FX {
     uint16_t _length, _lengthRaw, _virtualSegmentLength;
     uint16_t _rand16seed;
     uint8_t _brightness;
-    static uint16_t _usedSegmentData;
+    uint16_t _usedSegmentData = 0;
+    uint16_t _transitionDur = 750;
 
     void load_gradient_palette(uint8_t);
     void handle_palette(void);
@@ -764,10 +873,15 @@ class WS2812FX {
     CRGB twinklefox_one_twinkle(uint32_t ms, uint8_t salt, bool cat);
     CRGB pacifica_one_layer(uint16_t i, CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);
 
-    void blendPixelColor(uint16_t n, uint32_t color, uint8_t blend);
+    void
+      blendPixelColor(uint16_t n, uint32_t color, uint8_t blend),
+      startTransition(uint8_t oldBri, uint32_t oldCol, uint16_t dur, uint8_t segn, uint8_t slot);
     
     uint32_t _lastPaletteChange = 0;
     uint32_t _lastShow = 0;
+
+    uint32_t _colors_t[3];
+    uint8_t _bri_t;
     
     #ifdef WLED_USE_ANALOG_LEDS
     uint32_t _analogLastShow = 0;
@@ -784,7 +898,12 @@ class WS2812FX {
     segment_runtime _segment_runtimes[MAX_NUM_SEGMENTS]; // SRAM footprint: 28 bytes per element
     friend class Segment_runtime;
 
-    uint16_t realPixelIndex(uint16_t i);
+    ColorTransition transitions[MAX_NUM_TRANSITIONS]; //12 bytes per element
+    friend class ColorTransition;
+
+    uint16_t
+      realPixelIndex(uint16_t i),
+      transitionProgress(uint8_t tNr);
 };
 
 //10 names per line

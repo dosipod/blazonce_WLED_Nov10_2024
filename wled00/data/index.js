@@ -718,7 +718,6 @@ function populatePalettes()
 
 function redrawPalPrev()
 {
-	console.log('redraw');
 	let palettes = d.querySelectorAll('#selectPalette .lstI');
 	for (let i = 0; i < palettes.length; i++) {
 		let id = palettes[i].dataset.id;
@@ -978,8 +977,8 @@ function requestJson(command, rinfo = true, verbose = true, callback = null) {
 	var type = command ? 'post':'get';
 	if (command)
 	{
-    command.v = verbose;
-    command.time = Math.floor(Date.now() / 1000);
+		command.v = verbose;
+		command.time = Math.floor(Date.now() / 1000);
 		req = JSON.stringify(command);
 		//console.log(req);
 	}
@@ -1435,14 +1434,14 @@ function saveP(i) {
 	var pQN = d.getElementById(`p${i}ql`).value;
 	if (pQN.length > 0) obj.ql = pQN;
 
-  showToast("Saving " + pN +" (" + pI + ")");
+	showToast("Saving " + pN +" (" + pI + ")");
 	requestJson(obj);
 	if (obj.o) {
 		pJson[pI] = obj;
-    delete pJson[pI].psave;
-    delete pJson[pI].o;
-    delete pJson[pI].v;
-    delete pJson[pI].time;
+		delete pJson[pI].psave;
+		delete pJson[pI].o;
+		delete pJson[pI].v;
+		delete pJson[pI].time;
 	} else {
 		pJson[pI] = {"n":pN, "win":"Please refresh the page to see this newly saved command."};
 		if (obj.win) pJson[pI].win = obj.win;
