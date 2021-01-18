@@ -492,13 +492,14 @@ function populateQL()
 function populatePresets(fromls)
 {
 	if (fromls) pJson = JSON.parse(localStorage.getItem("wledP"));
+	if (!pJson) return;
 	delete pJson["0"];
 	var cn = "";
 	var arr = Object.entries(pJson);
 	arr.sort(cmpP);
 	var added = false;
-  pQL = [];
-  var is = [];
+	pQL = [];
+	var is = [];
 
 	for (var key of (arr||[]))
 	{
