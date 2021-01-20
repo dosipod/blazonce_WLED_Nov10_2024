@@ -244,6 +244,7 @@ button {
 	margin-top: var(--tp);
 	transform: translate(calc(var(--i, 0)/var(--n)*-100%));
 	overscroll-behavior: none;
+	padding-top: 11px;
 }
 
 .tabcontent {
@@ -251,7 +252,6 @@ button {
 	position: relative;
 	width: 100%;
 	width: calc(100%/var(--n));
-	padding: 11px 0;
 	box-sizing: border-box;
 	border: 0px;
 	overflow: auto;
@@ -259,11 +259,13 @@ button {
 	overscroll-behavior: none;
 }
 
+#Colors {
+	padding: 11px 0;
+	margin-top: -11px;
+}
+
 #Effects {
-	padding-top: 0;
-	margin-top: 11px;
-	height: calc(100% - 11px);
-  -webkit-overflow-scrolling: touch;
+	-webkit-overflow-scrolling: touch;
 }
 
 .smooth { transition: transform	calc(var(--f, 1)*.5s) ease-out }
@@ -298,8 +300,6 @@ button {
 	top: -1px;
 	z-index: 1;
     margin: 1px auto auto;
-    width: 282px;
-	border-radius: 25px;
 }
 
 #staytop1 {

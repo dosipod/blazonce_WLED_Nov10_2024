@@ -274,19 +274,17 @@ function getRuntimeStr(rt)
 	return str;
 }
 
-function inforow(key, val, unit = "")
-{
+function inforow(key, val, unit = "") {
 	return `<tr><td class="keytd">${key}</td><td class="valtd">${val}${unit}</td></tr>`;
 }
 
-function getLowestUnusedP()
-{
+function getLowestUnusedP() {
 	var l = 1;
 	for (var key in pJson)
 	{
 		if (key == l) l++;
-  }
-  if (l > 250) l = 250;
+	}
+	if (l > 250) l = 250;
 	return l;
 }
 
@@ -300,13 +298,14 @@ function checkUsed(i) {
 }
 
 function pName(i) {
+	if (!pJson || !pJson[i]) return "";
 	var n = "Preset " + i;
 	if (pJson[i].n) n = pJson[i].n;
 	return n;
 }
 
 function papiVal(i) {
-	if (!pJson[i]) return "";
+	if (!pJson || !pJson[i]) return "";
 	var o = Object.assign({},pJson[i]);
 	if (o.win) return o.win;
 	delete o.n; delete o.p; delete o.ql;
@@ -314,9 +313,8 @@ function papiVal(i) {
 }
 
 function qlName(i) {
-	if (!pJson[i]) return "";
-  if (!pJson[i].ql) return "";
-  return pJson[i].ql;
+	if (!pJson || !pJson[i] || !pJson[i].ql) return "";
+	return pJson[i].ql;
 }
 
 function cpBck() {
@@ -492,7 +490,7 @@ function populateQL()
 function populatePresets(fromls)
 {
 	if (fromls) pJson = JSON.parse(localStorage.getItem("wledP"));
-	if (!pJson) return;
+	if (!pJson) {pJson={};return};
 	delete pJson["0"];
 	var cn = "";
 	var arr = Object.entries(pJson);
