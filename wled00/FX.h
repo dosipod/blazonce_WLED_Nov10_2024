@@ -28,10 +28,14 @@
 #define WS2812FX_h
 
 #ifdef ESP32_MULTISTRIP
-  #define MAX_NUMBER_OF_STRIPS 8
+  #if !defined(MAX_NUMBER_OF_STRIPS) || MAX_NUMBER_OF_STRIPS>8
+    #define MAX_NUMBER_OF_STRIPS 8
+  #endif
   #include "../usermods/esp32_multistrip/NpbWrapper.h"
 #elif defined(ESP8266_MULTISTRIP)
-  #define MAX_NUMBER_OF_STRIPS 4
+  #if !defined(MAX_NUMBER_OF_STRIPS) || MAX_NUMBER_OF_STRIPS>4
+    #define MAX_NUMBER_OF_STRIPS 4
+  #endif
   #include "../usermods/esp8266_multistrip/NpbWrapper.h"
 #else
   #define MAX_NUMBER_OF_STRIPS 1

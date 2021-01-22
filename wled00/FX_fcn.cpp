@@ -570,7 +570,7 @@ uint8_t WS2812FX::getColorOrder(uint8_t s) {
   if (s >= MAX_NUMBER_OF_STRIPS) return -1;
   return _stripCO[s]; //bus->GetColorOrder(s);
   #else
-  return bus->GetColorOrder();
+  return _stripCO[0];
   #endif
 }
 
@@ -579,7 +579,7 @@ void WS2812FX::setColorOrder(uint8_t co, uint8_t s) {
   if (s >= MAX_NUMBER_OF_STRIPS) return;
   bus->SetColorOrder(_stripCO[s]=co, s);
   #else
-  bus->SetColorOrder(co);
+  bus->SetColorOrder(_stripCO[0]=co);
   #endif
 }
 
