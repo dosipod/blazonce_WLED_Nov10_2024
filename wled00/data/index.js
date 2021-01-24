@@ -542,17 +542,7 @@ function populateInfo(i)
 	var pwru = "Not calculated";
 	if (pwr > 1000) {pwr /= 1000; pwr = pwr.toFixed((pwr > 10) ? 0 : 1); pwru = pwr + " A";}
 	else if (pwr > 0) {pwr = 50 * Math.round(pwr/50); pwru = pwr + " mA";}
-  var urows="";
-  if (i.u) {
-    for (const [k, val] of Object.entries(i.u))
-    {
-      if (val[1]) {
-        urows += inforow(k,val[0],val[1]);
-      } else {
-        urows += inforow(k,val);
-      }
-    }
-  }
+  	var urows="";
 	if (i.nodes) {
 		for (var x=0;x<i.nodes.length;x++)
 		{
@@ -560,6 +550,16 @@ function populateInfo(i)
 			if (o.name) {
 				var url = `<button class="btn btna-icon tab" onclick="location.assign('http://${o.ip}');">${o.name}</button>`;
 				urows += inforow(url,o.type);
+			}
+		}
+	}
+	if (i.u) {
+		for (const [k, val] of Object.entries(i.u))
+		{
+			if (val[1]) {
+			urows += inforow(k,val[0],val[1]);
+			} else {
+			urows += inforow(k,val);
 			}
 		}
 	}
@@ -947,7 +947,7 @@ function updateSelectedFx(scrollto=false)
 	if (scrollto && selectedEffect) {
 		selectedEffect.scrollIntoView({
 			behavior: 'smooth',
-			block: 'nearest',
+			block: 'center',
 		});
 	}	
 }
