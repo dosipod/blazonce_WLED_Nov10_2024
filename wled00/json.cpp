@@ -348,7 +348,8 @@ void serializeState(JsonObject root, bool forPreset, bool includeBri, bool segme
     root[F("pss")] = savedPresets;
     root[F("pl")] = (presetCyclingEnabled) ? 0: -1;
 
-    usermods.addToJsonState(root);
+    JsonObject um = root.createNestedObject(F("um"));
+    usermods.addToJsonState(um);
 
     //temporary for preset cycle
     JsonObject ccnf = root.createNestedObject("ccnf");
@@ -723,8 +724,6 @@ void serializePalettes(JsonObject root, AsyncWebServerRequest* request)
 
 void serveJson(AsyncWebServerRequest* request)
 {
-  DEBUG_PRINT(F("serveJSON start heap: "));
-  DEBUG_PRINTLN(ESP.getFreeHeap());
   byte subJson = 0;
   const String& url = request->url();
   if      (url.indexOf("state") > 0) subJson = 1;
@@ -733,26 +732,18 @@ void serveJson(AsyncWebServerRequest* request)
   else if (url.indexOf("palx") > 0) subJson = 4;
   else if (url.indexOf("live")  > 0) {
     serveLiveLeds(request);
-    DEBUG_PRINT(F("serveJSON end heap: "));
-    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
   else if (url.indexOf(F("eff"))   > 0) {
     request->send_P(200, "application/json", JSON_mode_names);
-    DEBUG_PRINT(F("serveJSON end heap: "));
-    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
   else if (url.indexOf(F("pal"))   > 0) {
     request->send_P(200, "application/json", JSON_palette_names);
-    DEBUG_PRINT(F("serveJSON end heap: "));
-    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
   else if (url.length() > 6) { //not just /json
     request->send(  501, "application/json", F("{\"error\":\"Not implemented\"}"));
-    DEBUG_PRINT(F("serveJSON end heap: "));
-    DEBUG_PRINTLN(ESP.getFreeHeap());
     return;
   }
 
@@ -781,9 +772,6 @@ void serveJson(AsyncWebServerRequest* request)
 
   response->setLength();
   request->send(response);
-
-  DEBUG_PRINT(F("serveJSON end heap: "));
-  DEBUG_PRINTLN(ESP.getFreeHeap());
 }
 
 #define MAX_LIVE_LEDS 180

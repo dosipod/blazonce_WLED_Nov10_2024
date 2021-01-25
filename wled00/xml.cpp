@@ -93,7 +93,7 @@ void URL_response(AsyncWebServerRequest *request)
   for (int i = 0; i < 3; i++)
   {
    sprintf(s,"%02X", col[i]);
-   oappend(s); 
+   oappend(s);
   }
   oappend(SET_F("&C2=h"));
   for (int i = 0; i < 3; i++)
@@ -116,7 +116,7 @@ void URL_response(AsyncWebServerRequest *request)
   oappend(SET_F("<html><body><a href=\""));
   oappend(s2buf);
   oappend(SET_F("\" target=\"_blank\">"));
-  oappend(s2buf);  
+  oappend(s2buf);
   oappend(SET_F("</a></body></html>"));
 
   if (request != nullptr) request->send(200, "text/html", obuf);
@@ -180,8 +180,6 @@ void sappends(char stype, const char* key, char* val)
 void getSettingsJS(byte subPage, char* dest)
 {
   //0: menu 1: wifi 2: leds 3: ui 4: sync 5: time 6: sec
-  DEBUG_PRINT(F("settings resp"));
-  DEBUG_PRINTLN(subPage);
   obuf = dest;
   olen = 0;
 
@@ -258,8 +256,8 @@ void getSettingsJS(byte subPage, char* dest)
 
     // add usermod pins as d.um_p array
     DynamicJsonDocument doc(JSON_BUFFER_SIZE);
-    JsonObject mods = doc.createNestedObject(F("mods"));
-    usermods.addToJsonState(mods);
+    JsonObject mods = doc.createNestedObject(F("um"));
+    usermods.addToConfig(mods);
     if (!mods.isNull()) {
       uint8_t i=0;
       oappend(SET_F("d.um_p=["));
@@ -267,6 +265,13 @@ void getSettingsJS(byte subPage, char* dest)
         if (strncmp_P(kv.key().c_str(),PSTR("pin_"),4) == 0) {
           if (i++) oappend(SET_F(","));
           oappend(itoa((int)kv.value(),nS,10));
+        } else if (!kv.value().isNull()) {
+          // element is an JsonObject
+          JsonObject obj = kv.value();
+          if (obj[F("pin")] != nullptr) {
+            if (i++) oappend(SET_F(","));
+            oappend(itoa((int)obj[F("pin")],nS,10));
+          }
         }
       }
       #ifdef WLED_DEBUG
@@ -429,7 +434,7 @@ void getSettingsJS(byte subPage, char* dest)
       case HUE_ERROR_TIMEOUT      : strcpy(hueErrorString,(char*)F("Timeout"));                 break;
       default: sprintf(hueErrorString,(char*)F("Bridge Error %i"),hueError);
     }
-    
+
     sappends('m',SET_F("(\"sip\")[0]"),hueErrorString);
     #endif
   }
@@ -492,17 +497,17 @@ void getSettingsJS(byte subPage, char* dest)
     oappendi(VERSION);
     oappend(SET_F(")\";"));
   }
-  
+
   #ifdef WLED_ENABLE_DMX // include only if DMX is enabled
   if (subPage == 7)
   {
     sappend('v',SET_F("PU"),e131ProxyUniverse);
-    
+
     sappend('v',SET_F("CN"),DMXChannels);
     sappend('v',SET_F("CG"),DMXGap);
     sappend('v',SET_F("CS"),DMXStart);
     sappend('v',SET_F("SL"),DMXStartLED);
-    
+
     sappend('i',SET_F("CH1"),DMXFixtureMap[0]);
     sappend('i',SET_F("CH2"),DMXFixtureMap[1]);
     sappend('i',SET_F("CH3"),DMXFixtureMap[2]);
