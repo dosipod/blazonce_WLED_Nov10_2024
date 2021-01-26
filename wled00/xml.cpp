@@ -252,10 +252,10 @@ void getSettingsJS(byte subPage, char* dest)
   }
 
   if (subPage == 2) {
-    char nS[3];
+    char nS[4];
 
     // add usermod pins as d.um_p array
-    DynamicJsonDocument doc(JSON_BUFFER_SIZE);
+    DynamicJsonDocument doc(JSON_BUFFER_SIZE/2);
     JsonObject mods = doc.createNestedObject(F("um"));
     usermods.addToConfig(mods);
     if (!mods.isNull()) {

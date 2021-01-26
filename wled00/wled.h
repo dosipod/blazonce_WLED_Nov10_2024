@@ -477,7 +477,7 @@ WLED_GLOBAL uint8_t tpmPacketCount _INIT(0);
 WLED_GLOBAL uint16_t tpmPayloadFrameSize _INIT(0);
 
 // mqtt
-WLED_GLOBAL long lastMqttReconnectAttempt _INIT(0);
+WLED_GLOBAL unsigned long lastMqttReconnectAttempt _INIT(0);
 WLED_GLOBAL long lastInterfaceUpdate _INIT(0);
 WLED_GLOBAL byte interfaceUpdateCallMode _INIT(NOTIFIER_CALL_MODE_INIT);
 WLED_GLOBAL char mqttStatusTopic[40] _INIT("");        // this must be global because of async handlers

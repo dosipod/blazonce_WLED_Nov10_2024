@@ -541,7 +541,7 @@ void serializeInfo(JsonObject root)
   root["mac"] = escapedMac;
 
   JsonArray nodes = root.createNestedArray("nodes");
-  IPAddress ip = WiFi.localIP();
+  IPAddress ip = Network.localIP();
   for (NodesMap::iterator it = Nodes.begin(); it != Nodes.end(); ++it)
   {
     if (it->second.ip[0] != 0)

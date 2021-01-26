@@ -166,6 +166,6 @@ bool initMqtt()
 }
 
 #else
-bool initMqtt(){return false;}
+bool initMqtt(){lastMqttReconnectAttempt = millis();return false;}
 void publishMqtt(){}
 #endif

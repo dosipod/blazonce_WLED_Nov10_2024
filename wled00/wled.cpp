@@ -213,8 +213,13 @@ void WLED::loop()
 #ifdef ESP8266
   MDNS.update();
 #endif
+  //millis() rolls over every 50 days
+  if (lastMqttReconnectAttempt > millis()) {
+    rolloverMillis++;
+    lastMqttReconnectAttempt = 0;
+  }
   if (millis() - lastMqttReconnectAttempt > 30000) {
-    if (lastMqttReconnectAttempt > millis()) rolloverMillis++; //millis() rolls over every 50 days
+    lastMqttReconnectAttempt = millis();
     initMqtt();
     refreshNodeList();
     sendSysInfoUDP();

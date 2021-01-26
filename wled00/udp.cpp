@@ -405,7 +405,7 @@ void sendSysInfoUDP(uint8_t repeats)
     return;
   }
 
-  IPAddress ip = WiFi.localIP();
+  IPAddress ip = Network.localIP();
 
   // TODO: make a nice struct of it and clean up
   //  0: 1 byte 'binary token 255'
