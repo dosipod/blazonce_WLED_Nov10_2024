@@ -544,6 +544,7 @@ function populateInfo(i)
 	else if (pwr > 0) {pwr = 50 * Math.round(pwr/50); pwru = pwr + " mA";}
   	var urows="";
 	if (i.nodes) {
+		i.nodes.sort((a,b) => (a.name).localeCompare(b.name));
 		for (var x=0;x<i.nodes.length;x++)
 		{
 			var o = i.nodes[x];
@@ -674,7 +675,7 @@ function populateEffects()
 	for (let i = 0; i < effects.length; i++) {
 		effects[i] = {id: effects[i][0], name:effects[i][1]};
 	}
-	effects.sort(compare);
+	effects.sort((a,b) => (a.name).localeCompare(b.name));
 
 	effects.unshift({
 		"id": 0,
@@ -703,7 +704,7 @@ function populatePalettes()
 			"name": palettes[i][1]
 		};
 	}
-	palettes.sort(compare);
+	palettes.sort((a,b) => (a.name).localeCompare(b.name));
 
 	palettes.unshift({
 		"id": 0,
@@ -960,10 +961,6 @@ function displayRover(i,s)
 	d.getElementById('roverstar').style.display = (i.live && s.lor) ? "block":"none";
 }
 
-function compare(a, b) {
-	if (a.name < b.name) return -1;
-	return 1;
-}
 function cmpP(a, b) {
 	if (!a[1].n) return (a[0] > b[0]);
   return a[1].n.localeCompare(b[1].n,undefined, {numeric: true});
