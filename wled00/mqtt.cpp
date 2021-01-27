@@ -136,7 +136,6 @@ void publishMqtt()
 
 bool initMqtt()
 {
-  lastMqttReconnectAttempt = millis();
   if (!mqttEnabled || mqttServer[0] == 0 || !WLED_CONNECTED) return false;
 
   if (mqtt == nullptr) {
@@ -166,6 +165,6 @@ bool initMqtt()
 }
 
 #else
-bool initMqtt(){lastMqttReconnectAttempt = millis();return false;}
+bool initMqtt(){lreturn false;}
 void publishMqtt(){}
 #endif

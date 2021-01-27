@@ -449,7 +449,7 @@ img {
 
 input[type=range] {
 	-webkit-appearance: none;
-	width: 220px;
+	width: 200px;
 	padding: 0px;
 	margin: 0px 10px 0px 10px;
 	background-color: transparent;
@@ -497,7 +497,7 @@ input[type=range]:active + .sliderbubble {
 
 .sliderwrap {
 	height: 30px;
-	width: 240px;
+	width: 220px;
 	position: relative;
 }
 

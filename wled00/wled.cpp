@@ -219,7 +219,7 @@ void WLED::loop()
     lastMqttReconnectAttempt = 0;
   }
   if (millis() - lastMqttReconnectAttempt > 30000) {
-    lastMqttReconnectAttempt = millis();
+    lastMqttReconnectAttempt = millis();  // don't do it in initMqtt()
     initMqtt();
     refreshNodeList();
     sendSysInfoUDP();
