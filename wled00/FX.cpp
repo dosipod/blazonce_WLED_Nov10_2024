@@ -1786,7 +1786,7 @@ uint16_t WS2812FX::mode_fire_2012()
     // Step 1.  Cool down every cell a little
     for (uint16_t i = 0; i < SEGLEN; i++) {
       uint8_t temp = qsub8(heat[i], random8(0, (((20 + SEGMENT.speed /3) * 10) / SEGLEN) + 2));
-      heat[i] = (temp==0 && i<ignition) ? 2 : temp; // prevent ignition area from becoming black
+      heat[i] = (temp==0 && i<ignition) ? 16 : temp; // prevent ignition area from becoming black
     }
   
     // Step 2.  Heat from each cell drifts 'up' and diffuses a little
@@ -2963,7 +2963,7 @@ uint16_t WS2812FX::mode_starburst(void) {
 uint16_t WS2812FX::mode_exploding_fireworks(void)
 {
   //allocate segment data
-  uint16_t numSparks = 2 + (SEGLEN >> 1); 
+  uint16_t numSparks = 2 + (SEGLEN >> 2); 
   if (numSparks > 80) numSparks = 80;
   uint16_t dataSize = sizeof(spark) * numSparks;
   if (!SEGENV.allocateData(dataSize)) return mode_static(); //allocation failed
@@ -3059,7 +3059,7 @@ uint16_t WS2812FX::mode_exploding_fireworks(void)
     SEGENV.aux0--;
     if (SEGENV.aux0 < 4) {
       SEGENV.aux0 = 0; //back to flare
-      SEGENV.step = (SEGMENT.intensity > random8()); //decide firing side
+      SEGENV.step = actuallyReverse ^ (SEGMENT.intensity > random8()); //decide firing side
     }
   }
 
@@ -3149,8 +3149,8 @@ uint16_t WS2812FX::mode_drip(void)
 / adapted from https://github.com/atuline/FastLED-Demos/blob/master/plasma/plasma.ino
 */
 uint16_t WS2812FX::mode_plasma(void) {
-  uint8_t thisPhase = beatsin8(6,-64,64);                       // Setting phase change for a couple of waves.
-  uint8_t thatPhase = beatsin8(7,-64,64);
+  uint8_t thisPhase = beatsin8(6+_segment_index%3,-64,64);                       // Setting phase change for a couple of waves.
+  uint8_t thatPhase = beatsin8(7+_segment_index%3,-64,64);
 
   for (int i = 0; i < SEGLEN; i++) {   // For each of the LED's in the strand, set color &  brightness based on a wave as follows:
     uint8_t colorIndex = cubicwave8((i*(1+ 3*(SEGMENT.speed >> 5)))+(thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
