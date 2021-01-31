@@ -941,10 +941,11 @@ uint16_t WS2812FX::running(uint32_t color1, uint32_t color2, bool theatre) {
   uint8_t width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
   uint32_t cycleTime = 50 + (255 - SEGMENT.speed)<<1;
   uint32_t it = now / cycleTime;
+  bool usePalette = color1 == SEGCOLOR(0);
   
   for(uint16_t i = 0; i < SEGLEN; i++) {
     uint32_t col = color2;
-    if (color1 == SEGCOLOR(0)) color1 = color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
+    if (usePalette) color1 = color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
     if (theatre) {
       if ((i % width) == SEGENV.aux0) col = color1;
     } else {
