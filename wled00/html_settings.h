@@ -91,7 +91,7 @@ max="40" required onchange="UI()"><div name="iLK" style="display:inline">clk:
 <input name="LK" type="number" min="0" max="40" onchange="UI()"></div>count:
 <input name="LC" type="number" min="1" max="1500" oninput="UI()" required></div>
 </div><hr>Relay pin: <input type="number" min="-1" max="40" name="RL" 
-onchange="UI()"> Active high? <input type="checkbox" name="RM"><br>Button pin: 
+onchange="UI()"> Non-latching? <input type="checkbox" name="RM"><br>Button pin: 
 <input type="number" min="-1" max="40" name="BT" onchange="UI()"><br>IR pin: 
 <input type="number" min="-1" max="40" name="IR" onchange="UI()"><br>AUX pin: 
 <input type="number" min="-1" max="40" name="AX" onchange="UI()"><hr><div 

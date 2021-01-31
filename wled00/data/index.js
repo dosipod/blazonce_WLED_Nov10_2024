@@ -794,13 +794,13 @@ function genPalPrevCss(id)
 
 function generateListItemHtml(listName, id, name, clickAction, extraHtml = '')
 {
-    return `<div class="lstI" data-id="${id}" onClick="${clickAction}(${id})">
+    return `<div class="lstI" data-id="${id}">
 			<label class="check schkl">
 				&nbsp;
 				<input type="radio" value="${id}" name="${listName}" onChange="${clickAction}()">
 				<span class="checkmark schk"></span>
 			</label>
-			<div class="lstIcontent">
+			<div class="lstIcontent" onClick="${clickAction}(${id})">
 				<span class="lstIname">
 					${name}
 				</span>
@@ -1340,7 +1340,7 @@ function setX(ind = null) {
 	if (ind === null) {
 		ind = parseInt(d.querySelector('#fxlist input[name="fx"]:checked').value);
 	} else {
-		d.querySelector(`#fxlist input[name="fx"][value="${ind}`).checked = true;
+		d.querySelector(`#fxlist input[name="fx"][value="${ind}"]`).checked = true;
 	}
 	var selElement = d.querySelector('#fxlist .selected');
 	if (selElement) {
