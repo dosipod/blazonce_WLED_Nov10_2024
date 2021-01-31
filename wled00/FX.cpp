@@ -939,7 +939,7 @@ uint16_t WS2812FX::mode_chase_flash_random(void) {
  */
 uint16_t WS2812FX::running(uint32_t color1, uint32_t color2, bool theatre) {
   uint8_t width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
-  uint32_t cycleTime = 50 + (255 - SEGMENT.speed)<<1;
+  uint32_t cycleTime = 50 + (255 - SEGMENT.speed);
   uint32_t it = now / cycleTime;
   bool usePalette = color1 == SEGCOLOR(0);
   
