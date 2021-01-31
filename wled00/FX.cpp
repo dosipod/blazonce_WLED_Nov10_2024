@@ -396,40 +396,11 @@ uint16_t WS2812FX::mode_rainbow_cycle(void) {
 
 
 /*
- * theater chase function
- */
-uint16_t WS2812FX::theater_chase(uint32_t color1, uint32_t color2, bool do_palette) {
-  byte gap = 2 + ((255 - SEGMENT.intensity) >> 5);
-  uint32_t cycleTime = 50 + (255 - SEGMENT.speed)*2;
-  uint32_t it = now / cycleTime;
-  if (it != SEGENV.step) //new color
-  {
-    SEGENV.aux0 = (SEGENV.aux0 +1) % gap;
-    SEGENV.step = it;
-  }
-  
-  for(uint16_t i = 0; i < SEGLEN; i++) {
-    if((i % gap) == SEGENV.aux0) {
-      if (do_palette)
-      {
-        setPixelColor(i, color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
-      } else {
-        setPixelColor(i, color1);
-      }
-    } else {
-      setPixelColor(i, color2);
-    }
-  }
-  return FRAMETIME;
-}
-
-
-/*
  * Theatre-style crawling lights.
  * Inspired by the Adafruit examples.
  */
 uint16_t WS2812FX::mode_theater_chase(void) {
-  return theater_chase(SEGCOLOR(0), SEGCOLOR(1), true);
+  return running(SEGCOLOR(0), SEGCOLOR(1), true);
 }
 
 
@@ -438,7 +409,7 @@ uint16_t WS2812FX::mode_theater_chase(void) {
  * Inspired by the Adafruit examples.
  */
 uint16_t WS2812FX::mode_theater_chase_rainbow(void) {
-  return theater_chase(color_wheel(SEGENV.step), SEGCOLOR(1), false);
+  return running(color_wheel(SEGENV.step), SEGCOLOR(1), true);
 }
 
 
@@ -966,29 +937,26 @@ uint16_t WS2812FX::mode_chase_flash_random(void) {
 /*
  * Alternating pixels running function.
  */
-uint16_t WS2812FX::running(uint32_t color1, uint32_t color2) {
-  uint8_t pxw = 1 + (SEGMENT.intensity >> 5);
-  uint32_t cycleTime = 35 + (255 - SEGMENT.speed);
+uint16_t WS2812FX::running(uint32_t color1, uint32_t color2, bool theatre) {
+  uint8_t width = (theatre ? 3 : 1) + (SEGMENT.intensity >> 4);  // window
+  uint32_t cycleTime = 50 + (255 - SEGMENT.speed)<<1;
   uint32_t it = now / cycleTime;
-  if (SEGMENT.speed == 0) it = 0;
-
+  
   for(uint16_t i = 0; i < SEGLEN; i++) {
-    if((i + SEGENV.aux0) % (pxw*2) < pxw) {
-      if (color1 == SEGCOLOR(0))
-      {
-        setPixelColor(SEGLEN -i -1, color_from_palette(SEGLEN -i -1, true, PALETTE_SOLID_WRAP, 0));
-      } else
-      {
-        setPixelColor(SEGLEN -i -1, color1);
-      }
+    uint32_t col = color2;
+    if (color1 == SEGCOLOR(0)) color1 = color_from_palette(i, true, PALETTE_SOLID_WRAP, 0);
+    if (theatre) {
+      if ((i % width) == SEGENV.aux0) col = color1;
     } else {
-      setPixelColor(SEGLEN -i -1, color2);
+      int8_t pos = (i % (width<<1));
+      if ((pos < SEGENV.aux0-width) || ((pos >= SEGENV.aux0) && (pos < SEGENV.aux0+width))) col = color1;
     }
+    setPixelColor(i,col);
   }
 
   if (it != SEGENV.step )
   {
-    SEGENV.aux0 = (SEGENV.aux0 +1) % (pxw*2);
+    SEGENV.aux0 = (SEGENV.aux0 +1) % (theatre ? width : (width<<1));
     SEGENV.step = it;
   }
   return FRAMETIME;
