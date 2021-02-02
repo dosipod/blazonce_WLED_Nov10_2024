@@ -20,6 +20,18 @@ int8_t playlistIndex = -1;
 
 uint16_t playlistEntryDur = 0;
 
+void deserializePlaylist() {
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE);
+
+  DEBUG_PRINTLN(F("Reading playlist from /playlist.json..."));
+
+  if (!readObjectFromFile("/playlist.json", nullptr, &doc)) return; //if file does not exist just exit
+
+  JsonObject playlist = doc[F("playlist")];
+  if (!playlist.isNull()) loadPlaylist(playlist);
+}
+
+
 void loadPlaylist(JsonObject playlistObj) {
   delete playlistEntries;
   playlistIndex = -1; playlistEntryDur = 0;

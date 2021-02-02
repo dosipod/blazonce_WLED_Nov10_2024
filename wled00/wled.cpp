@@ -323,6 +323,8 @@ void WLED::setup()
   // Serial.println(F("Ada"));
   DEBUG_PRINTLN(F("Ada"));
 
+  deserializePlaylist();
+  
   // generate module IDs
   escapedMac = WiFi.macAddress();
   escapedMac.replace(":", "");

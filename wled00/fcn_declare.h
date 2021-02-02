@@ -166,6 +166,7 @@ class PinManagerClass {
 };
 
 //playlist.cpp
+void deserializePlaylist();
 void loadPlaylist(JsonObject playlistObject);
 void handlePlaylist();
 
