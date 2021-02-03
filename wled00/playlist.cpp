@@ -10,12 +10,30 @@ typedef struct PlaylistEntry {
   uint16_t tr;
 } ple;
 
-byte     playlistRepeat = 1;
+int8_t   playlistRepeat = 1;
 byte     playlistEndPreset = 0;
 byte    *playlistEntries = nullptr;
 byte     playlistLen;
 int8_t   playlistIndex = -1;
 uint16_t playlistEntryDur = 0;
+
+
+void shufflePlaylist() {
+  int currentIndex = playlistLen, randomIndex;
+
+  PlaylistEntry temporaryValue, *entries = reinterpret_cast<PlaylistEntry*>(playlistEntries);
+
+  // While there remain elements to shuffle...
+  while (currentIndex--) {
+    // Pick a random element...
+    randomIndex = random(0, currentIndex);
+    // And swap it with the current element.
+    temporaryValue = entries[currentIndex];
+    entries[currentIndex] = entries[randomIndex];
+    entries[randomIndex] = temporaryValue;
+  }
+}
+
 
 void deserializePlaylist() {
   DynamicJsonDocument doc(JSON_BUFFER_SIZE);
@@ -81,6 +99,7 @@ void loadPlaylist(JsonObject playlistObj) {
   currentPlaylist = 0; //TODO here we need the preset ID where the playlist is saved
 }
 
+
 void handlePlaylist() {
   if (currentPlaylist < 0 || playlistEntries == nullptr || presetCyclingEnabled) return;
   
@@ -97,7 +116,14 @@ void handlePlaylist() {
       if (playlistEndPreset) applyPreset(playlistEndPreset);
       return;
     }
-    if (!playlistIndex) playlistRepeat--; // decrease repeat count on each index reset
+    // playlist roll-over
+    if (!playlistIndex) {
+      if (playlistRepeat > 0) {// playlistRepeat < 0 => endless loop with shuffling presets
+        playlistRepeat--; // decrease repeat count on each index reset
+      } else {
+        shufflePlaylist();  // shuffle playlist and start over
+      }
+    }
 
     PlaylistEntry* entries = reinterpret_cast<PlaylistEntry*>(playlistEntries);
 
