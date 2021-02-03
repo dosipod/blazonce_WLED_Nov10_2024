@@ -13,7 +13,7 @@ typedef struct PlaylistEntry {
 byte playlistRepeat = 1;
 byte playlistEndPreset = 0;
 
-uint8_t* playlistEntries;
+byte* playlistEntries = nullptr;
 
 byte playlistLen;
 int8_t playlistIndex = -1;
@@ -33,7 +33,7 @@ void deserializePlaylist() {
 
 
 void loadPlaylist(JsonObject playlistObj) {
-  delete playlistEntries;
+  if (playlistEntries != nullptr) delete[] playlistEntries;
   playlistIndex = -1; playlistEntryDur = 0;
   JsonArray presets = playlistObj["ps"];
   playlistLen = presets.size();
@@ -98,7 +98,7 @@ void handlePlaylist()
       playlistIndex = 0;
       if (playlistRepeat == 1) { //stop
         currentPlaylist = -1;
-        delete playlistEntries;
+        delete[] playlistEntries;
         playlistEntries = nullptr;
         if (playlistEndPreset) applyPreset(playlistEndPreset);
         return;
