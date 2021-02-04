@@ -34,7 +34,9 @@ void shufflePlaylist() {
   }
 }
 
-
+/*
+ * The same thing as saving and loading playlist can be achieved using JSON API saved in a preset.
+ * 
 void deserializePlaylist() {
   DynamicJsonDocument doc(JSON_BUFFER_SIZE);
 
@@ -70,7 +72,7 @@ void serializePlaylist() {
   if (f) serializeJson(doc, f);
   f.close();
 }
-
+*/
 
 void loadPlaylist(JsonObject playlistObj) {
   if (playlistEntries != nullptr) delete[] playlistEntries;

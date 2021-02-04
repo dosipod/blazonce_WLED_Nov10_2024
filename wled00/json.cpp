@@ -281,13 +281,7 @@ bool deserializeState(JsonObject root)
 
   JsonObject playlist = root[F("playlist")];
   if (!playlist.isNull()) {
-    if (!playlist[F("remove")].isNull() && (bool)playlist[F("remove")]) {
-      WLED_FS.remove("/playlist.json");
-      return stateResponse;
-    }
-    loadPlaylist(playlist);
-    if (!playlist[F("save")].isNull() && (bool)playlist[F("save")]) serializePlaylist();
-    return stateResponse;
+    loadPlaylist(playlist); return stateResponse;
   }
 
   colorUpdated(noNotification ? NOTIFIER_CALL_MODE_NO_NOTIFY : NOTIFIER_CALL_MODE_DIRECT_CHANGE);

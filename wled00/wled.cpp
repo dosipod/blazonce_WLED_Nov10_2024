@@ -320,8 +320,6 @@ void WLED::setup()
   WiFi.persistent(false);
   WiFi.onEvent(WiFiEvent);
 
-  deserializePlaylist();
-
   // Serial.println(F("Ada"));
   DEBUG_PRINTLN(F("Ada"));
 
