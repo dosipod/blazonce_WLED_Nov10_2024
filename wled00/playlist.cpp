@@ -75,8 +75,8 @@ void serializePlaylist() {
 */
 
 void loadPlaylist(JsonObject playlistObj) {
-  if (playlistEntries != nullptr) delete[] playlistEntries;
-  playlistIndex = -1; playlistEntryDur = 0;
+  if (playlistEntries != nullptr) {delete[] playlistEntries; playlistEntries = nullptr;}
+  currentPlaylist = playlistIndex = -1; playlistEntryDur = 0;
   JsonArray presets = playlistObj["ps"];
   playlistLen = presets.size();
   if (playlistLen == 0) return;
