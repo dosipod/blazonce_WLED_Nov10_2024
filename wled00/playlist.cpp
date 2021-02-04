@@ -47,6 +47,31 @@ void deserializePlaylist() {
 }
 
 
+void serializePlaylist() {
+  DynamicJsonDocument doc(JSON_BUFFER_SIZE/8); // we don't need big buffer (>1k is ok)
+
+  DEBUG_PRINTLN(F("Writing playlist to /playlist.json..."));
+
+  PlaylistEntry* entries = reinterpret_cast<PlaylistEntry*>(playlistEntries);
+
+  JsonObject playlist = doc.createNestedObject(F("playlist"));
+  JsonArray ps = playlist.createNestedArray(F("ps"));
+  JsonArray dur = playlist.createNestedArray(F("dur"));
+  JsonArray tr = playlist.createNestedArray(F("transition"));
+  for (uint8_t i=0; i<playlistLen; i++) {
+    ps.add(entries[i].preset);
+    dur.add(entries[i].dur);
+    tr.add(entries[i].tr);
+  }
+  playlist[F("repeat")] = playlistRepeat; // TODO: this one is decreasing with each loop
+  playlist[F("end")] = playlistEndPreset;
+
+  File f = WLED_FS.open("/playlist.json", "w");
+  if (f) serializeJson(doc, f);
+  f.close();
+}
+
+
 void loadPlaylist(JsonObject playlistObj) {
   if (playlistEntries != nullptr) delete[] playlistEntries;
   playlistIndex = -1; playlistEntryDur = 0;
