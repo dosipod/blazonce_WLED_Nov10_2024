@@ -384,7 +384,7 @@ void WLED::beginStrip()
 
   // init relay pin
   if (rlyPin>=0)
-    digitalWrite(rlyPin, (rlyMde ? bri : !bri));
+    digitalWrite(rlyPin, (bri ? rlyMde : !rlyMde));
 
   // disable button if it is "pressed" unintentionally
   if (btnPin>=0 && isButtonPressed())
