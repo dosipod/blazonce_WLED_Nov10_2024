@@ -1960,7 +1960,7 @@ uint16_t WS2812FX::mode_colortwinkle()
   if (!SEGENV.allocateData(dataSize)) return mode_static(); //allocation failed
   
   CRGB fastled_col, prev;
-  fract8 fadeUpAmount = 8 + (SEGMENT.speed/4), fadeDownAmount = 5 + (SEGMENT.speed/7);
+  fract8 fadeUpAmount = _brightness>28 ? 8 + (SEGMENT.speed>>2) : 68-_brightness, fadeDownAmount = _brightness>28 ? 8 + (SEGMENT.speed>>3) : 68-_brightness;
   for (uint16_t i = 0; i < SEGLEN; i++) {
     fastled_col = col_to_crgb(getPixelColor(i));
     prev = fastled_col;
@@ -1970,7 +1970,7 @@ uint16_t WS2812FX::mode_colortwinkle()
     
     if (fadeUp) {
       CRGB incrementalColor = fastled_col;
-      incrementalColor.nscale8_video( fadeUpAmount);
+      incrementalColor.nscale8_video(fadeUpAmount);
       fastled_col += incrementalColor;
 
       if (fastled_col.red == 255 || fastled_col.green == 255 || fastled_col.blue == 255) {
@@ -1978,24 +1978,21 @@ uint16_t WS2812FX::mode_colortwinkle()
       }
       setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
 
-      if (col_to_crgb(getPixelColor(i)) == prev) //fix "stuck" pixels
-      {
+      if (col_to_crgb(getPixelColor(i)) == prev) {  //fix "stuck" pixels
         fastled_col += fastled_col;
         setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
       }
     } else {
-      fastled_col.nscale8( 255 - fadeDownAmount);
+      fastled_col.nscale8(255 - fadeDownAmount);
       setPixelColor(i, fastled_col.red, fastled_col.green, fastled_col.blue);
     }
   }
 
-  for (uint16_t j = 0; j <= SEGLEN / 50; j++)
-  {
+  for (uint16_t j = 0; j <= SEGLEN / 50; j++) {
     if (random8() <= SEGMENT.intensity) {
-      for (uint8_t times = 0; times < 5; times++) //attempt to spawn a new pixel 5 times
-      {
+      for (uint8_t times = 0; times < 5; times++) { //attempt to spawn a new pixel 5 times
         int i = random16(SEGLEN);
-        if(getPixelColor(i) == 0) {
+        if (getPixelColor(i) == 0) {
           fastled_col = ColorFromPalette(currentPalette, random8(), 64, NOBLEND);
           uint16_t index = i >> 3;
           uint8_t  bitNum = i & 0x07;
