@@ -3155,7 +3155,7 @@ uint16_t WS2812FX::mode_tetris(void) {
     if (drop->pos > SEGENV.aux1) {    // fall until top of stack
       drop->pos -= drop->speed;       // may add gravity as: speed += gravity
       if (int(drop->pos) < SEGENV.aux1) drop->pos = SEGENV.aux1;
-      for (uint16_t i=int(drop->pos); i<SEGLEN-1; i++) setPixelColor(i,i<int(drop->pos)+SEGENV.aux0 ? drop->col : SEGCOLOR(1));
+      for (uint16_t i=int(drop->pos); i<SEGLEN; i++) setPixelColor(i,i<int(drop->pos)+SEGENV.aux0 ? drop->col : SEGCOLOR(1));
     } else {                          // we hit bottom
       SEGENV.step = 0;                // go back to init
       SEGENV.aux1 += SEGENV.aux0;     // increase the stack size
