@@ -95,9 +95,11 @@
 #else //esp8266
   #define PIXELMETHOD NeoEsp8266BitBang800KbpsMethod
   #define NeoPixelBrightnessBusGrb0  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266BitBang800KbpsMethod>
+  #define NeoPixelBrightnessBusGrb1  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266Uart0Ws2813Method>
   #define NeoPixelBrightnessBusGrb2  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266Uart1Ws2813Method>
   #define NeoPixelBrightnessBusGrb3  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266Dma800KbpsMethod>
   #define NeoPixelBrightnessBusGrbw0 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266BitBang800KbpsMethod>
+  #define NeoPixelBrightnessBusGrbw1 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266Uart0Ws2813Method>
   #define NeoPixelBrightnessBusGrbw2 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266Uart1Ws2813Method>
   #define NeoPixelBrightnessBusGrbw3 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266Dma800KbpsMethod>
 #endif
@@ -189,6 +191,8 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb1(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->Begin(); break;
             case 2:
               _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb2(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->Begin(); break;
             case 3:
@@ -225,6 +229,8 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw1(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->Begin(); break;
             case 2:
               _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw2(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->Begin(); break;
             case 3:
@@ -357,6 +363,7 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->Show(); break;
             case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->Show(); break;
             case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->Show(); break;
             default: ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->Show(); break;
@@ -382,6 +389,7 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->Show(); break;
             case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->Show(); break;
             case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->Show(); break;
             default: ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->Show(); break;
@@ -441,6 +449,7 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: canShow &= ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->CanShow(); break;
             case 2: canShow &= ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->CanShow(); break;
             case 3: canShow &= ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->CanShow(); break;
             default: canShow &= ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->CanShow(); break;
@@ -466,6 +475,7 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: canShow &= ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->CanShow(); break;
             case 2: canShow &= ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->CanShow(); break;
             case 3: canShow &= ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->CanShow(); break;
             default: canShow &= ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->CanShow(); break;
@@ -542,6 +552,7 @@ public:
         #else
         switch (pixelStripPins[stripIdx])
         {
+          case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
           case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
           case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
           default: ((NeoPixelBrightnessBusGrb0*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
@@ -567,6 +578,7 @@ public:
         #else
         switch (pixelStripPins[stripIdx])
         {
+          case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
           case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
           case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
           default: ((NeoPixelBrightnessBusGrbw0*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
@@ -652,6 +664,7 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->SetBrightness(b); break;
             case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->SetBrightness(b); break;
             case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->SetBrightness(b); break;
             default: ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->SetBrightness(b); break;
@@ -677,6 +690,7 @@ public:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->SetBrightness(b); break;
             case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->SetBrightness(b); break;
             case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->SetBrightness(b); break;
             default: ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->SetBrightness(b); break;
@@ -751,6 +765,7 @@ public:
         #else
         switch (pixelStripPins[stripIdx])
         {
+          case 1: return ((NeoPixelBrightnessBusGrb1*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
           case 2: return ((NeoPixelBrightnessBusGrb2*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
           case 3: return ((NeoPixelBrightnessBusGrb3*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
           default: return ((NeoPixelBrightnessBusGrb0*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
@@ -776,6 +791,7 @@ public:
         #else
         switch (pixelStripPins[stripIdx])
         {
+          case 1: return ((NeoPixelBrightnessBusGrbw1*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
           case 2: return ((NeoPixelBrightnessBusGrbw2*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
           case 3: return ((NeoPixelBrightnessBusGrbw3*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
           default: return ((NeoPixelBrightnessBusGrbw0*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
@@ -870,6 +886,7 @@ private:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: delete ((NeoPixelBrightnessBusGrb1*)_pGRB[idx]); _pGRB[idx] = NULL; break;
             case 2: delete ((NeoPixelBrightnessBusGrb2*)_pGRB[idx]); _pGRB[idx] = NULL; break;
             case 3: delete ((NeoPixelBrightnessBusGrb3*)_pGRB[idx]); _pGRB[idx] = NULL; break;
             default: delete ((NeoPixelBrightnessBusGrb0*)_pGRB[idx]); _pGRB[idx] = NULL; break;
@@ -895,6 +912,7 @@ private:
           #else
           switch (pixelStripPins[idx])
           {
+            case 1: delete ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx]); _pGRB[idx] = NULL; break;
             case 2: delete ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx]); _pGRB[idx] = NULL; break;
             case 3: delete ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx]); _pGRB[idx] = NULL; break;
             default: delete ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx]); _pGRB[idx] = NULL; break;
