@@ -216,7 +216,7 @@ function onLoad() {
 	if (localStorage.getItem('pcm') == "true") togglePcMode(true);
 	var sls = d.querySelectorAll('input[type="range"]');
 	for (var sl of sls) {
-		sl.addEventListener('input', updateBubble, true);
+		//sl.addEventListener('input', updateBubble, true);
 		sl.addEventListener('touchstart', toggleBubble);
 		sl.addEventListener('touchend', toggleBubble);
 	}
@@ -669,7 +669,7 @@ function populateSegments(s)
 function populateEffects()
 {
     var effects = eJson;
-	var html = `<input type="text" class="search" placeholder="Search" oninput="search(this)" />`;
+	var html = "";
 
 	effects.shift(); //remove solid
 	for (let i = 0; i < effects.length; i++) {
@@ -711,7 +711,7 @@ function populatePalettes()
 		"name": "Default",
 	});
 	
-	var paletteHtml = `<input type="text" class="search" placeholder="Search" oninput="search(this)" />`;
+	var paletteHtml = `<input type="text" class="search" placeholder="Search" oninput="search(this.value,this.parentElement)" />`;
 	for (let i = 0; i < palettes.length; i++) {
 		let previewCss = genPalPrevCss(palettes[i].id);
 		paletteHtml += generateListItemHtml(
@@ -806,7 +806,6 @@ function generateListItemHtml(listName, id, name, clickAction, extraHtml = '')
 				</span>
 				${extraHtml}
 			</div>
-			
 		</div>`;
 }
 
@@ -825,20 +824,14 @@ function updateTrail(e, slidercol)
 	}
 	var val = `linear-gradient(90deg, ${scol} ${progress}%, var(--c-4) ${progress}%)`;
 	e.parentNode.getElementsByClassName('sliderdisplay')[0].style.background = val;
-}
-
-function updateBubble(e)
-{
-	var bubble = e.target.parentNode.getElementsByTagName('output')[0];
-
-	if (bubble) {
-		bubble.innerHTML = e.target.value;
-	}
+	var bubble = e.parentNode.parentNode.getElementsByTagName('output')[0];
+	if (bubble) bubble.innerHTML = e.value;
 }
 
 function toggleBubble(e)
 {
-	e.target.parentNode.querySelector('output').classList.toggle('hidden');
+	var bubble = e.target.parentNode.parentNode.getElementsByTagName('output')[0];
+	bubble.classList.toggle('sliderbubbleshow');
 }
 
 function updateLen(s)
@@ -1680,13 +1673,12 @@ function getPalettesData(page, callback)
 	});
 }
 
-function search(searchField) {
-	var searchText = searchField.value.toUpperCase();
-	var elements = searchField.parentElement.querySelectorAll('.lstI');
+function search(searchText,listParent) {
+	var elements = listParent.querySelectorAll('.lstI');
 	for (i = 0; i < elements.length; i++) {
 		var item = elements[i];
 		var itemText = item.querySelector('.lstIname').innerText.toUpperCase();
-		if (itemText.indexOf(searchText) > -1) {
+		if (itemText.indexOf(searchText.toUpperCase()) > -1) {
 			item.style.display = "";
 		} else {
 			item.style.display = "none";

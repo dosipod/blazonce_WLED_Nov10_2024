@@ -11,14 +11,6 @@
 //#define WLED_USE_5CH_LEDS  //5 Channel H801 for cold and warm white
 //#define WLED_USE_BWLT11
 //#define WLED_USE_SHOJO_PCB
-
-//enable color order override for a specific range of the strip
-//This can be useful if you want to chain multiple strings with incompatible color order
-//#define COLOR_ORDER_OVERRIDE
-#define COO_MIN    0
-#define COO_MAX   35 //not inclusive, this would set the override for LEDs 0-26
-#define COO_ORDER COL_ORDER_GRB
-
 //END CONFIGURATION
 
 #ifdef WLED_USE_ANALOG_LEDS
@@ -623,9 +615,6 @@ public:
     RgbwColor col;
 
     uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
-    #ifdef COLOR_ORDER_OVERRIDE
-    if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
-    #endif
 
     //reorder channels to selected order
     switch (co)
@@ -834,9 +823,6 @@ public:
   {
     RgbwColor col = GetPixelColorRaw(indexPixel);
     uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
-    #ifdef COLOR_ORDER_OVERRIDE
-    if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
-    #endif
 
     switch (co)
     {
