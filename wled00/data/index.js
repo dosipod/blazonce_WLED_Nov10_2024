@@ -711,7 +711,7 @@ function populatePalettes()
 		"name": "Default",
 	});
 	
-	var paletteHtml = `<input type="text" class="search" placeholder="Search" oninput="search(this.value,this.parentElement)" />`;
+	var paletteHtml = "";
 	for (let i = 0; i < palettes.length; i++) {
 		let previewCss = genPalPrevCss(palettes[i].id);
 		paletteHtml += generateListItemHtml(

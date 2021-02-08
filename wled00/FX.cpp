@@ -3135,7 +3135,7 @@ uint16_t WS2812FX::mode_tetris(void) {
   }
   
   if (SEGENV.step == 0) {             //init
-    drop->speed = 0.0238 * (SEGMENT.speed ? (SEGMENT.speed>>4)+1 : random8(3,20)); // set speed
+    drop->speed = 0.0238 * (SEGMENT.speed ? (SEGMENT.speed>>3)+1 : random8(3,32)); // set speed
     drop->pos   = SEGLEN-1;           // start at end of segment
     drop->col   = color_from_palette(random8(0,15)<<4,false,false,0);     // limit color choices so there is enough HUE gap
     SEGENV.step = 1;                  // drop state (0 init, 1 forming, 2 falling)
