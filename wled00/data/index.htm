@@ -102,7 +102,7 @@
 		<div class="il">
 			<i class="icons sel-icon" onclick="tglHex()">&#xe2b3;</i>
 			<div class="staytop search">
-				<input type="text" class="search" placeholder="Search" oninput="search(this,d.getElementById('selectPalette'))" />
+				<input type="text" class="search" placeholder="Search" oninput="search(this,'selectPalette')" onfocus="search(this)" />
 				<span onclick="clean(this)"></span>
 			</div>
 			<div id="selectPalette" class="list">
@@ -151,7 +151,7 @@
 		</div>
 		<div class="il">
 			<div class="staytop search" id="staytop2">
-				<input type="text" class="search" placeholder="Search" oninput="search(this,d.getElementById('fxlist'))" />
+				<input type="text" class="search" placeholder="Search" oninput="search(this,'fxlist')" onfocus="search(this)" />
 				<span onclick="clean(this);"></span>
 			</div>
 			<p class="labels">Effect mode</p>

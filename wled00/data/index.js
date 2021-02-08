@@ -1666,34 +1666,30 @@ function getPalettesData(page, callback)
 			callback();
 		}
 	})
-	.catch(function (error) {
+	.catch(function(error) {
 		showToast(error, true);
 		console.log(error);
 		presetError(false);
 	});
 }
 
-function search(f,p) {
-	var elements = p.querySelectorAll('.lstI');
-	for (i = 0; i < elements.length; i++) {
-		var item = elements[i];
-		var itemText = item.querySelector('.lstIname').innerText.toUpperCase();
-		if (itemText.indexOf(f.value.toUpperCase()) > -1) {
-			item.style.display = "";
-		} else {
-			item.style.display = "none";
-		}
+function search(f,l=null) {
+	if (f.value!=='') f.nextElementSibling.style.display='block';
+	if (!l) return;
+	var el = d.getElementById(l).querySelectorAll('.lstI');
+	for (i = 0; i < el.length; i++) {
+		var it = el[i];
+		var itT = it.querySelector('.lstIname').innerText.toUpperCase();
+		it.style.display = itT.indexOf(f.value.toUpperCase()) > -1 ? "" : "none";
 	}
-	if (f.value!=='')
-		f.nextElementSibling.style.display='block';
 }
 
 function clean(c) {
 	var i=c.previousElementSibling;
 	i.value='';
+	c.style.display='none';
 	i.focus();
 	i.dispatchEvent(new Event('input'));
-	c.style.display='none';
 }
 
 function expand(i,a)
