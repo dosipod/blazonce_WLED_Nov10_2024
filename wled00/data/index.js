@@ -1673,17 +1673,27 @@ function getPalettesData(page, callback)
 	});
 }
 
-function search(searchText,listParent) {
-	var elements = listParent.querySelectorAll('.lstI');
+function search(f,p) {
+	var elements = p.querySelectorAll('.lstI');
 	for (i = 0; i < elements.length; i++) {
 		var item = elements[i];
 		var itemText = item.querySelector('.lstIname').innerText.toUpperCase();
-		if (itemText.indexOf(searchText.toUpperCase()) > -1) {
+		if (itemText.indexOf(f.value.toUpperCase()) > -1) {
 			item.style.display = "";
 		} else {
 			item.style.display = "none";
 		}
 	}
+	if (f.value!=='')
+		f.nextElementSibling.style.display='block';
+}
+
+function clean(c) {
+	var i=c.previousElementSibling;
+	i.value='';
+	i.focus();
+	i.dispatchEvent(new Event('input'));
+	c.style.display='none';
 }
 
 function expand(i,a)

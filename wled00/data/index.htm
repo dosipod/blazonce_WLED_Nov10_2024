@@ -101,8 +101,9 @@
 		<p class="labels">Color palette</p>
 		<div class="il">
 			<i class="icons sel-icon" onclick="tglHex()">&#xe2b3;</i>
-			<div class="staytop">
-				<input type="text" class="search" placeholder="Search" oninput="search(this.value,d.getElementById('selectPalette'))" />
+			<div class="staytop search">
+				<input type="text" class="search" placeholder="Search" oninput="search(this,d.getElementById('selectPalette'))" />
+				<span onclick="clean(this)"></span>
 			</div>
 			<div id="selectPalette" class="list">
 				<div class="lstI" data-id="0">
@@ -148,12 +149,15 @@
 			</div>
 			<output class="sliderbubble"></output>
 		</div>
-		<div class="staytop" id="staytop2">
-			<input type="text" class="search" placeholder="Search" oninput="search(this.value,d.getElementById('fxlist'))" />
-		</div>
-		<p class="labels">Effect mode</p>
-		<div id="fxlist" class="list">
-			Loading...
+		<div class="il">
+			<div class="staytop search" id="staytop2">
+				<input type="text" class="search" placeholder="Search" oninput="search(this,d.getElementById('fxlist'))" />
+				<span onclick="clean(this);"></span>
+			</div>
+			<p class="labels">Effect mode</p>
+			<div id="fxlist" class="list">
+				Loading...
+			</div>
 		</div>
 	</div>
 
