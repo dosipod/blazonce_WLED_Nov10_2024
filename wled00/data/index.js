@@ -190,6 +190,9 @@ function onLoad() {
 	for (var i = 0; i < cd.length; i++) {
 		cd[i].style.backgroundColor = "rgb(0, 0, 0)";
 	}
+	var icn = d.getElementById('clnIcn').innerHTML;
+	var fnd = d.getElementsByName('clnBtn');
+	for (var i=0; i<fnd.length; i++) fnd[i].innerHTML = icn;
 	selectSlot(0);
 	updateTablinks(0);
 	resetUtil();
@@ -1674,20 +1677,20 @@ function getPalettesData(page, callback)
 }
 
 function search(f,l=null) {
-	if (f.value!=='') f.nextElementSibling.style.display='block';
+	f.nextElementSibling.style.display=(f.value!=='')?'block':'none'; 
 	if (!l) return;
 	var el = d.getElementById(l).querySelectorAll('.lstI');
 	for (i = 0; i < el.length; i++) {
 		var it = el[i];
 		var itT = it.querySelector('.lstIname').innerText.toUpperCase();
-		it.style.display = itT.indexOf(f.value.toUpperCase()) > -1 ? "" : "none";
+		it.style.display = itT.indexOf(f.value.toUpperCase())>-1?'':'none';
 	}
 }
 
 function clean(c) {
+	c.style.display='none';
 	var i=c.previousElementSibling;
 	i.value='';
-	c.style.display='none';
 	i.focus();
 	i.dispatchEvent(new Event('input'));
 }

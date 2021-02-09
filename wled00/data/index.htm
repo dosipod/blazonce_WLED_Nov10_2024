@@ -101,9 +101,9 @@
 		<p class="labels">Color palette</p>
 		<div class="il">
 			<i class="icons sel-icon" onclick="tglHex()">&#xe2b3;</i>
-			<div class="staytop search">
-				<input type="text" class="search" placeholder="Search" oninput="search(this,'selectPalette')" onfocus="search(this)" />
-				<span onclick="clean(this)"></span>
+			<div class="staytop fnd">
+				<input type="text" class="fnd" placeholder="Search" oninput="search(this,'selectPalette')" onfocus="search(this)" />
+				<span onclick="clean(this)" name="clnBtn"><!--&#x2297;--></span>
 			</div>
 			<div id="selectPalette" class="list">
 				<div class="lstI" data-id="0">
@@ -150,9 +150,9 @@
 			<output class="sliderbubble"></output>
 		</div>
 		<div class="il">
-			<div class="staytop search" id="staytop2">
-				<input type="text" class="search" placeholder="Search" oninput="search(this,'fxlist')" onfocus="search(this)" />
-				<span onclick="clean(this);"></span>
+			<div class="staytop fnd" id="staytop2">
+				<input type="text" class="fnd" placeholder="Search" oninput="search(this,'fxlist')" onfocus="search(this)" />
+				<span onclick="clean(this);" name="clnBtn"><!--&#x2297;--></span>
 			</div>
 			<p class="labels">Effect mode</p>
 			<div id="fxlist" class="list">
@@ -215,6 +215,13 @@
 <button class="btn infobtn" onclick="openGH()">WLED Wiki</button>
 <button class="btn infobtn" id="resetbtn" onclick="cnfReset()">Reboot WLED</button><br>
 <span class="h">Made with <span id="heart">&#10084;&#xFE0E;</span> by Aircoookie and the WLED community</span>
+</div>
+<div id="clnIcn" class="hidden">
+	<svg xmlns='http://www.w3.org/2000/svg' class='fndIcn'>
+		<circle fill-opacity='0' cx='10' cy='10' r='8.5' />
+		<line x1='4' y1='10' x2='16' y2='10' transform='rotate(45,10,10)' />
+		<line x1='4' y1='10' x2='16' y2='10' transform='rotate(-45,10,10)' />
+	</svg>
 </div>
 
 <div id="rover" class="modal">
