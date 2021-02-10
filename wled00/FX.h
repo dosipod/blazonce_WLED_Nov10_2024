@@ -612,6 +612,7 @@ class WS2812FX {
     }
 
     void
+      deserializeMap(void),
       init(bool supportWhite, uint16_t countPixels, bool skipFirst),
       addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder),
       service(void),
