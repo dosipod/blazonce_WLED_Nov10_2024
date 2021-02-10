@@ -970,14 +970,6 @@ uint16_t WS2812FX::mode_running_color(void) {
   return running(SEGCOLOR(0), SEGCOLOR(1));
 }
 
-
-/*
- * Alternating red/green pixels running.
- */
-uint16_t WS2812FX::mode_merry_christmas(void) {
-  return running(RED, GREEN);
-}
-
 /*
  * Alternating red/white pixels running.
  */
@@ -3120,7 +3112,7 @@ typedef struct Tetris {
   uint32_t col;
 } tetris;
 
-uint16_t WS2812FX::mode_tetris(void) {
+uint16_t WS2812FX::mode_tetrix(void) {
 
   uint16_t dataSize = sizeof(tetris);
   if (!SEGENV.allocateData(dataSize)) return mode_static(); //allocation failed
@@ -3135,7 +3127,7 @@ uint16_t WS2812FX::mode_tetris(void) {
   }
   
   if (SEGENV.step == 0) {             //init
-    drop->speed = 0.0238 * (SEGMENT.speed ? (SEGMENT.speed>>3)+1 : random8(3,32)); // set speed
+    drop->speed = 0.0238 * (SEGMENT.speed ? (SEGMENT.speed>>3)+1 : random8(6,40)); // set speed
     drop->pos   = SEGLEN-1;           // start at end of segment
     drop->col   = color_from_palette(random8(0,15)<<4,false,false,0);     // limit color choices so there is enough HUE gap
     SEGENV.step = 1;                  // drop state (0 init, 1 forming, 2 falling)
@@ -3143,7 +3135,7 @@ uint16_t WS2812FX::mode_tetris(void) {
   }
   
   if (SEGENV.step == 1) {             // forming
-    if (random8()>>6) {               // random drop, 25% chance
+    if (random8()>>6) {               // random drop
       SEGENV.step = 2;                // fall
     }
   }
