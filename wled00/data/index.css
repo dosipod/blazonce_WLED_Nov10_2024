@@ -914,8 +914,11 @@ input[type=number]::-webkit-outer-spin-button {
 	width: 20px;
 	height: 20px;
 	stroke: var(--c-3);
-	stroke-width: 3px;
+	stroke-width: 2.5;
 	fill: var(--c-d);
+}
+.fndIcn circle {
+	stroke-width: 0;
 }
 
 div.fnd span {
