@@ -913,8 +913,9 @@ input[type=number]::-webkit-outer-spin-button {
 .fndIcn {
 	width: 20px;
 	height: 20px;
-	stroke: var(--c-e);
-	stroke-width: 3px;;
+	stroke: var(--c-3);
+	stroke-width: 3px;
+	fill: var(--c-d);
 }
 
 div.fnd span {
