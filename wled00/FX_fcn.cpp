@@ -110,9 +110,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
   deserializeMap();
 
   // we could skip this if we pass "this" pointer to bus->Begin()
-  #ifdef ESP8266_MULTISTRIP
   bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType, _stripCO);
-  #endif
   bus->Begin((NeoPixelType)ty, _lengthRaw);
 
   _segments[0].start = 0;
@@ -588,21 +586,13 @@ uint32_t WS2812FX::getLastShow(void) {
 }
 
 uint8_t WS2812FX::getColorOrder(uint8_t s) {
-  #ifdef ESP8266_MULTISTRIP
-  if (s >= MAX_NUMBER_OF_STRIPS) return -1;
+  if (s > MAX_NUMBER_OF_STRIPS) return -1;
   return _stripCO[s]; //bus->GetColorOrder(s);
-  #else
-  return _stripCO[0];
-  #endif
 }
 
 void WS2812FX::setColorOrder(uint8_t co, uint8_t s) {
-  #ifdef ESP8266_MULTISTRIP
-  if (s >= MAX_NUMBER_OF_STRIPS) return;
+  if (s > MAX_NUMBER_OF_STRIPS) return;
   bus->SetColorOrder(_stripCO[s]=co, s);
-  #else
-  bus->SetColorOrder(_stripCO[0]=co);
-  #endif
 }
 
 void WS2812FX::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t grouping, uint8_t spacing) {

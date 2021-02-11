@@ -4,67 +4,14 @@
 
 //PIN CONFIGURATION
 #ifndef LEDPIN
-#define LEDPIN 2  //strip pin. Any for ESP32, gpio2 or 3 is recommended for ESP8266 (gpio2/3 are labeled D4/RX on NodeMCU and Wemos)
+#define LEDPIN 2  // Legacy pin def required by some other portions of code. This pin is not used do drive LEDs.
 #endif
-//#define USE_APA102  // Uncomment for using APA102 LEDs.
-//#define USE_WS2801  // Uncomment for using WS2801 LEDs (make sure you have NeoPixelBus v2.5.6 or newer)
-//#define USE_LPD8806 // Uncomment for using LPD8806
-//#define USE_TM1814  // Uncomment for using TM1814 LEDs (make sure you have NeoPixelBus v2.5.7 or newer)
-//#define USE_P9813   // Uncomment for using P9813 LEDs (make sure you have NeoPixelBus v2.5.8 or newer)
 //#define WLED_USE_ANALOG_LEDS //Uncomment for using "dumb" PWM controlled LEDs (see pins below, default R: gpio5, G: 12, B: 15, W: 13)
 //#define WLED_USE_H801 //H801 controller. Please uncomment #define WLED_USE_ANALOG_LEDS as well
 //#define WLED_USE_5CH_LEDS  //5 Channel H801 for cold and warm white
 //#define WLED_USE_BWLT11
 //#define WLED_USE_SHOJO_PCB
-
-#ifndef BTNPIN
-#define BTNPIN  0  //button pin. Needs to have pullup (gpio0 recommended)
-#endif
-
-#ifndef TOUCHPIN
-//#define TOUCHPIN T0 //touch pin. Behaves the same as button. ESP32 only.
-#endif
-
-#ifndef WLED_DISABLE_INFRARED
-#ifndef IRPIN
-#define IRPIN  4  //infrared pin (-1 to disable)  MagicHome: 4, H801 Wifi: 0
-#endif
-#else
-#define IRPIN -1
-#endif
-
-#ifndef RLYPIN
-#define RLYPIN 12  //pin for relay, will be set HIGH if LEDs are on (-1 to disable). Also usable for standby leds, triggers,...
-#endif
-
-#ifndef AUXPIN
-#define AUXPIN -1  //debug auxiliary output pin (-1 to disable)
-#endif
-
-#ifndef RLYMDE
-#define RLYMDE  1  //mode for relay, 0: LOW if LEDs are on 1: HIGH if LEDs are on
-#endif
-
-//enable color order override for a specific range of the strip
-//This can be useful if you want to chain multiple strings with incompatible color order
-//#define COLOR_ORDER_OVERRIDE
-#define COO_MIN    0
-#define COO_MAX   35 //not inclusive, this would set the override for LEDs 0-34
-#define COO_ORDER COL_ORDER_GRB
-
 //END CONFIGURATION
-
-#if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
- #ifndef CLKPIN
-  #define CLKPIN 0
- #endif
- #ifndef DATAPIN
-  #define DATAPIN 2
- #endif
- #if BTNPIN == CLKPIN || BTNPIN == DATAPIN
-  #undef BTNPIN   // Deactivate button pin if it conflicts with one of the APA102 pins.
- #endif
-#endif
 
 #ifdef WLED_USE_ANALOG_LEDS
   //PWM pins - PINs 15,13,12,14 (W2 = 04)are used with H801 Wifi LED Controller
@@ -120,62 +67,40 @@
 
 //automatically uses the right driver method for each platform
 #ifdef ARDUINO_ARCH_ESP32
- #ifdef USE_APA102
-  #define PIXELMETHOD DotStarMethod
- #elif defined(USE_WS2801)
-  #define PIXELMETHOD NeoWs2801Method
- #elif defined(USE_LPD8806)
-  #define PIXELMETHOD Lpd8806Method
- #elif defined(USE_TM1814)
-  #define PIXELMETHOD NeoTm1814Method  
- #elif defined(USE_P9813)
-  #define PIXELMETHOD P9813Method  
- #else
   #define PIXELMETHOD NeoEsp32Rmt0Ws2812xMethod
- #endif
+  #define NeoPixelBrightnessBusGrb0  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt0Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb1  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt1Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb2  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt2Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb3  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt3Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb4  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt4Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb5  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt5Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb6  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt6Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrb7  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp32Rmt7Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw0 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt0Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw1 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt1Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw2 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt2Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw3 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt3Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw4 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt4Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw5 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt5Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw6 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt6Ws2812xMethod>
+  #define NeoPixelBrightnessBusGrbw7 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp32Rmt7Ws2812xMethod>
 #else //esp8266
- //autoselect the right method depending on strip pin
- #ifdef USE_APA102
-  #define PIXELMETHOD DotStarMethod
- #elif defined(USE_WS2801)
-  #define PIXELMETHOD NeoWs2801Method
- #elif defined(USE_LPD8806)
-  #define PIXELMETHOD Lpd8806Method
- #elif defined(USE_TM1814)
-  #define PIXELMETHOD NeoTm1814Method  
- #elif defined(USE_P9813)
-  #define PIXELMETHOD P9813Method  
- #elif LEDPIN == 2
-  #define PIXELMETHOD NeoEsp8266Uart1Ws2813Method //if you get an error here, try to change to NeoEsp8266UartWs2813Method or update Neopixelbus
- #elif LEDPIN == 3
-  #define PIXELMETHOD NeoEsp8266Dma800KbpsMethod
- #else
   #define PIXELMETHOD NeoEsp8266BitBang800KbpsMethod
-  #pragma message "Software BitBang will be used because of your selected LED pin. This may cause flicker. Use GPIO 2 or 3 for best results."
- #endif
+  #define NeoPixelBrightnessBusGrb0  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266BitBang800KbpsMethod>
+  #define NeoPixelBrightnessBusGrb1  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266Uart0Ws2813Method>
+  #define NeoPixelBrightnessBusGrb2  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266Uart1Ws2813Method>
+  #define NeoPixelBrightnessBusGrb3  NeoPixelBrightnessBus<NeoGrbFeature,NeoEsp8266Dma800KbpsMethod>
+  #define NeoPixelBrightnessBusGrbw0 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266BitBang800KbpsMethod>
+  #define NeoPixelBrightnessBusGrbw1 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266Uart0Ws2813Method>
+  #define NeoPixelBrightnessBusGrbw2 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266Uart1Ws2813Method>
+  #define NeoPixelBrightnessBusGrbw3 NeoPixelBrightnessBus<NeoGrbwFeature,NeoEsp8266Dma800KbpsMethod>
 #endif
-
-
-//you can now change the color order in the web settings
-#ifdef USE_APA102
- #define PIXELFEATURE3 DotStarBgrFeature
- #define PIXELFEATURE4 DotStarLbgrFeature
-#elif defined(USE_LPD8806)
- #define PIXELFEATURE3 Lpd8806GrbFeature 
- #define PIXELFEATURE4 Lpd8806GrbFeature 
-#elif defined(USE_WS2801)
- #define PIXELFEATURE3 NeoRbgFeature
- #define PIXELFEATURE4 NeoRbgFeature
-#elif defined(USE_TM1814)
-  #define PIXELFEATURE3 NeoWrgbTm1814Feature
-  #define PIXELFEATURE4 NeoWrgbTm1814Feature
-#elif defined(USE_P9813)
- #define PIXELFEATURE3 P9813BgrFeature 
- #define PIXELFEATURE4 NeoGrbwFeature   
-#else
- #define PIXELFEATURE3 NeoGrbFeature
- #define PIXELFEATURE4 NeoGrbwFeature
-#endif
+#define NeoPixelBrightnessBusWS2801  NeoPixelBrightnessBus<NeoRbgFeature,NeoWs2801Method>
+#define NeoPixelBrightnessBusAPA102  NeoPixelBrightnessBus<DotStarBgrFeature,DotStarMethod>
+#define NeoPixelBrightnessBusAPA102W NeoPixelBrightnessBus<DotStarLbgrFeature,DotStarMethod>
+#define NeoPixelBrightnessBusLPD8806 NeoPixelBrightnessBus<Lpd8806GrbFeature,Lpd8806Method>
+#define NeoPixelBrightnessBusTM1814  NeoPixelBrightnessBus<NeoWrgbTm1814Feature,NeoTm1814Method>
+#define NeoPixelBrightnessBusP9813   NeoPixelBrightnessBus<P9813BgrFeature,P9813Method>
 
 
 #include <NeoPixelBrightnessBus.h>
@@ -193,12 +118,14 @@ class NeoPixelWrapper
 {
 public:
   NeoPixelWrapper() :
-    // initialize each member to null
-    _pGrb(NULL),
-    _pGrbw(NULL),
-    _type(NeoPixelType_None)
+    _type(NeoPixelType_None),
+    pixelStrips(0)
   {
-
+    for (uint8_t i=0; i < MAX_NUMBER_OF_STRIPS; i++ )
+    {
+      _pGRB[i] = NULL;
+      pixelColorOrder[i]=0;
+    }
   }
 
   ~NeoPixelWrapper()
@@ -206,30 +133,138 @@ public:
     cleanup();
   }
 
-  void Begin(NeoPixelType type, uint16_t countPixels)
+  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType, uint8_t *colorOrder)
   {
     cleanup();
-    _type = type;
 
-    switch (_type)
+    uint16_t totalPixels = 0;
+    pixelStrips = numStrips;
+    for (uint8_t idx = 0; idx < numStrips; idx++)
     {
-      case NeoPixelType_Grb:
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
-        _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, CLKPIN, DATAPIN);
-      #else
-        _pGrb = new NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>(countPixels, LEDPIN);
-      #endif
-        _pGrb->Begin();
-      break;
+      pixelType[idx] = ledType[idx];
+      pixelCounts[idx] = stripLen[idx];
+      pixelStripPins[idx] = stripPin[idx];
+      pixelStripPinsClk[idx] = stripPinClk[idx];
+      pixelStripStartIdx[idx] = totalPixels;
+      pixelColorOrder[idx] = colorOrder[idx];
+      totalPixels += pixelCounts[idx];
+    }
+  }
 
-      case NeoPixelType_Grbw:
-      #if defined(USE_APA102) || defined(USE_WS2801) || defined(USE_LPD8806) || defined(USE_P9813)
-        _pGrbw = new NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>(countPixels, CLKPIN, DATAPIN);
-      #else
-        _pGrbw = new NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>(countPixels, LEDPIN);
-      #endif
-        _pGrbw->Begin();
-      break;
+  void Begin(NeoPixelType type, uint16_t pixelCount)
+  {
+    cleanup();
+
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
+    {
+      switch (pixelType[idx]) {
+        case TYPE_WS2812_RGB:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb0(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->Begin(); break;
+            case 1:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb1(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->Begin(); break;
+            case 2:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb2(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->Begin(); break;
+            case 3:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb3(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->Begin(); break;
+            case 4:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb4(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb4*)_pGRB[idx])->Begin(); break;
+            case 5:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb5(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb5*)_pGRB[idx])->Begin(); break;
+            case 6:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb6(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb6*)_pGRB[idx])->Begin(); break;
+            case 7:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb7(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb7*)_pGRB[idx])->Begin(); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb1(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->Begin(); break;
+            case 2:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb2(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->Begin(); break;
+            case 3:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb3(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->Begin(); break;
+            default:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrb0(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->Begin(); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_SK6812_RGBW:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw0(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->Begin(); break;
+            case 1:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw1(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->Begin(); break;
+            case 2:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw2(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->Begin(); break;
+            case 3:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw3(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->Begin(); break;
+            case 4:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw4(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw4*)_pGRB[idx])->Begin(); break;
+            case 5:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw5(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw5*)_pGRB[idx])->Begin(); break;
+            case 6:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw6(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw6*)_pGRB[idx])->Begin(); break;
+            case 7:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw7(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw7*)_pGRB[idx])->Begin(); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw1(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->Begin(); break;
+            case 2:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw2(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->Begin(); break;
+            case 3:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw3(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->Begin(); break;
+            default:
+              _pGRB[idx] = (void*) new NeoPixelBrightnessBusGrbw0(pixelCounts[idx], pixelStripPins[idx]); ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->Begin(); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_WS2801:
+          _pGRB[idx] = (void*) new NeoPixelBrightnessBusWS2801(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
+          ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->Begin();
+        break;
+
+        case TYPE_APA102:
+          if (_type==NeoPixelType_Grb) {
+            _pGRB[idx] = (void*) new NeoPixelBrightnessBusAPA102(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
+            ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->Begin();
+          } else {
+            _pGRB[idx] = (void*) new NeoPixelBrightnessBusAPA102W(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
+            ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->Begin();
+          }
+        break;
+
+        case TYPE_LPD8806:
+          _pGRB[idx] = (void*) new NeoPixelBrightnessBusLPD8806(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
+          ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->Begin();
+        break;
+
+        case TYPE_P9813:
+          _pGRB[idx] = (void*) new NeoPixelBrightnessBusP9813(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
+          ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->Begin();
+        break;
+
+        case TYPE_TM1814:
+          _pGRB[idx] = (void*) new NeoPixelBrightnessBusTM1814(pixelCounts[idx], pixelStripPins[idx]);
+          ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->Begin();
+        break;
+
+      }
     }
 
     #ifdef WLED_USE_ANALOG_LEDS 
@@ -268,69 +303,318 @@ public:
   }
 
 #ifdef WLED_USE_ANALOG_LEDS      
-    void SetRgbwPwm(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t w2=0)
-    {
-      #ifdef ARDUINO_ARCH_ESP32
-        ledcWrite(0, r);
-        ledcWrite(1, g);
-        ledcWrite(2, b);
-        switch (_type) {
-          case NeoPixelType_Grb:                                                  break;
-          #ifdef WLED_USE_5CH_LEDS
-            case NeoPixelType_Grbw: ledcWrite(3, w); ledcWrite(4, w2);            break;
-          #else
-            case NeoPixelType_Grbw: ledcWrite(3, w);                              break;
-          #endif
-        }        
-      #else   // ESP8266
-        analogWrite(RPIN, r);
-        analogWrite(GPIN, g);
-        analogWrite(BPIN, b);
-        switch (_type) {
-          case NeoPixelType_Grb:                                                  break;
-          #ifdef WLED_USE_5CH_LEDS
-            case NeoPixelType_Grbw: analogWrite(WPIN, w); analogWrite(W2PIN, w2); break;
-          #else
-            case NeoPixelType_Grbw: analogWrite(WPIN, w);                         break;
-          #endif
-        }
-      #endif 
-    }
+  void SetRgbwPwm(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t w2=0)
+  {
+    #ifdef ARDUINO_ARCH_ESP32
+      ledcWrite(0, r);
+      ledcWrite(1, g);
+      ledcWrite(2, b);
+      switch (_type) {
+        case NeoPixelType_Grb:                                                  break;
+        #ifdef WLED_USE_5CH_LEDS
+          case NeoPixelType_Grbw: ledcWrite(3, w); ledcWrite(4, w2);            break;
+        #else
+          case NeoPixelType_Grbw: ledcWrite(3, w);                              break;
+        #endif
+      }        
+    #else   // ESP8266
+      analogWrite(RPIN, r);
+      analogWrite(GPIN, g);
+      analogWrite(BPIN, b);
+      switch (_type) {
+        case NeoPixelType_Grb:                                                  break;
+        #ifdef WLED_USE_5CH_LEDS
+          case NeoPixelType_Grbw: analogWrite(WPIN, w); analogWrite(W2PIN, w2); break;
+        #else
+          case NeoPixelType_Grbw: analogWrite(WPIN, w);                         break;
+        #endif
+      }
+    #endif 
+  }
 #endif
 
   void Show()
   {
-    switch (_type)
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      case NeoPixelType_Grb:  _pGrb->Show();  break;
-      case NeoPixelType_Grbw: _pGrbw->Show(); break;
+      switch (pixelType[idx]) {
+        case TYPE_WS2812_RGB:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->Show(); break;
+            case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->Show(); break;
+            case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->Show(); break;
+            case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->Show(); break;
+            case 4: ((NeoPixelBrightnessBusGrb4*)_pGRB[idx])->Show(); break;
+            case 5: ((NeoPixelBrightnessBusGrb5*)_pGRB[idx])->Show(); break;
+            case 6: ((NeoPixelBrightnessBusGrb6*)_pGRB[idx])->Show(); break;
+            case 7: ((NeoPixelBrightnessBusGrb7*)_pGRB[idx])->Show(); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->Show(); break;
+            case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->Show(); break;
+            case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->Show(); break;
+            default: ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->Show(); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_SK6812_RGBW:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->Show(); break;
+            case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->Show(); break;
+            case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->Show(); break;
+            case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->Show(); break;
+            case 4: ((NeoPixelBrightnessBusGrbw4*)_pGRB[idx])->Show(); break;
+            case 5: ((NeoPixelBrightnessBusGrbw5*)_pGRB[idx])->Show(); break;
+            case 6: ((NeoPixelBrightnessBusGrbw6*)_pGRB[idx])->Show(); break;
+            case 7: ((NeoPixelBrightnessBusGrbw7*)_pGRB[idx])->Show(); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->Show(); break;
+            case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->Show(); break;
+            case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->Show(); break;
+            default: ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->Show(); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_WS2801:
+          ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->Show();
+        break;
+
+        case TYPE_APA102:
+          if (_type==NeoPixelType_Grb) {
+            ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->Show();
+          } else {
+            ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->Show();
+          }
+        break;
+
+        case TYPE_LPD8806:
+          ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->Show();
+        break;
+
+        case TYPE_P9813:
+          ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->Show();
+        break;
+
+        case TYPE_TM1814:
+          ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->Show();
+        break;
+
+      }
     }
   }
 
-  /** 
-   * This will return true if enough time has passed since the last time Show() was called. 
-   * This also means that calling Show() will not cause any undue waiting. If the method for 
-   * the defined bus is hardware that sends asynchronously, then call CanShow() will let 
-   * you know if it has finished sending the data from the last Show().
-   */
   bool CanShow()
   {
-    switch (_type)
+    bool canShow = true;
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
-      case NeoPixelType_Grb:  return _pGrb->CanShow();
-      case NeoPixelType_Grbw: return _pGrbw->CanShow();
-      default: return true;
+      switch (pixelType[idx]) {
+        case TYPE_WS2812_RGB:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: canShow &= ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->CanShow(); break;
+            case 1: canShow &= ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->CanShow(); break;
+            case 2: canShow &= ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->CanShow(); break;
+            case 3: canShow &= ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->CanShow(); break;
+            case 4: canShow &= ((NeoPixelBrightnessBusGrb4*)_pGRB[idx])->CanShow(); break;
+            case 5: canShow &= ((NeoPixelBrightnessBusGrb5*)_pGRB[idx])->CanShow(); break;
+            case 6: canShow &= ((NeoPixelBrightnessBusGrb6*)_pGRB[idx])->CanShow(); break;
+            case 7: canShow &= ((NeoPixelBrightnessBusGrb7*)_pGRB[idx])->CanShow(); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: canShow &= ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->CanShow(); break;
+            case 2: canShow &= ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->CanShow(); break;
+            case 3: canShow &= ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->CanShow(); break;
+            default: canShow &= ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->CanShow(); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_SK6812_RGBW:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: canShow &= ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->CanShow(); break;
+            case 1: canShow &= ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->CanShow(); break;
+            case 2: canShow &= ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->CanShow(); break;
+            case 3: canShow &= ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->CanShow(); break;
+            case 4: canShow &= ((NeoPixelBrightnessBusGrbw4*)_pGRB[idx])->CanShow(); break;
+            case 5: canShow &= ((NeoPixelBrightnessBusGrbw5*)_pGRB[idx])->CanShow(); break;
+            case 6: canShow &= ((NeoPixelBrightnessBusGrbw6*)_pGRB[idx])->CanShow(); break;
+            case 7: canShow &= ((NeoPixelBrightnessBusGrbw7*)_pGRB[idx])->CanShow(); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: canShow &= ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->CanShow(); break;
+            case 2: canShow &= ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->CanShow(); break;
+            case 3: canShow &= ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->CanShow(); break;
+            default: canShow &= ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->CanShow(); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_WS2801:
+          canShow &= ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->CanShow();
+        break;
+
+        case TYPE_APA102:
+          if (_type==NeoPixelType_Grb) {
+            canShow &= ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->CanShow();
+          } else {
+            canShow &= ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->CanShow();
+          }
+        break;
+
+        case TYPE_LPD8806:
+          canShow &= ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->CanShow();
+        break;
+
+        case TYPE_P9813:
+          canShow &= ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->CanShow();
+        break;
+
+        case TYPE_TM1814:
+          canShow &= ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->CanShow();
+        break;
+
+      }
+    }
+    return canShow;
+  }
+
+  uint8_t GetStripFromPixel(uint16_t indexPixel)
+  {
+    // figure out which strip this pixel index is on
+    uint8_t stripIdx = 0;
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
+      if (indexPixel >= pixelStripStartIdx[idx])
+        stripIdx = idx;
+      else
+        break;
+    return stripIdx;
+  }
+
+  void SetPixelColorRaw(uint16_t indexPixel, RgbwColor c)
+  {
+    // figure out which strip this pixel index is on
+    uint8_t stripIdx = GetStripFromPixel(indexPixel);
+
+    // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
+    indexPixel -= pixelStripStartIdx[stripIdx];
+    RgbColor rgb = RgbColor(c.R, c.G, c.B);
+
+    switch (pixelType[stripIdx]) {
+      case TYPE_WS2812_RGB:
+      {
+        #ifdef ARDUINO_ARCH_ESP32
+        switch (stripIdx)
+        {
+          case 0: ((NeoPixelBrightnessBusGrb0*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 4: ((NeoPixelBrightnessBusGrb4*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 5: ((NeoPixelBrightnessBusGrb5*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 6: ((NeoPixelBrightnessBusGrb6*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 7: ((NeoPixelBrightnessBusGrb7*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+        }
+        #else
+        switch (pixelStripPins[stripIdx])
+        {
+          case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+          default: ((NeoPixelBrightnessBusGrb0*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb); break;
+        }
+        #endif
+      }
+      break;
+
+      case TYPE_SK6812_RGBW:
+      {
+        #ifdef ARDUINO_ARCH_ESP32
+        switch (stripIdx)
+        {
+          case 0: ((NeoPixelBrightnessBusGrbw0*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 4: ((NeoPixelBrightnessBusGrbw4*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 5: ((NeoPixelBrightnessBusGrbw5*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 6: ((NeoPixelBrightnessBusGrbw6*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 7: ((NeoPixelBrightnessBusGrbw7*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+        }
+        #else
+        switch (pixelStripPins[stripIdx])
+        {
+          case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+          default: ((NeoPixelBrightnessBusGrbw0*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c); break;
+        }
+        #endif
+      }
+      break;
+
+      case TYPE_WS2801:
+        ((NeoPixelBrightnessBusWS2801*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
+      break;
+
+      case TYPE_APA102:
+        if (_type==NeoPixelType_Grb) {
+          ((NeoPixelBrightnessBusAPA102*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
+        } else {
+          ((NeoPixelBrightnessBusAPA102W*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c);
+        }
+      break;
+
+      case TYPE_LPD8806:
+        ((NeoPixelBrightnessBusLPD8806*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
+      break;
+
+      case TYPE_P9813:
+        ((NeoPixelBrightnessBusP9813*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
+      break;
+
+      case TYPE_TM1814:
+        ((NeoPixelBrightnessBusTM1814*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c);
+      break;
+
     }
   }
 
   void SetPixelColor(uint16_t indexPixel, RgbwColor c)
   {
+    /*
+    Set pixel color with necessary color order conversion.
+    */
+
     RgbwColor col;
 
-    uint8_t co = _colorOrder;
-    #ifdef COLOR_ORDER_OVERRIDE
-    if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
-    #endif
+    uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
 
     //reorder channels to selected order
     switch (co)
@@ -344,61 +628,201 @@ public:
     }
     col.W = c.W;
 
-    switch (_type) {
-      case NeoPixelType_Grb: {
-        _pGrb->SetPixelColor(indexPixel, RgbColor(col.R,col.G,col.B));
-      }
-      break;
-      case NeoPixelType_Grbw: {
-        #if defined(USE_LPD8806) || defined(USE_WS2801)
-        _pGrbw->SetPixelColor(indexPixel, RgbColor(col.R,col.G,col.B));
-        #else
-        _pGrbw->SetPixelColor(indexPixel, col);
-        #endif
-      }
-      break;
-    } 
+    SetPixelColorRaw(indexPixel, col);
   }
 
   void SetBrightness(byte b)
   {
-    switch (_type) {
-      case NeoPixelType_Grb: _pGrb->SetBrightness(b);   break;
-      case NeoPixelType_Grbw:_pGrbw->SetBrightness(b);  break;
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
+    {
+      switch (pixelType[idx]) {
+        case TYPE_WS2812_RGB:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->SetBrightness(b); break;
+            case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->SetBrightness(b); break;
+            case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->SetBrightness(b); break;
+            case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->SetBrightness(b); break;
+            case 4: ((NeoPixelBrightnessBusGrb4*)_pGRB[idx])->SetBrightness(b); break;
+            case 5: ((NeoPixelBrightnessBusGrb5*)_pGRB[idx])->SetBrightness(b); break;
+            case 6: ((NeoPixelBrightnessBusGrb6*)_pGRB[idx])->SetBrightness(b); break;
+            case 7: ((NeoPixelBrightnessBusGrb7*)_pGRB[idx])->SetBrightness(b); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: ((NeoPixelBrightnessBusGrb1*)_pGRB[idx])->SetBrightness(b); break;
+            case 2: ((NeoPixelBrightnessBusGrb2*)_pGRB[idx])->SetBrightness(b); break;
+            case 3: ((NeoPixelBrightnessBusGrb3*)_pGRB[idx])->SetBrightness(b); break;
+            default: ((NeoPixelBrightnessBusGrb0*)_pGRB[idx])->SetBrightness(b); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_SK6812_RGBW:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->SetBrightness(b); break;
+            case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->SetBrightness(b); break;
+            case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->SetBrightness(b); break;
+            case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->SetBrightness(b); break;
+            case 4: ((NeoPixelBrightnessBusGrbw4*)_pGRB[idx])->SetBrightness(b); break;
+            case 5: ((NeoPixelBrightnessBusGrbw5*)_pGRB[idx])->SetBrightness(b); break;
+            case 6: ((NeoPixelBrightnessBusGrbw6*)_pGRB[idx])->SetBrightness(b); break;
+            case 7: ((NeoPixelBrightnessBusGrbw7*)_pGRB[idx])->SetBrightness(b); break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx])->SetBrightness(b); break;
+            case 2: ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx])->SetBrightness(b); break;
+            case 3: ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx])->SetBrightness(b); break;
+            default: ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx])->SetBrightness(b); break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_WS2801:
+          ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->SetBrightness(b);
+        break;
+
+        case TYPE_APA102:
+          if (_type==NeoPixelType_Grb) {
+            ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->SetBrightness(b);
+          } else {
+            ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->SetBrightness(b);
+          }
+        break;
+
+        case TYPE_LPD8806:
+          ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->SetBrightness(b);
+        break;
+
+        case TYPE_P9813:
+          ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->SetBrightness(b);
+        break;
+
+        case TYPE_TM1814:
+          ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->SetBrightness(b);
+        break;
+
+      }
     }
   }
 
-  void SetColorOrder(byte colorOrder) {
-    _colorOrder = colorOrder;
-  }
-
-  uint8_t GetColorOrder() {
-    return _colorOrder;
-  }
-
-  RgbwColor GetPixelColorRaw(uint16_t indexPixel) const
+  void SetColorOrder(byte colorOrder, uint8_t strip=0)
   {
-    switch (_type) {
-      case NeoPixelType_Grb:  return _pGrb->GetPixelColor(indexPixel);  break;
-      case NeoPixelType_Grbw: return _pGrbw->GetPixelColor(indexPixel); break;
+    if (strip>pixelStrips) return;
+    pixelColorOrder[strip] = colorOrder;
+  }
+
+  uint8_t GetColorOrder(uint8_t strip=0)
+  {
+    if (strip>pixelStrips) return 0;
+    return pixelColorOrder[strip];
+  }
+
+  RgbwColor GetPixelColorRaw(uint16_t indexPixel)
+  {
+    // figure out which strip this pixel index is on
+    uint8_t stripIdx = GetStripFromPixel(indexPixel);
+
+    // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
+    indexPixel -= pixelStripStartIdx[stripIdx];
+
+    switch (pixelType[stripIdx]) {
+      case TYPE_WS2812_RGB:
+      {
+        #ifdef ARDUINO_ARCH_ESP32
+        switch (stripIdx)
+        {
+          case 0: return ((NeoPixelBrightnessBusGrb0*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 1: return ((NeoPixelBrightnessBusGrb1*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 2: return ((NeoPixelBrightnessBusGrb2*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 3: return ((NeoPixelBrightnessBusGrb3*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 4: return ((NeoPixelBrightnessBusGrb4*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 5: return ((NeoPixelBrightnessBusGrb5*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 6: return ((NeoPixelBrightnessBusGrb6*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 7: return ((NeoPixelBrightnessBusGrb7*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+        }
+        #else
+        switch (pixelStripPins[stripIdx])
+        {
+          case 1: return ((NeoPixelBrightnessBusGrb1*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 2: return ((NeoPixelBrightnessBusGrb2*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 3: return ((NeoPixelBrightnessBusGrb3*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          default: return ((NeoPixelBrightnessBusGrb0*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+        }
+        #endif
+      }
+      break;
+
+      case TYPE_SK6812_RGBW:
+      {
+        #ifdef ARDUINO_ARCH_ESP32
+        switch (stripIdx)
+        {
+          case 0: return ((NeoPixelBrightnessBusGrbw0*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 1: return ((NeoPixelBrightnessBusGrbw1*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 2: return ((NeoPixelBrightnessBusGrbw2*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 3: return ((NeoPixelBrightnessBusGrbw3*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 4: return ((NeoPixelBrightnessBusGrbw4*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 5: return ((NeoPixelBrightnessBusGrbw5*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 6: return ((NeoPixelBrightnessBusGrbw6*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 7: return ((NeoPixelBrightnessBusGrbw7*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+        }
+        #else
+        switch (pixelStripPins[stripIdx])
+        {
+          case 1: return ((NeoPixelBrightnessBusGrbw1*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 2: return ((NeoPixelBrightnessBusGrbw2*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          case 3: return ((NeoPixelBrightnessBusGrbw3*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+          default: return ((NeoPixelBrightnessBusGrbw0*)_pGRB[stripIdx])->GetPixelColor(indexPixel); break;
+        }
+        #endif
+      }
+      break;
+
+      case TYPE_WS2801:
+        return ((NeoPixelBrightnessBusWS2801*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
+      break;
+
+      case TYPE_APA102:
+        if (_type==NeoPixelType_Grb) {
+          return ((NeoPixelBrightnessBusAPA102*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
+        } else {
+          return ((NeoPixelBrightnessBusAPA102W*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
+        }
+      break;
+
+      case TYPE_LPD8806:
+        return ((NeoPixelBrightnessBusLPD8806*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
+      break;
+
+      case TYPE_P9813:
+        return ((NeoPixelBrightnessBusP9813*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
+      break;
+
+      case TYPE_TM1814:
+        return ((NeoPixelBrightnessBusTM1814*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
+      break;
+
     }
     return 0;
   }
 
-  // NOTE:  Due to feature differences, some support RGBW but the method name
+  // NOTE: Due to feature differences, some support RGBW but the method name
   // here needs to be unique, thus GetPixeColorRgbw
-  uint32_t GetPixelColorRgbw(uint16_t indexPixel) const
+  uint32_t GetPixelColorRgbw(uint16_t indexPixel)
   {
-    RgbwColor col(0,0,0,0);
-    switch (_type) {
-      case NeoPixelType_Grb:  col = _pGrb->GetPixelColor(indexPixel);  break;
-      case NeoPixelType_Grbw: col = _pGrbw->GetPixelColor(indexPixel); break;
-    }
-
-    uint8_t co = _colorOrder;
-    #ifdef COLOR_ORDER_OVERRIDE
-    if (indexPixel >= COO_MIN && indexPixel < COO_MAX) co = COO_ORDER;
-    #endif
+    RgbwColor col = GetPixelColorRaw(indexPixel);
+    uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
 
     switch (co)
     {
@@ -410,33 +834,104 @@ public:
       case  4: return ((col.W << 24) | (col.R << 8) | (col.B << 16) | (col.G)); //4 = BGR
       case  5: return ((col.W << 24) | (col.G << 8) | (col.B << 16) | (col.R)); //5 = GBR
     }
+
     return 0;
   }
-
-  uint8_t* GetPixels(void)
-  {
-    switch (_type) {
-      case NeoPixelType_Grb:  return _pGrb->Pixels();  break;
-      case NeoPixelType_Grbw: return _pGrbw->Pixels(); break;
-    }
-    return 0;
-  }
-
-
+  
 private:
   NeoPixelType _type;
+  byte      pixelColorOrder[MAX_NUMBER_OF_STRIPS];
+  uint8_t   pixelStrips;                              // number of strips
+  uint8_t   pixelType[MAX_NUMBER_OF_STRIPS];          // LED pixel type
+  uint16_t  pixelCounts[MAX_NUMBER_OF_STRIPS];        // number of pixels on each strip
+  int8_t    pixelStripPins[MAX_NUMBER_OF_STRIPS];     // strip GPIO pin
+  int8_t    pixelStripPinsClk[MAX_NUMBER_OF_STRIPS];  // strip GPIO pin
+  uint16_t  pixelStripStartIdx[MAX_NUMBER_OF_STRIPS]; // start index in a single virtual strip
 
-  // have a member for every possible type
-  NeoPixelBrightnessBus<PIXELFEATURE3,PIXELMETHOD>*  _pGrb;
-  NeoPixelBrightnessBus<PIXELFEATURE4,PIXELMETHOD>* _pGrbw;
-
-  byte _colorOrder = 0;
+  void *_pGRB[MAX_NUMBER_OF_STRIPS];
 
   void cleanup()
   {
-    switch (_type) {
-      case NeoPixelType_Grb:  delete _pGrb ; _pGrb  = NULL; break;
-      case NeoPixelType_Grbw: delete _pGrbw; _pGrbw = NULL; break;
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
+    {
+      switch (pixelType[idx]) {
+        case TYPE_WS2812_RGB:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: delete ((NeoPixelBrightnessBusGrb0*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 1: delete ((NeoPixelBrightnessBusGrb1*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 2: delete ((NeoPixelBrightnessBusGrb2*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 3: delete ((NeoPixelBrightnessBusGrb3*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 4: delete ((NeoPixelBrightnessBusGrb4*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 5: delete ((NeoPixelBrightnessBusGrb5*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 6: delete ((NeoPixelBrightnessBusGrb6*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 7: delete ((NeoPixelBrightnessBusGrb7*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: delete ((NeoPixelBrightnessBusGrb1*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 2: delete ((NeoPixelBrightnessBusGrb2*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 3: delete ((NeoPixelBrightnessBusGrb3*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            default: delete ((NeoPixelBrightnessBusGrb0*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_SK6812_RGBW:
+        {
+          #ifdef ARDUINO_ARCH_ESP32
+          switch (idx)
+          {
+            case 0: delete ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 1: delete ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 2: delete ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 3: delete ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 4: delete ((NeoPixelBrightnessBusGrbw4*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 5: delete ((NeoPixelBrightnessBusGrbw5*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 6: delete ((NeoPixelBrightnessBusGrbw6*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 7: delete ((NeoPixelBrightnessBusGrbw7*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+          }
+          #else
+          switch (pixelStripPins[idx])
+          {
+            case 1: delete ((NeoPixelBrightnessBusGrbw1*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 2: delete ((NeoPixelBrightnessBusGrbw2*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            case 3: delete ((NeoPixelBrightnessBusGrbw3*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+            default: delete ((NeoPixelBrightnessBusGrbw0*)_pGRB[idx]); _pGRB[idx] = NULL; break;
+          }
+          #endif
+        }
+        break;
+
+        case TYPE_WS2801:
+          delete ((NeoPixelBrightnessBusWS2801*)_pGRB[idx]); _pGRB[idx] = NULL;
+        break;
+
+        case TYPE_APA102:
+          if (_type==NeoPixelType_Grb) {
+            delete ((NeoPixelBrightnessBusAPA102*)_pGRB[idx]); _pGRB[idx] = NULL;
+          } else {
+            delete ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx]); _pGRB[idx] = NULL;
+          }
+        break;
+
+        case TYPE_LPD8806:
+          delete ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx]); _pGRB[idx] = NULL;
+        break;
+
+        case TYPE_P9813:
+          delete ((NeoPixelBrightnessBusP9813*)_pGRB[idx]); _pGRB[idx] = NULL;
+        break;
+
+        case TYPE_TM1814:
+          delete ((NeoPixelBrightnessBusTM1814*)_pGRB[idx]); _pGRB[idx] = NULL;
+        break;
+
+      }
     }
   }
 };
