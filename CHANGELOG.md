@@ -2,6 +2,20 @@
 
 ### Development versions after 0.11.1 release
 
+#### Build 2102110
+
+-   Catching up on additions to official WLED :)
+-   Dynamic/runtime multi-strip support (no more recompiling if you want different pins or different number of LEDs)
+-   Dynamic/runtime selection for relay, AUX and IR pins
+-   Enhanced UI with searchable palettes and effects
+-   Autodiscovery of other WLED nodes on the network (so you don't need to remember their names or IP addresses, Info page)
+-   Increased maximum number of segments for ESP8266 (up to 13)
+-   Dynamic/runtime configurable LED mapping for custom LED arrangement (via `ledmap.json` file using `{"map":[<comma separated LED order>]}`)
+-   Randomisation of playlists (if the "repeats" is equal to -1)
+-   Proper handling of empty playlists (causes playlist to stop)
+-   Memory and speed optimisations
+-   And last but not least ... all of the latest additions from `master` branch of WLED including my very own Tetrix effect. ;)
+
 #### Build 2101130
 
 -   Added color transitions for all segments and slots and for segment brightness
