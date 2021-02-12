@@ -190,9 +190,6 @@ function onLoad() {
 	for (var i = 0; i < cd.length; i++) {
 		cd[i].style.backgroundColor = "rgb(0, 0, 0)";
 	}
-	var icn = d.getElementById('clnIcn').innerHTML;
-	var fnd = d.getElementsByName('clnBtn');
-	for (var i=0; i<fnd.length; i++) fnd[i].innerHTML = icn;
 	selectSlot(0);
 	updateTablinks(0);
 	resetUtil();
