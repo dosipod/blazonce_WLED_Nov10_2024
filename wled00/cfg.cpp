@@ -99,6 +99,7 @@ void deserializeConfig() {
   CJSON(strip.reverseMode, hw_led[F("rev")]);
   CJSON(strip.rgbwMode, hw_led[F("rgbwm")]);
 
+  useRGBW = skipFirstLed = false;
   strip.numStrips = 0;
   int8_t pins[2] = {-1,-1};
   JsonVariant strVar = hw_led["ins"];
@@ -111,6 +112,8 @@ void deserializeConfig() {
     uint8_t s=0;
     for ( JsonObject elm : elms ) {
       if (s>=MAX_NUMBER_OF_STRIPS) break;
+      uint16_t len = elm[F("len")];
+      if (ledCount+len > MAX_LEDS || len==0) break;  // zero length or we reached max. number of LEDs, just stop
       pins[0] = elm[F("pin")][0];
       if (pins[0]>=0 && pinManager.allocatePin(pins[0])) {
         if (elm[F("pin")].size()==2) {
@@ -123,12 +126,10 @@ void deserializeConfig() {
       } else {
         break; // pin not ok
       }
-      uint16_t len = elm[F("len")];
       uint8_t co = elm[F("order")];
-      skipFirstLed = elm[F("skip")]; // 0
+      skipFirstLed |= (bool) elm[F("skip")]; // if skipping, skip all 1st LEDs
       uint8_t type = elm[F("type")];
-      useRGBW = ((type == TYPE_SK6812_RGBW) || type == TYPE_TM1814);
-      if (len==0) break;
+      useRGBW |= ((type == TYPE_SK6812_RGBW) || type == TYPE_TM1814); // if one strip is RGBW all are considered RGBW
       ledCount += len;
       strip.addLEDs(type, pins, len, co);
       s++;
@@ -139,7 +140,6 @@ void deserializeConfig() {
       strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
     }
   }
-  if (ledCount > MAX_LEDS) ledCount = MAX_LEDS;
 
   JsonObject hw_btn_ins_0 = hw[F("btn")][F("ins")][0];
   CJSON(buttonEnabled, hw_btn_ins_0[F("type")]);

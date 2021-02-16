@@ -133,7 +133,7 @@ public:
     cleanup();
   }
 
-  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType, uint8_t *colorOrder)
+  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType, uint8_t *colorOrder, uint8_t skipFirst)
   {
     cleanup();
 
@@ -142,7 +142,7 @@ public:
     for (uint8_t idx = 0; idx < numStrips; idx++)
     {
       pixelType[idx] = ledType[idx];
-      pixelCounts[idx] = stripLen[idx];
+      pixelCounts[idx] = stripLen[idx] + skipFirst;
       pixelStripPins[idx] = stripPin[idx];
       pixelStripPinsClk[idx] = stripPinClk[idx];
       pixelStripStartIdx[idx] = totalPixels;
@@ -151,10 +151,11 @@ public:
     }
   }
 
-  void Begin(NeoPixelType type, uint16_t pixelCount)
+  void Begin(NeoPixelType type)
   {
     cleanup();
 
+    _type = type;
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
       switch (pixelType[idx]) {
@@ -265,6 +266,9 @@ public:
         break;
 
       }
+
+      // clear potential sacrificial pixels (they may never get updated again)
+      //SetPixelColorRaw(pixelStripStartIdx[idx], RgbwColor(0,0,0,0));
     }
 
     #ifdef WLED_USE_ANALOG_LEDS 
@@ -505,22 +509,10 @@ public:
     return canShow;
   }
 
-  uint8_t GetStripFromPixel(uint16_t indexPixel)
-  {
-    // figure out which strip this pixel index is on
-    uint8_t stripIdx = 0;
-    for (uint8_t idx = 0; idx < pixelStrips; idx++)
-      if (indexPixel >= pixelStripStartIdx[idx])
-        stripIdx = idx;
-      else
-        break;
-    return stripIdx;
-  }
-
   void SetPixelColorRaw(uint16_t indexPixel, RgbwColor c)
   {
     // figure out which strip this pixel index is on
-    uint8_t stripIdx = GetStripFromPixel(indexPixel);
+    uint8_t stripIdx = GetStripFromRealPixel(indexPixel);
 
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
@@ -606,7 +598,7 @@ public:
     }
   }
 
-  void SetPixelColor(uint16_t indexPixel, RgbwColor c)
+  void SetPixelColor(uint16_t indexPixel, RgbwColor c, uint8_t skipAmount)
   {
     /*
     Set pixel color with necessary color order conversion.
@@ -614,7 +606,10 @@ public:
 
     RgbwColor col;
 
-    uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
+    // take into account sacrificial pixels
+    indexPixel = GetRealPixelIndex(indexPixel, skipAmount);
+
+    uint8_t co = pixelColorOrder[GetStripFromRealPixel(indexPixel)];
 
     //reorder channels to selected order
     switch (co)
@@ -728,10 +723,11 @@ public:
     return pixelColorOrder[strip];
   }
 
+  // get real (physical) pixel color (including sacrificial pixels)
   RgbwColor GetPixelColorRaw(uint16_t indexPixel)
   {
     // figure out which strip this pixel index is on
-    uint8_t stripIdx = GetStripFromPixel(indexPixel);
+    uint8_t stripIdx = GetStripFromRealPixel(indexPixel);
 
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
@@ -819,10 +815,13 @@ public:
 
   // NOTE: Due to feature differences, some support RGBW but the method name
   // here needs to be unique, thus GetPixeColorRgbw
-  uint32_t GetPixelColorRgbw(uint16_t indexPixel)
+  uint32_t GetPixelColorRgbw(uint16_t indexPixel, uint8_t skipAmount)
   {
+    // take into account sacrificial pixels
+    indexPixel = GetRealPixelIndex(indexPixel, skipAmount);
+
     RgbwColor col = GetPixelColorRaw(indexPixel);
-    uint8_t co = pixelColorOrder[GetStripFromPixel(indexPixel)];
+    uint8_t co = pixelColorOrder[GetStripFromRealPixel(indexPixel)];
 
     switch (co)
     {
@@ -849,6 +848,31 @@ private:
   uint16_t  pixelStripStartIdx[MAX_NUMBER_OF_STRIPS]; // start index in a single virtual strip
 
   void *_pGRB[MAX_NUMBER_OF_STRIPS];
+
+  // extracts strip index from real (physical) pixel index (including sacrificial pixels)
+  uint8_t GetStripFromRealPixel(uint16_t indexPixel)
+  {
+    // figure out which strip this (real) pixel is on
+    uint8_t stripIdx = 0;
+    for (uint8_t idx = 0; idx < pixelStrips; idx++)
+      if (indexPixel >= pixelStripStartIdx[idx])
+        stripIdx = idx;
+      else
+        break;
+    return stripIdx;
+  }
+
+  // calculates real (physical) pixel index from logical index (adding sacrificial pixel for each strip)
+  uint16_t GetRealPixelIndex(uint16_t indexPixel, uint8_t skipAmount)
+  {
+    if (!skipAmount) return indexPixel;
+    indexPixel += skipAmount;
+    for (uint8_t idx = 1; idx < pixelStrips; idx++) {
+      if (indexPixel < pixelStripStartIdx[idx]) break;
+      indexPixel += skipAmount; // each strip has its own sacrificial pixel
+    }
+    return indexPixel;
+  }
 
   void cleanup()
   {

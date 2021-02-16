@@ -75,7 +75,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   //LED SETTINGS
   if (subPage == 2)
   {
-    String LC=F("LC"), LP=F("LP"), LK=F("LK"), CO=F("CO"), LTsel=F("LTsel");
+    String LC=F("LC"), LP=F("LP"), LK=F("LK"), CO=F("CO"), LTsel=F("LTsel"), EW=F("EW");
     int8_t type, co, pins[2] = {-1,-1};
     uint16_t t, len;
 
@@ -92,10 +92,17 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
     ledType = request->arg(LTsel).toInt();
 
+    skipFirstLed = request->hasArg(F("SL"));
+    useRGBW = request->hasArg(EW.c_str());
+
     strip.numStrips = 0;
     pins[0] = request->arg(LP).toInt();
-    t = len = request->arg(LC).toInt();
-    if (len>0 && pinManager.allocatePin(pins[0])) {
+    len = request->arg(LC).toInt();
+    #ifdef ESP8266
+    if (pins[0]==3 && len > MAX_LEDS_DMA) len = MAX_LEDS_DMA; //DMA method uses too much ram
+    #endif
+    t = len;
+    if (len>0 && len <= MAX_LEDS && pinManager.allocatePin(pins[0])) {
       if ( request->hasArg(LK.c_str()) ) {
         pins[1] = (request->arg(LK)).length() > 0 ? request->arg(LK).toInt() : -1;
         if (!(pins[1]>=0 && pinManager.allocatePin(pins[1]))) {
@@ -107,6 +114,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       type = request->arg(LTsel).toInt();
       strip.addLEDs(type, pins, len, co);
     } else {
+      t = 30;
       pins[0] = LEDPIN; pins[1] = -1;
       pinManager.allocatePin(pins[0], true); // fail-safe
       strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
@@ -115,8 +123,13 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
       if (request->hasArg((LP+i).c_str()) && request->hasArg((LC+i).c_str()) && request->hasArg((CO+i).c_str()) && request->hasArg((LTsel+i).c_str())) {
         pins[0] = request->arg((LP+i).c_str()).toInt();
-        t += len = request->arg((LC+i).c_str()).toInt();
-        if (len>0 && pinManager.allocatePin(pins[0])) {
+        len = request->arg((LC+i).c_str()).toInt();
+        #ifdef ESP8266
+        if (pins[0]==3 && len > MAX_LEDS_DMA) len = MAX_LEDS_DMA; //DMA method uses too much ram
+        #endif
+        if (t+len > MAX_LEDS || len == 0) break;  // too many pixels or none, discard the rest
+        t += len;
+        if (pinManager.allocatePin(pins[0])) {
           if ( request->hasArg((LK+i).c_str()) ) {
             pins[1] = (request->arg((LK+i).c_str())).length() > 0 ? request->arg((LK+i).c_str()).toInt() : -1;
             if (!(pins[1]>=0 && pinManager.allocatePin(pins[1]))) {
@@ -130,17 +143,14 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
           DEBUG_PRINTLN(F("Unable to allocate pin or length 0."));
           break;
         }
+        useRGBW |= request->hasArg((EW+i).c_str());
         co = request->arg((CO+i).c_str()).toInt();
         strip.addLEDs(type, pins, len, co);
       } else {
         break;  // no parameter
       }
     }
-
-    if (t > 0 && t <= MAX_LEDS) ledCount = t;
-    #ifdef ESP8266
-    if ( pinManager.isPinAllocated(3) && ledCount > MAX_LEDS_DMA) ledCount = MAX_LEDS_DMA; //DMA method uses too much ram
-    #endif
+    ledCount = t;
 
     // upate other pins
     #ifndef WLED_DISABLE_INFRARED
@@ -178,8 +188,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     strip.ablMilliampsMax = request->arg(F("MA")).toInt();
     strip.milliampsPerLed = request->arg(F("LA")).toInt();
     
-    useRGBW = request->hasArg(F("EW"));
-    strip.rgbwMode = request->arg(F("AW")).toInt();
+    strip.rgbwMode = request->arg(F("AW")).toInt(); // auto white calculation
 
     briS = request->arg(F("CA")).toInt();
 
@@ -205,7 +214,6 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     t = request->arg(F("PB")).toInt();
     if (t >= 0 && t < 4) strip.paletteBlend = t;
     strip.reverseMode = request->hasArg(F("RV"));
-    skipFirstLed = request->hasArg(F("SL"));
     t = request->arg(F("BF")).toInt();
     if (t > 0) briMultiplier = t;
   }
@@ -424,6 +432,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
   if (subPage != 6 || !doReboot) serializeConfig(); //do not save if factory reset
   if (subPage == 2) {
+    while (strip.isUpdating()) yield(); // wait if pixels are updating
     strip.init(useRGBW,ledCount,skipFirstLed);
   }
   if (subPage == 4) alexaInit();

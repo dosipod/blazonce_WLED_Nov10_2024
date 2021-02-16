@@ -53,15 +53,7 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
   //if (supportWhite == _useRgbw && countPixels == _length && _skipFirstMode == skipFirst) return;
   RESET_RUNTIME;
   _useRgbw = supportWhite;
-  _length = countPixels;
   _skipFirstMode = skipFirst;
-
-  uint8_t ty = 1;
-  if (supportWhite) ty = 2;
-  _lengthRaw = _length;
-  if (_skipFirstMode) {
-    _lengthRaw += LED_SKIP_AMOUNT;
-  }
 
   #ifdef WLED_DEBUG
   for (int i=0; i<numStrips; i++) {
@@ -82,12 +74,24 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
 
   deserializeMap();
 
-  // we could skip this if we pass "this" pointer to bus->Begin()
-  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType, _stripCO);
-  bus->Begin((NeoPixelType)ty, _lengthRaw);
+  _length = 0;
+  for (uint8_t i=0; i<numStrips; i++) {
+    _segments[i].start = _length;
+    _length += _stripLen[i];
+    _segments[i].stop = _length;
+    _segments[i].mode = DEFAULT_MODE;
+    _segments[i].colors[0] = DEFAULT_COLOR;
+    _segments[i].speed = DEFAULT_SPEED;
+    _segments[i].intensity = DEFAULT_INTENSITY;
+    _segments[i].grouping = 1;
+    _segments[i].setOption(SEG_OPTION_SELECTED, 1);
+    _segments[i].setOption(SEG_OPTION_ON, 1);
+    _segments[i].opacity = 255;
+  }
 
-  _segments[0].start = 0;
-  _segments[0].stop = _length;
+  // we could skip this if we pass "this" pointer to bus->Begin()
+  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType, _stripCO, (skipFirst ? LED_SKIP_AMOUNT : 0));
+  bus->Begin((NeoPixelType)(_useRgbw?2:1));
 
   setBrightness(_brightness);
 }
@@ -203,6 +207,15 @@ uint16_t WS2812FX::realPixelIndex(uint16_t i) {
   return realIndex;
 }
 
+bool WS2812FX::isFirstPixel(int16_t i) {
+  uint8_t s=0;
+  while (i>0) {
+    i -= _stripLen[s++];
+  }
+  if (i != 0) return false;
+  return true;
+}
+
 void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
 {
   //auto calculate white channel value if enabled
@@ -243,12 +256,12 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
       if (reverseMode) indexSetRev = REV(indexSet);
       if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
       if (indexSetRev >= SEGMENT.start && indexSetRev < SEGMENT.stop) {
-        bus->SetPixelColor(indexSet + skip, col);
+        bus->SetPixelColor(indexSet, col, skip);
         if (IS_MIRROR) { //set the corresponding mirrored pixel
           if (reverseMode) {
-            bus->SetPixelColor(REV(SEGMENT.start) - indexSet + skip + REV(SEGMENT.stop) + 1, col);
+            bus->SetPixelColor(REV(SEGMENT.start) - indexSet + REV(SEGMENT.stop) + 1, col, skip);
           } else {
-            bus->SetPixelColor(SEGMENT.stop - indexSet + skip + SEGMENT.start - 1, col);
+            bus->SetPixelColor(SEGMENT.stop - indexSet + SEGMENT.start - 1, col, skip);
           }
         }
       }
@@ -256,12 +269,7 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
   } else { //live data, etc.
     if (reverseMode) i = REV(i);
     if (i < customMappingSize) i = customMappingTable[i];
-    bus->SetPixelColor(i + skip, col);
-  }
-  if (skip && i == 0) {
-    for (uint16_t j = 0; j < skip; j++) {
-      bus->SetPixelColor(j, RgbwColor(0, 0, 0, 0));
-    }
+    bus->SetPixelColor(i, col, skip);
   }
 }
 
@@ -468,19 +476,12 @@ void WS2812FX::setBrightness(uint8_t b) {
     {
       _segments[i].setOption(SEG_OPTION_FREEZE, false);
     }
-    // why would you want bus to depend on LED_BUILTIN?
-//    for (uint8_t s=0; s<this->numStrips; s++) {
-//      if (getStripPin(s)==LED_BUILTIN) {
-        shouldStartBus = true;
-//        break;
-//      }
+//    shouldStartBus = true;
+//  } else {
+//    if (shouldStartBus) {
+//      shouldStartBus = false;
+//      bus->Begin((NeoPixelType)(_useRgbw?2:1));
 //    }
-  } else {
-    if (shouldStartBus) {
-      shouldStartBus = false;
-      const uint8_t ty = _useRgbw ? 2 : 1;
-      bus->Begin((NeoPixelType)ty, _lengthRaw);
-    }
   }
   if (SEGENV.next_time > millis() + 22 && millis() - _lastShow > MIN_SHOW_DELAY) show();//apply brightness change immediately if no refresh soon
 }
@@ -533,12 +534,9 @@ uint32_t WS2812FX::getPixelColor(uint16_t i)
   i = realPixelIndex(i);
   
   if (i < customMappingSize) i = customMappingTable[i];
-
-  if (_skipFirstMode) i += LED_SKIP_AMOUNT;
+  if (i >= _length) return 0;
   
-  if (i >= _lengthRaw) return 0;
-  
-  return bus->GetPixelColorRgbw(i);
+  return bus->GetPixelColorRgbw(i, (_skipFirstMode?LED_SKIP_AMOUNT:0));
 }
 
 WS2812FX::Segment& WS2812FX::getSegment(uint8_t id) {

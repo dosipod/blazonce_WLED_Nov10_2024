@@ -830,7 +830,7 @@ class WS2812FX {
     CRGBPalette16 currentPalette;
     CRGBPalette16 targetPalette;
 
-    uint16_t _length, _lengthRaw, _virtualSegmentLength;
+    uint16_t _length, _virtualSegmentLength;
     uint16_t _rand16seed;
     uint8_t _brightness;
     uint16_t _usedSegmentData = 0;
@@ -840,10 +840,10 @@ class WS2812FX {
     void handle_palette(void);
 
     bool
-      shouldStartBus = false,
       _useRgbw = false,
       _skipFirstMode,
-      _triggered;
+      _triggered,
+      isFirstPixel(int16_t i);
 
     mode_ptr _mode[MODE_COUNT]; // SRAM footprint: 4 bytes per element
 
