@@ -262,7 +262,7 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
           if (indexSetRev < customMappingSize) indexSetRev = customMappingTable[indexSetRev];
           bus->SetPixelColor(indexSetRev, col);
         }
-		if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
+		    if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
         bus->SetPixelColor(indexSet, col);
       }
     }

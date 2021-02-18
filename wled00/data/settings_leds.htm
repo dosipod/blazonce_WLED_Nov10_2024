@@ -42,6 +42,7 @@
         case 255: d.Sf.LAsel.value = 255; break;
         default: d.getElementById('LAdis').style.display = 'inline';
       }
+      d.getElementById('maxLED').innerText = d.LCmax;
       UI();
     }
 		function UI(change=false)
@@ -78,11 +79,11 @@
 			}
 
       var LCs = d.getElementsByTagName("input");
-      var sLC = 0;
+      var sLC = 0, sLCt, sLCm = 0;
       for (i=0; i<LCs.length; i++) {
         var nm = LCs[i].name.substring(0,2);
-        if (nm=="LC") {sLC+=parseInt(LCs[i].value,10);continue;}
-        if (nm=="LP") {var lc=d.getElementsByName("LC"+LCs[i].name.substring(2))[0]; if(LCs[i].value==3) lc.max=500; else lc.max=1500;}
+        if (nm=="LC") {sLC+=sLCt=parseInt(LCs[i].value,10);sLCm=(sLCt>sLCm?sLCt:sLCm);continue;}
+        if (nm=="LP") {var lc=d.getElementsByName("LC"+LCs[i].name.substring(2))[0]; if(d.LDmax && LCs[i].value==3) lc.max=d.LDmax; else lc.max=d.LCmax;}
         if (nm=="LP" || nm=="LK" || nm=="RL" || nm=="BT" || nm=="IR" || nm=="AX")
           if (LCs[i].value!="" && LCs[i].value!="-1") {
             if (d.um_p && d.um_p.some((e)=>e==parseInt(LCs[i].value,10))) {alert("Usermod pin clash!");LCs[i].value="";LCs[i].focus();continue;}
@@ -96,6 +97,7 @@
           }
       }
       d.getElementById('ledwarning').style.display = (sLC > 1000) ? 'inline':'none';
+      d.getElementById('ledwarning2').style.display = (sLCm > 800) ? 'inline':'none';
 
       //var val = Math.ceil((100 + d.Sf.LC.value * laprev)/500)/2;
       var val = Math.ceil((100 + sLC * laprev)/500)/2;
@@ -183,7 +185,7 @@
 
         t.appendChild(d.createTextNode(" count:"));
         e = d.createElement("input");
-        e.type = "number"; e.value = "0"; e.name = "LC"+i; e.min=0; e.max=1500; e.required=true; e.oninput = function(){UI()};
+        e.type = "number"; e.value = "0"; e.name = "LC"+i; e.min=0; e.max=d.LCmax; e.required=true; e.oninput = function(){UI()};
         t.appendChild(e);
 
         t.appendChild(d.createElement("br"));
@@ -249,7 +251,7 @@
       RGBW: <input type="checkbox" name="EW" onchange=UI() id="rgbw"><br>
       pin:<input name="LP" type="number" min="0" max="40" required onchange="UI()">
       <div name="iLK" style="display:inline;">clk:<input name="LK" type="number" min="0" max="40" onchange="UI()"></div>
-      count:<input name="LC" type="number" min="1" max="1500" oninput="UI()" required><br>
+      count:<input name="LC" type="number" min="1" oninput="UI()" required><br>
       reversed (rotate 180°): <input type="checkbox" name="RV" onchange=UI()>
       </div>
     </div><hr>
@@ -259,9 +261,13 @@
     AUX pin: <input type="number" min="-1" max="40" name="AX" onchange="UI()"><hr>
     <div id="ledwarning" style="color: orange; display: none;">
         &#9888; You might run into stability or lag issues.<br>
-        Use less than 1000 LEDs per ESP for the best experience!<br>
+        Use less than <span id="maxLED">1000</span> LEDs per ESP for the best experience!<br>
     </div>
-		<i>Recommended power supply for brightest white:</i><br>
+    <div id="ledwarning2" style="color: orangered; display: none;">
+      &#9888; High number of LEDs per strip may result in slow animations.<br>
+      Use less than 800 LEDs per strip (ESP pin) for the best experience!<br>
+  </div>
+  <i>Recommended power supply for brightest white:</i><br>
 		<b><span id="psu">?</span></b><br>
     <span id="psu2"><br></span>
     <br>

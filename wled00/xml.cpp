@@ -283,16 +283,16 @@ void getSettingsJS(byte subPage, char* dest)
       oappend(SET_F("];"));
     }
 
+    #ifdef ESP8266
+      oappend(SET_F("d.LCmax=1500;"));
+      oappend(SET_F("d.LDmax=500;"));
+    #else
+      oappend(SET_F("d.LCmax=4000;"));
+    #endif
     #if defined(MAX_NUMBER_OF_STRIPS) && MAX_NUMBER_OF_STRIPS>1
       oappend(SET_F("addLEDs("));
       oappend(itoa(MAX_NUMBER_OF_STRIPS,nS,10));
       oappend(SET_F(");"));
-    #endif
-    #ifdef ESP8266
-    if (strip.getStripPin(0)==3)
-      oappend(SET_F("d.Sf.LC.max=500;"));
-    else
-      oappend(SET_F("d.Sf.LC.max=1500;"));
     #endif
     sappend('v',SET_F("LP"),strip.getStripPin(0));
     if (strip.getStripPinClk(0)>=0) sappend('v',SET_F("LK"),strip.getStripPinClk(0));
@@ -307,6 +307,7 @@ void getSettingsJS(byte subPage, char* dest)
       sappend('v',LP.c_str(),strip.getStripPin(s));
       if (strip.getStripPinClk(s)>=0) sappend('v',LK.c_str(),strip.getStripPinClk(s));
       sappend('v',LC.c_str(),strip.getStripLen(s));
+/*
       #ifdef ESP8266
       if (strip.getStripPin(s)==3) {
         oappend(SET_F("d.Sf."));
@@ -318,6 +319,7 @@ void getSettingsJS(byte subPage, char* dest)
         oappend(SET_F(".max=1500;")); // make this changeable via #define
       }
       #endif
+*/
       sappend('v',LTsel.c_str(),strip.getStripType(s));
       sappend('v',CO.c_str(),strip.getColorOrder(s));
       sappend('c',RV.c_str(),strip.isStripReversed(s));

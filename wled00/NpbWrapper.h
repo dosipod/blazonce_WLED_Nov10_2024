@@ -525,7 +525,7 @@ public:
 
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
-	// pixelCounts contains sacrificial pixel
+	  // pixelCounts contains sacrificial pixel
     if (IS_STRIP_REVERSED(stripIdx)) indexPixel = pixelCounts[stripIdx] - 1 - indexPixel + pixelSkipAmount;
 
     RgbColor rgb = RgbColor(c.R, c.G, c.B);
@@ -743,7 +743,7 @@ public:
 
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
-	// pixelCounts contains sacrificial pixel
+	  // pixelCounts contains sacrificial pixel
     if (IS_STRIP_REVERSED(stripIdx)) indexPixel = pixelCounts[stripIdx] - 1 - indexPixel + pixelSkipAmount;
 
     switch (pixelType[stripIdx]) {
