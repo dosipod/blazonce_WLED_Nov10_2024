@@ -591,23 +591,24 @@ class WS2812FX {
       currentMilliamps = 0;
       timebase = 0;
       for (uint8_t i=0; i<MAX_NUMBER_OF_STRIPS; i++) {
-        _stripPin[i] = _stripPinClk[i] = -1;
+        _stripPin[i][0] = -1;
+        _stripPin[i][1] = -1;
         _stripType[i] = TYPE_NONE;
         _stripCO[i] = -1;
       }
       #if defined(DATAPIN) && defined(CLOCKPIN) && DATAPIN>-1 && CLOCKPIN>-1
-        /*pinManager.allocatePin(*/_stripPin[0] = DATAPIN/*, true)*/;
-        /*pinManager.allocatePin(*/_stripPinClk[0] = CLOCKPIN/*, true)*/;
+        /*pinManager.allocatePin(*/_stripPin[0][0] = DATAPIN/*, true)*/;
+        /*pinManager.allocatePin(*/_stripPin[0][1] = CLOCKPIN/*, true)*/;
       #elif defined(LEDPIN) && LEDPIN>-1
-        /*pinManager.allocatePin(*/_stripPin[0] = LEDPIN/*, true)*/;
+        /*pinManager.allocatePin(*/_stripPin[0][0] = LEDPIN/*, true)*/;
       #endif
       bus = new NeoPixelWrapper();
       resetSegments();
     }
 
     void
-      init(bool supportWhite, uint16_t countPixels, bool skipFirst),
-      addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder),
+      init(bool supportWhite, bool skipFirst),
+      addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder, bool reverse),
       service(void),
       blur(uint8_t),
       fill(uint32_t),
@@ -632,12 +633,12 @@ class WS2812FX {
       setPixelSegment(uint8_t n);
 
     bool
-      reverseMode = false,      //is the entire LED strip reversed?
       gammaCorrectBri = false,
       gammaCorrectCol = true,
       applyToAllSelected = true,
       segmentsAreIdentical(Segment* a, Segment* b),
       setEffectConfig(uint8_t m, uint8_t s, uint8_t i, uint8_t p),
+      isStripReversed(uint8_t strip),
       // return true if the strip is being sent pixel updates
       isUpdating(void);
 
@@ -819,11 +820,11 @@ class WS2812FX {
   private:
     NeoPixelWrapper *bus;
 
-    uint8_t _stripType[MAX_NUMBER_OF_STRIPS];
-    int8_t  _stripPin[MAX_NUMBER_OF_STRIPS];
-    int8_t  _stripPinClk[MAX_NUMBER_OF_STRIPS];
+    uint8_t  _stripType[MAX_NUMBER_OF_STRIPS];
+    int8_t   _stripPin[MAX_NUMBER_OF_STRIPS][2];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
-    uint8_t _stripCO[MAX_NUMBER_OF_STRIPS];
+    uint8_t  _stripCO[MAX_NUMBER_OF_STRIPS];
+    uint16_t _stripReverseMode;  // bit pattern of reverse mode for strip
 
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);
@@ -841,7 +842,6 @@ class WS2812FX {
 
     bool
       _useRgbw = false,
-      _skipFirstMode,
       _triggered,
       isFirstPixel(int16_t i);
 

@@ -167,12 +167,6 @@
 
 #define NTP_PACKET_SIZE 48
 
-// maximum number of LEDs - more than 1500 LEDs (or 500 DMA "LEDPIN 3" driven ones) will cause a low memory condition on ESP8266
-#ifndef MAX_LEDS
-#define MAX_LEDS 1500
-#endif
-
-#define MAX_LEDS_DMA 500
 
 // string temp buffer (now stored in stack locally)
 #define OMAX 2048
@@ -186,8 +180,16 @@
 
 // Size of buffer for API JSON object (increase for more segments)
 #ifdef ESP8266
+  // maximum number of LEDs - more than 1500 LEDs (or 500 DMA "LEDPIN 3" driven ones) will cause a low memory condition on ESP8266
+  #define MAX_LEDS_DMA 500
+  #ifndef MAX_LEDS
+    #define MAX_LEDS 1500
+  #endif
   #define JSON_BUFFER_SIZE 10240
 #else
+  #ifndef MAX_LEDS
+    #define MAX_LEDS 4000
+  #endif
   #define JSON_BUFFER_SIZE 16384
 #endif
 

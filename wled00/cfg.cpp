@@ -96,7 +96,7 @@ void deserializeConfig() {
   ledCount = 0;
   CJSON(strip.ablMilliampsMax, hw_led[F("maxpwr")]);
   CJSON(strip.milliampsPerLed, hw_led[F("ledma")]);
-  CJSON(strip.reverseMode, hw_led[F("rev")]);
+  //CJSON(strip.reverseMode, hw_led[F("rev")]);
   CJSON(strip.rgbwMode, hw_led[F("rgbwm")]);
 
   useRGBW = skipFirstLed = false;
@@ -106,7 +106,7 @@ void deserializeConfig() {
   if (strVar.is<JsonObject>()) {
     pins[0] = LEDPIN;
     pinManager.allocatePin(pins[0], true); // fail-safe
-    strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
+    strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB, false);  // safety fall-back
   } else {
     JsonArray elms = strVar.as<JsonArray>();
     uint8_t s=0;
@@ -129,15 +129,16 @@ void deserializeConfig() {
       uint8_t co = elm[F("order")];
       skipFirstLed |= (bool) elm[F("skip")]; // if skipping, skip all 1st LEDs
       uint8_t type = elm[F("type")];
-      useRGBW |= ((type == TYPE_SK6812_RGBW) || type == TYPE_TM1814); // if one strip is RGBW all are considered RGBW
+      bool rv = elm[F("rev")];
+      useRGBW |= ((type == TYPE_SK6812_RGBW) || (type == TYPE_TM1814)); // if one strip is RGBW all are considered RGBW
       ledCount += len;
-      strip.addLEDs(type, pins, len, co);
+      strip.addLEDs(type, pins, len, co, rv);
       s++;
     }
     if (s==0) {
       pins[0] = LEDPIN; pins[1] = -1;
       pinManager.allocatePin(pins[0], true); // fail-safe
-      strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
+      strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB, false);  // safety fall-back
     }
   }
 
@@ -448,7 +449,7 @@ void serializeConfig() {
   hw_led[F("total")] = ledCount;
   hw_led[F("maxpwr")] = strip.ablMilliampsMax;
   hw_led[F("ledma")] = strip.milliampsPerLed;
-  hw_led[F("rev")] = strip.reverseMode;
+  hw_led[F("rev")] = false;
   hw_led[F("rgbwm")] = strip.rgbwMode;
 
   JsonArray hw_led_ins = hw_led.createNestedArray("ins");
@@ -465,7 +466,7 @@ void serializeConfig() {
     hw_led_ins_0_pin.add(strip.getStripPin(s));
     if (strip.getStripPinClk(s)>=0) hw_led_ins_0_pin.add(strip.getStripPinClk(s));
     hw_led_ins_0[F("order")] = strip.getColorOrder(s);
-    hw_led_ins_0[F("rev")] = false;
+    hw_led_ins_0[F("rev")]  = strip.isStripReversed(s);
     hw_led_ins_0[F("skip")] = skipFirstLed ? 1 : 0;
     hw_led_ins_0[F("type")] = strip.getStripType(s);
   }

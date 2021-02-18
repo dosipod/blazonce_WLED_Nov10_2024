@@ -366,15 +366,12 @@ void WLED::beginStrip()
 {
   // Initialize NeoPixel Strip and button
 
-  if (ledCount > MAX_LEDS || ledCount == 0)
-    ledCount = 30;
-
-  strip.init(useRGBW, ledCount, skipFirstLed);
+  strip.init(useRGBW, skipFirstLed);
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
 
   if (bootPreset > 0) applyPreset(bootPreset);
-  if (turnOnAtBoot) {
+  if (!bootPreset && turnOnAtBoot) {
     if (briS > 0) bri = briS;
     else if (bri == 0) bri = 128;
   } else {

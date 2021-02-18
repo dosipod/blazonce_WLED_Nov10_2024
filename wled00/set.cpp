@@ -75,9 +75,10 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
   //LED SETTINGS
   if (subPage == 2)
   {
-    String LC=F("LC"), LP=F("LP"), LK=F("LK"), CO=F("CO"), LTsel=F("LTsel"), EW=F("EW");
+    String LC=F("LC"), LP=F("LP"), LK=F("LK"), CO=F("CO"), LTsel=F("LTsel"), EW=F("EW"), RV=F("RV");
     int8_t type, co, pins[2] = {-1,-1};
     uint16_t t, len;
+    bool rv;
 
     // deallocate all pins
     for (uint8_t s=0; s<strip.numStrips; s++) {
@@ -91,11 +92,11 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     if (btnPin>=0 && pinManager.isPinAllocated(btnPin)) pinManager.deallocatePin(btnPin);
 
     ledType = request->arg(LTsel).toInt();
-
     skipFirstLed = request->hasArg(F("SL"));
-    useRGBW = request->hasArg(EW.c_str());
 
     strip.numStrips = 0;
+    useRGBW = false;
+
     pins[0] = request->arg(LP).toInt();
     len = request->arg(LC).toInt();
     #ifdef ESP8266
@@ -110,14 +111,16 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
           DEBUG_PRINTLN(F("Unable to allocate clock pin."));
         }
       }
+      useRGBW |= request->hasArg(EW.c_str());
+      rv = request->hasArg(RV.c_str());
       co = request->arg(CO).toInt();
       type = request->arg(LTsel).toInt();
-      strip.addLEDs(type, pins, len, co);
+      strip.addLEDs(type, pins, len, co, rv);
     } else {
       t = 30;
       pins[0] = LEDPIN; pins[1] = -1;
       pinManager.allocatePin(pins[0], true); // fail-safe
-      strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB);  // safety fall-back
+      strip.addLEDs(TYPE_WS2812_RGB, pins, 30, COL_ORDER_GRB, false);  // safety fall-back
     }
 
     for (uint8_t i=1; i<MAX_NUMBER_OF_STRIPS; i++) {
@@ -140,12 +143,13 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
           co = request->arg((CO+i).c_str()).toInt();
           type = request->arg((LTsel+i).c_str()).toInt();
         } else {
-          DEBUG_PRINTLN(F("Unable to allocate pin or length 0."));
+          DEBUG_PRINTLN(F("Unable to allocate data pin."));
           break;
         }
+        rv = request->hasArg((RV+i).c_str());
         useRGBW |= request->hasArg((EW+i).c_str());
         co = request->arg((CO+i).c_str()).toInt();
-        strip.addLEDs(type, pins, len, co);
+        strip.addLEDs(type, pins, len, co, rv);
       } else {
         break;  // no parameter
       }
@@ -213,7 +217,6 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
     t = request->arg(F("PB")).toInt();
     if (t >= 0 && t < 4) strip.paletteBlend = t;
-    strip.reverseMode = request->hasArg(F("RV"));
     t = request->arg(F("BF")).toInt();
     if (t > 0) briMultiplier = t;
   }
@@ -432,8 +435,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
 
   if (subPage != 6 || !doReboot) serializeConfig(); //do not save if factory reset
   if (subPage == 2) {
-    while (strip.isUpdating()) yield(); // wait if pixels are updating
-    strip.init(useRGBW,ledCount,skipFirstLed);
+    strip.init(useRGBW,skipFirstLed);
   }
   if (subPage == 4) alexaInit();
 }

@@ -106,6 +106,11 @@
 #include <NeoPixelBrightnessBus.h>
 #include "const.h"
 
+#define IS_STRIP_REVERSED(s) ((bool)((pixelStripReversed >> s) & 0x01))
+/*
+ * #define STRIP_REVERSE_MODE(s,m) (m ? pixelStripReversed |= (0x0001 << s) : pixelStripReversed &= ~(0x0001 << s))
+ */
+
 enum NeoPixelType
 {
   NeoPixelType_None = 0,
@@ -119,9 +124,10 @@ class NeoPixelWrapper
 public:
   NeoPixelWrapper() :
     _type(NeoPixelType_None),
-    pixelStrips(0)
+    pixelStrips(0),
+    pixelStripReversed(0)
   {
-    for (uint8_t i=0; i < MAX_NUMBER_OF_STRIPS; i++ )
+    for (uint8_t i=0; i < MAX_NUMBER_OF_STRIPS; i++)
     {
       _pGRB[i] = NULL;
       pixelColorOrder[i]=0;
@@ -133,21 +139,23 @@ public:
     cleanup();
   }
 
-  void initStrips(uint8_t numStrips, int8_t *stripPin, int8_t *stripPinClk, uint16_t *stripLen, uint8_t *ledType, uint8_t *colorOrder, uint8_t skipFirst)
+  void initStrips(uint8_t numStrips, int8_t stripPins[][2], uint16_t stripLen[], uint8_t ledType[], uint8_t colorOrder[], uint8_t skipFirst, uint16_t reverseMode)
   {
     cleanup();
 
     uint16_t totalPixels = 0;
     pixelStrips = numStrips;
+    pixelStripReversed = reverseMode; // bit mapped info
+    pixelSkipAmount = skipFirst;
     for (uint8_t idx = 0; idx < numStrips; idx++)
     {
-      pixelType[idx] = ledType[idx];
-      pixelCounts[idx] = stripLen[idx] + skipFirst;
-      pixelStripPins[idx] = stripPin[idx];
-      pixelStripPinsClk[idx] = stripPinClk[idx];
+      pixelType[idx]          = ledType[idx];
+      pixelCounts[idx]        = stripLen[idx] + skipFirst;
+      pixelStripPins[idx]     = stripPins[idx][0];
+      pixelStripPinsClk[idx]  = stripPins[idx][1];
       pixelStripStartIdx[idx] = totalPixels;
-      pixelColorOrder[idx] = colorOrder[idx];
-      totalPixels += pixelCounts[idx];
+      pixelColorOrder[idx]    = colorOrder[idx];
+      totalPixels            += pixelCounts[idx];
     }
   }
 
@@ -427,6 +435,7 @@ public:
     bool canShow = true;
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
+      if (!_pGRB[idx]) continue;  // prevent uninitialised panic
       switch (pixelType[idx]) {
         case TYPE_WS2812_RGB:
         {
@@ -516,6 +525,9 @@ public:
 
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
+	// pixelCounts contains sacrificial pixel
+    if (IS_STRIP_REVERSED(stripIdx)) indexPixel = pixelCounts[stripIdx] - 1 - indexPixel + pixelSkipAmount;
+
     RgbColor rgb = RgbColor(c.R, c.G, c.B);
 
     switch (pixelType[stripIdx]) {
@@ -598,7 +610,7 @@ public:
     }
   }
 
-  void SetPixelColor(uint16_t indexPixel, RgbwColor c, uint8_t skipAmount)
+  void SetPixelColor(uint16_t indexPixel, RgbwColor c)
   {
     /*
     Set pixel color with necessary color order conversion.
@@ -607,7 +619,7 @@ public:
     RgbwColor col;
 
     // take into account sacrificial pixels
-    indexPixel = GetRealPixelIndex(indexPixel, skipAmount);
+    indexPixel = GetRealPixelIndex(indexPixel);
 
     uint8_t co = pixelColorOrder[GetStripFromRealPixel(indexPixel)];
 
@@ -731,6 +743,8 @@ public:
 
     // subtract strip start index so we're addressing just this strip instead of all pixels on all strips
     indexPixel -= pixelStripStartIdx[stripIdx];
+	// pixelCounts contains sacrificial pixel
+    if (IS_STRIP_REVERSED(stripIdx)) indexPixel = pixelCounts[stripIdx] - 1 - indexPixel + pixelSkipAmount;
 
     switch (pixelType[stripIdx]) {
       case TYPE_WS2812_RGB:
@@ -815,10 +829,10 @@ public:
 
   // NOTE: Due to feature differences, some support RGBW but the method name
   // here needs to be unique, thus GetPixeColorRgbw
-  uint32_t GetPixelColorRgbw(uint16_t indexPixel, uint8_t skipAmount)
+  uint32_t GetPixelColorRgbw(uint16_t indexPixel)
   {
     // take into account sacrificial pixels
-    indexPixel = GetRealPixelIndex(indexPixel, skipAmount);
+    indexPixel = GetRealPixelIndex(indexPixel);
 
     RgbwColor col = GetPixelColorRaw(indexPixel);
     uint8_t co = pixelColorOrder[GetStripFromRealPixel(indexPixel)];
@@ -836,6 +850,11 @@ public:
 
     return 0;
   }
+
+  bool isReversed(uint8_t strip) {
+    if (strip >= pixelStrips) return 0;
+    return IS_STRIP_REVERSED(strip);
+  }
   
 private:
   NeoPixelType _type;
@@ -846,6 +865,8 @@ private:
   int8_t    pixelStripPins[MAX_NUMBER_OF_STRIPS];     // strip GPIO pin
   int8_t    pixelStripPinsClk[MAX_NUMBER_OF_STRIPS];  // strip GPIO pin
   uint16_t  pixelStripStartIdx[MAX_NUMBER_OF_STRIPS]; // start index in a single virtual strip
+  uint16_t  pixelStripReversed;                       // bit mapped info if strip is reversed (max 16 strips)
+  uint8_t   pixelSkipAmount;                          // sacrificial (skipped) pixel count (same for each string)
 
   void *_pGRB[MAX_NUMBER_OF_STRIPS];
 
@@ -863,19 +884,20 @@ private:
   }
 
   // calculates real (physical) pixel index from logical index (adding sacrificial pixel for each strip)
-  uint16_t GetRealPixelIndex(uint16_t indexPixel, uint8_t skipAmount)
+  uint16_t GetRealPixelIndex(uint16_t indexPixel)
   {
-    if (!skipAmount) return indexPixel;
-    indexPixel += skipAmount;
+    if (!pixelSkipAmount) return indexPixel;
+    indexPixel += pixelSkipAmount;
     for (uint8_t idx = 1; idx < pixelStrips; idx++) {
       if (indexPixel < pixelStripStartIdx[idx]) break;
-      indexPixel += skipAmount; // each strip has its own sacrificial pixel
+      indexPixel += pixelSkipAmount;  // each strip has its own sacrificial pixel
     }
     return indexPixel;
   }
 
   void cleanup()
   {
+    while (!CanShow()) yield(); // wait while pixels are updating
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
       switch (pixelType[idx]) {

@@ -294,15 +294,15 @@ void getSettingsJS(byte subPage, char* dest)
     else
       oappend(SET_F("d.Sf.LC.max=1500;"));
     #endif
-    //sappend('v',SET_F("LC"),ledCount);
     sappend('v',SET_F("LP"),strip.getStripPin(0));
     if (strip.getStripPinClk(0)>=0) sappend('v',SET_F("LK"),strip.getStripPinClk(0));
     sappend('v',SET_F("LC"),strip.getStripLen(0));
     sappend('v',SET_F("LTsel"),strip.getStripType(0));
     sappend('v',SET_F("CO"),strip.getColorOrder(0));
+    sappend('c',SET_F("RV"),strip.isStripReversed(0));
     for (uint8_t s=1; s<strip.numStrips; s++){
-      String LP = F("LP"), LK = F("LK"), LC = F("LC"), CO = F("CO"), LTsel = F("LTsel");
-      LP += s; LK += s; LC += s; CO += s; LTsel += s;
+      String LP = F("LP"), LK = F("LK"), LC = F("LC"), CO = F("CO"), LTsel = F("LTsel"), EW = F("EW"), RV = F("RV");
+      LP += s; LK += s; LC += s; CO += s; LTsel += s; EW += s; RV += s;
       oappend(SET_F("addLEDs(1);"));
       sappend('v',LP.c_str(),strip.getStripPin(s));
       if (strip.getStripPinClk(s)>=0) sappend('v',LK.c_str(),strip.getStripPinClk(s));
@@ -315,11 +315,12 @@ void getSettingsJS(byte subPage, char* dest)
       } else {
         oappend(SET_F("d.Sf."));
         oappend(LC.c_str());
-        oappend(SET_F(".max=1500;"));
+        oappend(SET_F(".max=1500;")); // make this changeable via #define
       }
       #endif
       sappend('v',LTsel.c_str(),strip.getStripType(s));
       sappend('v',CO.c_str(),strip.getColorOrder(s));
+      sappend('c',RV.c_str(),strip.isStripReversed(s));
     }
     sappend('v',SET_F("MA"),strip.ablMilliampsMax);
     sappend('v',SET_F("LA"),strip.milliampsPerLed);
@@ -332,7 +333,6 @@ void getSettingsJS(byte subPage, char* dest)
     }
 
     sappend('v',SET_F("CA"),briS);
-    sappend('c',SET_F("EW"),useRGBW);
     sappend('i',SET_F("CO"),strip.getColorOrder());
     sappend('v',SET_F("AW"),strip.rgbwMode);
 
@@ -349,7 +349,6 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('v',SET_F("TL"),nightlightDelayMinsDefault);
     sappend('v',SET_F("TW"),nightlightMode);
     sappend('i',SET_F("PB"),strip.paletteBlend);
-    sappend('c',SET_F("RV"),strip.reverseMode);
     sappend('c',SET_F("SL"),skipFirstLed);
     sappend('v',SET_F("RL"),rlyPin);
     sappend('c',SET_F("RM"),rlyMde);

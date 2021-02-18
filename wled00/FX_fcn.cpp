@@ -45,24 +45,22 @@
   another example. Switches direction every 5 LEDs.
   {"map":[
   0, 1, 2, 3, 4, 9, 8, 7, 6, 5, 10, 11, 12, 13, 14,
-  19, 18, 17, 16, 15, 20, 21, 22, 23, 24, 29, 28, 27, 26, 25]
+  19, 18, 17, 16, 15, 20, 21, 22, 23, 24, 29, 28, 27, 26, 25]}
 */
 
-void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
+void WS2812FX::init(bool supportWhite, bool skipFirst)
 {
-  //if (supportWhite == _useRgbw && countPixels == _length && _skipFirstMode == skipFirst) return;
   RESET_RUNTIME;
   _useRgbw = supportWhite;
-  _skipFirstMode = skipFirst;
 
   #ifdef WLED_DEBUG
   for (int i=0; i<numStrips; i++) {
     DEBUG_PRINT(F("Added strip "));
     DEBUG_PRINT(i);
     DEBUG_PRINT(F(": data pin="));
-    DEBUG_PRINT(_stripPin[i]);
+    DEBUG_PRINT(_stripPin[i][0]);
     DEBUG_PRINT(F(" clock pin="));
-    DEBUG_PRINT(_stripPinClk[i]);
+    DEBUG_PRINT(_stripPin[i][1]);
     DEBUG_PRINT(F("; LED count="));
     DEBUG_PRINT(_stripLen[i]);
     DEBUG_PRINT(F("; LED type="));
@@ -90,21 +88,26 @@ void WS2812FX::init(bool supportWhite, uint16_t countPixels, bool skipFirst)
   }
 
   // we could skip this if we pass "this" pointer to bus->Begin()
-  bus->initStrips(numStrips, _stripPin, _stripPinClk, _stripLen, _stripType, _stripCO, (skipFirst ? LED_SKIP_AMOUNT : 0));
+  bus->initStrips(numStrips, _stripPin, _stripLen, _stripType, _stripCO, (skipFirst ? LED_SKIP_AMOUNT : 0), _stripReverseMode);
   bus->Begin((NeoPixelType)(_useRgbw?2:1));
 
   setBrightness(_brightness);
 }
 
-void WS2812FX::addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder) {
+#define STRIP_REVERSE_MODE(s,m) (m ? _stripReverseMode |= (0x0001U << s) : _stripReverseMode &= ~(0x0001U << s))
+
+void WS2812FX::addLEDs(uint8_t type, int8_t *pins, uint16_t len, uint8_t colorOrder, bool reverse) {
   if (numStrips >= MAX_NUMBER_OF_STRIPS) return;
+
+  //_useRgbw |= ((type == TYPE_SK6812_RGBW) || (type == TYPE_TM1814));
 
   uint8_t strip = numStrips++;
   _stripType[strip]   = type;
-  _stripPin[strip]    = pins[0];
-  _stripPinClk[strip] = pins[1];
+  _stripPin[strip][0] = pins[0];
+  _stripPin[strip][1] = pins[1];
   _stripLen[strip]    = len;
   _stripCO[strip]     = colorOrder;
+  STRIP_REVERSE_MODE(strip, reverse);
 }
 
 uint8_t WS2812FX::getStripType(uint8_t strip) {
@@ -114,17 +117,22 @@ uint8_t WS2812FX::getStripType(uint8_t strip) {
 
 int8_t WS2812FX::getStripPin(uint8_t strip) {
   if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
-  return _stripPin[strip];
+  return _stripPin[strip][0];
 }
 
 int8_t WS2812FX::getStripPinClk(uint8_t strip) {
   if (strip >= MAX_NUMBER_OF_STRIPS) return -1;
-  return _stripPinClk[strip];
+  return _stripPin[strip][1];
 }
 
 uint16_t WS2812FX::getStripLen(uint8_t strip) {
   if (strip >= MAX_NUMBER_OF_STRIPS) return 0;
   return _stripLen[strip];
+}
+
+bool WS2812FX::isStripReversed(uint8_t strip) {
+  if (strip >= MAX_NUMBER_OF_STRIPS) return false;
+  return (bool)((_stripReverseMode >> strip) & 0x01);
 }
 
 void WS2812FX::service() {
@@ -194,15 +202,13 @@ uint16_t WS2812FX::realPixelIndex(uint16_t i) {
   int16_t realIndex = iGroup;
   if (IS_REVERSE) {
     if (IS_MIRROR) {
-      realIndex = (SEGMENT.length() -1) / 2 - iGroup;  //only need to index half the pixels
+      realIndex = (SEGMENT.length() - 1) / 2 - iGroup;  //only need to index half the pixels
     } else {
-      realIndex = SEGMENT.length() - iGroup - 1;
+      realIndex = (SEGMENT.length() - 1) - iGroup;
     }
   }
 
   realIndex += SEGMENT.start;
-  /* Reverse the whole string */
-  if (reverseMode) realIndex = REV(realIndex);
 
   return realIndex;
 }
@@ -235,7 +241,6 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
   RgbwColor col;
   col.R = r; col.G = g; col.B = b; col.W = w;
   
-  uint16_t skip = _skipFirstMode ? LED_SKIP_AMOUNT : 0;
   if (SEGLEN) {//from segment
 
     //color_blend(getpixel, col, _bri_t); (pseudocode for future blending of segments)
@@ -246,30 +251,24 @@ void WS2812FX::setPixelColor(uint16_t i, byte r, byte g, byte b, byte w)
       col.W = scale8(col.W, _bri_t);
     }
 
-    /* Set all the pixels in the group, ensuring _skipFirstMode is honored */
-    bool reversed = reverseMode ^ IS_REVERSE;
+    /* Set all the pixels in the group */
     uint16_t realIndex = realPixelIndex(i);
 
     for (uint16_t j = 0; j < SEGMENT.grouping; j++) {
-      int16_t indexSet = realIndex + (reversed ? -j : j);
-      int16_t indexSetRev = indexSet;
-      if (reverseMode) indexSetRev = REV(indexSet);
-      if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
-      if (indexSetRev >= SEGMENT.start && indexSetRev < SEGMENT.stop) {
-        bus->SetPixelColor(indexSet, col, skip);
+      int16_t indexSet = realIndex + (IS_REVERSE ? -j : j);
+      if (indexSet >= SEGMENT.start && indexSet < SEGMENT.stop) { // watch for group out of bounds condition
         if (IS_MIRROR) { //set the corresponding mirrored pixel
-          if (reverseMode) {
-            bus->SetPixelColor(REV(SEGMENT.start) - indexSet + REV(SEGMENT.stop) + 1, col, skip);
-          } else {
-            bus->SetPixelColor(SEGMENT.stop - indexSet + SEGMENT.start - 1, col, skip);
-          }
+          int16_t indexSetRev = SEGMENT.stop + SEGMENT.start - indexSet - 1;
+          if (indexSetRev < customMappingSize) indexSetRev = customMappingTable[indexSetRev];
+          bus->SetPixelColor(indexSetRev, col);
         }
+		if (indexSet < customMappingSize) indexSet = customMappingTable[indexSet];
+        bus->SetPixelColor(indexSet, col);
       }
     }
   } else { //live data, etc.
-    if (reverseMode) i = REV(i);
     if (i < customMappingSize) i = customMappingTable[i];
-    bus->SetPixelColor(i, col, skip);
+    bus->SetPixelColor(i, col);
   }
 }
 
@@ -536,7 +535,8 @@ uint32_t WS2812FX::getPixelColor(uint16_t i)
   if (i < customMappingSize) i = customMappingTable[i];
   if (i >= _length) return 0;
   
-  return bus->GetPixelColorRgbw(i, (_skipFirstMode?LED_SKIP_AMOUNT:0));
+  // TODO: may need to add IS_REVERSE and IS_MIRROR logic
+  return bus->GetPixelColorRgbw(i);
 }
 
 WS2812FX::Segment& WS2812FX::getSegment(uint8_t id) {

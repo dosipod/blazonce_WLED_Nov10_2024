@@ -44,27 +44,23 @@
       }
       UI();
     }
-		function UI()
+		function UI(change=false)
 		{
-			var myC = d.querySelectorAll('.wc'),
-			l = myC.length;
-			for (i = 0; i < l; i++) {
-				myC[i].style.display = (d.getElementById('rgbw').checked) ? 'inline':'none';
-			}
-      
       d.getElementById('ampwarning').style.display = (d.Sf.MA.value > 7200) ? 'inline':'none';
 	  
 	    if (d.Sf.LA.value == 255) laprev = 12;
 	    else if (d.Sf.LA.value > 0) laprev = d.Sf.LA.value;
       
       var s = d.getElementsByTagName("select");
-      for (i=0; i<s.length; i++) {
+      var rgbw = false;
+      for (var i=0; i<s.length; i++) {
         if (s[i].name.substring(0,5)=="LTsel") {
-          n=s[i].name.substring(5);
-          d.getElementsByName("EW"+n)[0].checked = (parseInt(s[i].value)==30||parseInt(s[i].value)==54); // TYPE_xxxx values from const.h
+          n = s[i].name.substring(5);
+          if (change) d.getElementsByName("EW"+n)[0].checked = (parseInt(s[i].value)==30||parseInt(s[i].value)==54); // TYPE_xxxx values from const.h
+          rgbw |= d.getElementsByName("EW"+n)[0].checked;
           var LK = d.getElementsByName("LK"+n)[0];
           var o = d.getElementsByName("iLK");
-          n=(n==""?0:parseInt(n,10));
+          n = (n==""?0:parseInt(n,10));
           if (s[i].value>49 && s[i].value!=54) // TYPE_xxxx values from const.h
           {
               o[n].style = "display:inline;";
@@ -76,6 +72,10 @@
           }
         }
       }
+			var myC = d.querySelectorAll('.wc');
+			for (var i = 0; i < myC.length; i++) {
+				myC[i].style.display = rgbw ? 'inline':'none';
+			}
 
       var LCs = d.getElementsByTagName("input");
       var sLC = 0;
@@ -138,7 +138,7 @@
 
         s = d.createElement("select");
         s.setAttribute("name","LTsel"+i);
-        s.onchange = function(){UI()}
+        s.onchange = function(){UI(true)}
         o = d.createElement("option"); o.text = "WS281x";  o.value = "22"; s.add(o);
         o = d.createElement("option"); o.text = "SK6812";  o.value = "30"; s.add(o);
         o = d.createElement("option"); o.text = "WS2801";  o.value = "50"; s.add(o);
@@ -183,8 +183,17 @@
 
         t.appendChild(d.createTextNode(" count:"));
         e = d.createElement("input");
-        e.type = "number"; e.value = "0"; e.name = "LC"+i; e.min=0; e.max=1000; e.required=true; e.oninput = function(){UI()};
+        e.type = "number"; e.value = "0"; e.name = "LC"+i; e.min=0; e.max=1500; e.required=true; e.oninput = function(){UI()};
         t.appendChild(e);
+
+        t.appendChild(d.createElement("br"));
+        f.appendChild(t);
+
+        t.appendChild(d.createTextNode(" reversed (rotate 180°): "));
+        s = d.createElement("input");
+        s.type = "checkbox";
+        s.setAttribute("name","RV"+i);
+        t.appendChild(s);
 
         t.appendChild(d.createElement("br"));
         f.appendChild(t);
@@ -219,7 +228,7 @@
     <div id="mLC">
       <div name="iST">
       1:
-      <select name="LTsel" onchange="UI()">
+      <select name="LTsel" onchange="UI(true)">
         <option value="22">WS281x</option><!--TYPE_WS2812_RGB-->
         <option value="30">SK6812</option><!--TYPE_WS2812_RGB-->
         <option value="50">WS2801</option><!--TYPE_WS2801-->
@@ -240,7 +249,8 @@
       RGBW: <input type="checkbox" name="EW" onchange=UI() id="rgbw"><br>
       pin:<input name="LP" type="number" min="0" max="40" required onchange="UI()">
       <div name="iLK" style="display:inline;">clk:<input name="LK" type="number" min="0" max="40" onchange="UI()"></div>
-      count:<input name="LC" type="number" min="1" max="1500" oninput="UI()" required>
+      count:<input name="LC" type="number" min="1" max="1500" oninput="UI()" required><br>
+      reversed (rotate 180°): <input type="checkbox" name="RV" onchange=UI()>
       </div>
     </div><hr>
     Relay pin: <input type="number" min="-1" max="40" name="RL" onchange="UI()"> Inverse? <input type="checkbox" name="RM"><br>
@@ -301,7 +311,7 @@
 		Brightness factor: <input name="BF" type="number" min="1" max="255" required> %
 		<h3>Transitions</h3>
 		Crossfade: <input type="checkbox" name="TF"><br>
-		Transition Time: <input name="TD" maxlength="5" size="2"> ms<br>
+		Transition Time: <input type="number" name="TD" maxlength="5" size="2"> ms<br>
 		Enable Palette transitions: <input type="checkbox" name="PF">
 		<h3>Timed light</h3>
 		Default Duration: <input name="TL" type="number" min="1" max="255" required> min<br>
@@ -321,7 +331,6 @@
 			<option value="2">Linear (never wrap)</option>
 			<option value="3">None (not recommended)</option>
 		</select><br>
-		Reverse LED order (rotate 180): <input type="checkbox" name="RV"><br>
     Skip first LED: <input type="checkbox" name="SL"><hr>
 		<button type="button" onclick="B()">Back</button><button type="submit">Save</button>
 	</form>
