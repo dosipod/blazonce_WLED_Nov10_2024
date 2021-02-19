@@ -466,6 +466,7 @@ void WS2812FX::setColor(uint8_t slot, uint32_t c) {
 }
 
 void WS2812FX::setBrightness(uint8_t b) {
+  static bool shouldStartBus = false;
   if (gammaCorrectBri) b = gamma8(b);
   if (_brightness == b) return;
   _brightness = b;
@@ -475,12 +476,19 @@ void WS2812FX::setBrightness(uint8_t b) {
     {
       _segments[i].setOption(SEG_OPTION_FREEZE, false);
     }
-//    shouldStartBus = true;
-//  } else {
-//    if (shouldStartBus) {
-//      shouldStartBus = false;
-//      bus->Begin((NeoPixelType)(_useRgbw?2:1));
-//    }
+    // the following is needed if using LED_BUILTIN pin for driving pixels
+    // since turning it on/off disables NeoPixelBus
+    for (uint8_t s=0; s<numStrips; s++) {
+      if (getStripPin(s)==LED_BUILTIN) {
+        shouldStartBus = true;
+        break;
+      }
+    }
+  } else {
+    if (shouldStartBus) {
+      shouldStartBus = false;
+      bus->Begin((NeoPixelType)(_useRgbw?2:1));
+    }
   }
   if (SEGENV.next_time > millis() + 22 && millis() - _lastShow > MIN_SHOW_DELAY) show();//apply brightness change immediately if no refresh soon
 }

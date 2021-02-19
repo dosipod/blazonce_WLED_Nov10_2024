@@ -94,6 +94,10 @@ void handleIO()
   {
     if (!offMode) {
       #ifdef ESP8266
+      // on ESP8266 we want to switch off built-in LED when LEDs are off,
+      // this causes NeoPixelBus to cease functioning and needs to be reinitialised
+      // which is done in strip.setBrightness() since button.cpp does not have
+      // access to bus->Begin()
       for (uint8_t s=0; s<strip.numStrips; s++) {
         if (strip.getStripPin(s)==LED_BUILTIN) {
           pinMode(LED_BUILTIN, OUTPUT);
