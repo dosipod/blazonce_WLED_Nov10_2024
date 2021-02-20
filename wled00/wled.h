@@ -8,7 +8,7 @@
  */
 
 // version code in format yymmddb (b = daily build)
-#define VERSION 2102190
+#define VERSION 2102200
 
 //uncomment this if you have a "my_config.h" file you'd like to use
 //#define WLED_USE_MY_CONFIG
@@ -129,12 +129,6 @@
   #error You are not using the Aircoookie fork of the ESPAsyncWebserver library.\
   Using upstream puts your WiFi password at risk of being served by the filesystem.\
   Comment out this error message to build regardless.
-#endif
-
-#if !defined(IRPIN) || IRPIN < 0
-  #ifndef WLED_DISABLE_INFRARED
-    #define WLED_DISABLE_INFRARED
-  #endif
 #endif
 
 #ifndef WLED_DISABLE_INFRARED

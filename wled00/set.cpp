@@ -159,7 +159,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     // upate other pins
     #ifndef WLED_DISABLE_INFRARED
     int hw_ir_pin = request->arg(F("IR")).toInt();
-    if (pinManager.isPinOk(hw_ir_pin) && pinManager.allocatePin(hw_ir_pin,false)) {
+    if (pinManager.allocatePin(hw_ir_pin,false)) {
       irPin = hw_ir_pin;
     } else {
       irPin = -1;
