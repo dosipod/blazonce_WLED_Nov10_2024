@@ -98,7 +98,7 @@ onchange="UI()"> Inverse? <input type="checkbox" name="RM"><br>Button pin:
 <input type="number" min="-1" max="40" name="AX" onchange="UI()"><hr><div 
 id="ledwarning" style="color:orange;display:none">
 &#9888; You might run into stability or lag issues.<br>Use less than <span 
-id="maxLED"></span> LEDs per ESP for the best experience!<br></div><div 
+id="maxLED">1000</span> LEDs per ESP for the best experience!<br></div><div 
 id="ledwarning2" style="color:#ff4500;display:none">
 &#9888; High number of LEDs per strip may result in slow animations.<br>
 Use less than 800 LEDs per strip (ESP pin) for the best experience!<br></div><i>

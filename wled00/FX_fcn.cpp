@@ -476,6 +476,7 @@ void WS2812FX::setBrightness(uint8_t b) {
     {
       _segments[i].setOption(SEG_OPTION_FREEZE, false);
     }
+    #ifdef ESP8266
     // the following is needed if using LED_BUILTIN pin for driving pixels
     // since turning it on/off disables NeoPixelBus
     for (uint8_t s=0; s<numStrips; s++) {
@@ -484,11 +485,14 @@ void WS2812FX::setBrightness(uint8_t b) {
         break;
       }
     }
+    #endif
   } else {
+    #ifdef ESP8266
     if (shouldStartBus) {
       shouldStartBus = false;
       bus->Begin((NeoPixelType)(_useRgbw?2:1));
     }
+    #endif
   }
   if (SEGENV.next_time > millis() + 22 && millis() - _lastShow > MIN_SHOW_DELAY) show();//apply brightness change immediately if no refresh soon
 }
