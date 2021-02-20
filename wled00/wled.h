@@ -8,7 +8,7 @@
  */
 
 // version code in format yymmddb (b = daily build)
-#define VERSION 2102201
+#define VERSION 2102202
 
 //uncomment this if you have a "my_config.h" file you'd like to use
 //#define WLED_USE_MY_CONFIG
@@ -600,6 +600,10 @@ WLED_GLOBAL PinManagerClass pinManager _INIT(PinManagerClass());
 #endif
 #define WLED_WIFI_CONFIGURED (strlen(clientSSID) >= 1 && strcmp(clientSSID, DEFAULT_CLIENT_SSID) != 0)
 #define WLED_MQTT_CONNECTED (mqtt != nullptr && mqtt->connected())
+
+#define GET_BIT(var,bit)    ((var>>bit)&0x01)
+#define SET_BIT(var,bit)    (var|=(uint16_t)(0x0001<<bit))
+#define UNSET_BIT(var,bit)  (var&=(~(uint16_t)(0x0001<<bit)))
 
 // append new c string to temp buffer efficiently
 bool oappend(const char* txt);

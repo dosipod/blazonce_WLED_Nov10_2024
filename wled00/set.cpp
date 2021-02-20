@@ -115,6 +115,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       rv = request->hasArg(RV.c_str());
       co = request->arg(CO).toInt();
       type = request->arg(LTsel).toInt();
+      if (request->hasArg((EW).c_str())) SET_BIT(type,7); else UNSET_BIT(type,7);
       strip.addLEDs(type, pins, len, co, rv);
     } else {
       t = 30;
@@ -147,6 +148,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
           break;
         }
         rv = request->hasArg((RV+i).c_str());
+        if (request->hasArg((EW+i).c_str())) SET_BIT(type,7); else UNSET_BIT(type,7);
         useRGBW |= request->hasArg((EW+i).c_str());
         co = request->arg((CO+i).c_str()).toInt();
         strip.addLEDs(type, pins, len, co, rv);

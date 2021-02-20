@@ -92,11 +92,10 @@ void deserializeConfig() {
   // initialize LED pins and lengths prior to other HW
   JsonObject hw_led = hw[F("led")];
 
-//  CJSON(ledCount, hw_led[F("total")]);
+  //CJSON(ledCount, hw_led[F("total")]);
   ledCount = 0;
   CJSON(strip.ablMilliampsMax, hw_led[F("maxpwr")]);
   CJSON(strip.milliampsPerLed, hw_led[F("ledma")]);
-  //CJSON(strip.reverseMode, hw_led[F("rev")]);
   CJSON(strip.rgbwMode, hw_led[F("rgbwm")]);
 
   useRGBW = skipFirstLed = false;
@@ -129,6 +128,7 @@ void deserializeConfig() {
       uint8_t co = elm[F("order")];
       skipFirstLed |= (bool) elm[F("skip")]; // if skipping, skip all 1st LEDs
       uint8_t type = elm[F("type")];
+      if ((bool)elm[F("rgbw")]) SET_BIT(type,7); else UNSET_BIT(type,7);
       bool rv = elm[F("rev")];
       useRGBW |= ((type == TYPE_SK6812_RGBW) || (type == TYPE_TM1814)); // if one strip is RGBW all are considered RGBW
       ledCount += len;
@@ -468,7 +468,9 @@ void serializeConfig() {
     hw_led_ins_0[F("order")] = strip.getColorOrder(s);
     hw_led_ins_0[F("rev")]  = strip.isStripReversed(s);
     hw_led_ins_0[F("skip")] = skipFirstLed ? 1 : 0;
-    hw_led_ins_0[F("type")] = strip.getStripType(s);
+    uint8_t type = strip.getStripType(s);
+    hw_led_ins_0[F("type")] = type & 0x7F;
+    hw_led_ins_0[F("rgbw")] = (bool)GET_BIT(type,7);
   }
 
   JsonObject hw_btn = hw.createNestedObject("btn");

@@ -820,11 +820,11 @@ class WS2812FX {
   private:
     NeoPixelWrapper *bus;
 
-    uint8_t  _stripType[MAX_NUMBER_OF_STRIPS];
+    uint8_t  _stripType[MAX_NUMBER_OF_STRIPS];    // bit 7 holds RGBW (1) or RGB (0) mode for strip since types span only 0-60
     int8_t   _stripPin[MAX_NUMBER_OF_STRIPS][2];
     uint16_t _stripLen[MAX_NUMBER_OF_STRIPS];
     uint8_t  _stripCO[MAX_NUMBER_OF_STRIPS];
-    uint16_t _stripReverseMode;  // bit pattern of reverse mode for strip
+    uint16_t _stripReverseMode; // bit pattern of reverse mode for strip
 
     uint32_t crgb_to_col(CRGB fastled);
     CRGB col_to_crgb(uint32_t);
