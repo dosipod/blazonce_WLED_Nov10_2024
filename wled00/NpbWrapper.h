@@ -167,7 +167,9 @@ public:
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
       switch (pixelType[idx]) {
-        case TYPE_WS2812_RGB:
+
+        case TYPE_SK6812_RGBW: //RGBW bit unset
+        case TYPE_WS2812_RGB:  //RGBW bit unset
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -205,7 +207,8 @@ public:
         }
         break;
 
-        case TYPE_SK6812_RGBW:
+        case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+        case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -243,32 +246,36 @@ public:
         }
         break;
 
-        case TYPE_WS2801:
+        case TYPE_WS2801:  //RGBW bit unset
+        case TYPE_WS2801 | 0x80:  //RGBW bit set
           _pGRB[idx] = (void*) new NeoPixelBrightnessBusWS2801(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
           ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->Begin();
         break;
 
-        case TYPE_APA102:
-          if (_type==NeoPixelType_Grb) {
+        case TYPE_APA102:  //RGBW bit unset
             _pGRB[idx] = (void*) new NeoPixelBrightnessBusAPA102(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
             ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->Begin();
-          } else {
-            _pGRB[idx] = (void*) new NeoPixelBrightnessBusAPA102W(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
-            ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->Begin();
-          }
         break;
 
-        case TYPE_LPD8806:
+        case TYPE_APA102 | 0x80:  //RGBW bit set
+            _pGRB[idx] = (void*) new NeoPixelBrightnessBusAPA102W(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
+            ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->Begin();
+        break;
+
+        case TYPE_LPD8806: //RGBW bit unset
+        case TYPE_LPD8806 | 0x80: //RGBW bit set
           _pGRB[idx] = (void*) new NeoPixelBrightnessBusLPD8806(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
           ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->Begin();
         break;
 
-        case TYPE_P9813:
+        case TYPE_P9813:   //RGBW bit unset
+        case TYPE_P9813 | 0x80:   //RGBW bit set
           _pGRB[idx] = (void*) new NeoPixelBrightnessBusP9813(pixelCounts[idx], pixelStripPinsClk[idx], pixelStripPins[idx]);
           ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->Begin();
         break;
 
-        case TYPE_TM1814:
+        case TYPE_TM1814:  //RGBW bit unset
+        case TYPE_TM1814 | 0x80:  //RGBW bit set
           _pGRB[idx] = (void*) new NeoPixelBrightnessBusTM1814(pixelCounts[idx], pixelStripPins[idx]);
           ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->Begin();
         break;
@@ -350,7 +357,9 @@ public:
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
       switch (pixelType[idx]) {
-        case TYPE_WS2812_RGB:
+
+        case TYPE_SK6812_RGBW: //RGBW bit unset
+        case TYPE_WS2812_RGB:  //RGBW bit unset
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -376,7 +385,8 @@ public:
         }
         break;
 
-        case TYPE_SK6812_RGBW:
+        case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+        case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -403,26 +413,30 @@ public:
         break;
 
         case TYPE_WS2801:
+        case TYPE_WS2801 | 0x80:  //RGBW bit set
           ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->Show();
         break;
 
         case TYPE_APA102:
-          if (_type==NeoPixelType_Grb) {
             ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->Show();
-          } else {
+        break;
+
+        case TYPE_APA102 | 0x80:  //RGBW bit set
             ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->Show();
-          }
         break;
 
         case TYPE_LPD8806:
+        case TYPE_LPD8806 | 0x80: //RGBW bit set
           ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->Show();
         break;
 
         case TYPE_P9813:
+        case TYPE_P9813 | 0x80:   //RGBW bit set
           ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->Show();
         break;
 
         case TYPE_TM1814:
+        case TYPE_TM1814 | 0x80:  //RGBW bit set
           ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->Show();
         break;
 
@@ -437,7 +451,9 @@ public:
     {
       if (!_pGRB[idx]) continue;  // prevent uninitialised panic
       switch (pixelType[idx]) {
-        case TYPE_WS2812_RGB:
+
+        case TYPE_SK6812_RGBW: //RGBW bit unset
+        case TYPE_WS2812_RGB:  //RGBW bit unset
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -463,7 +479,8 @@ public:
         }
         break;
 
-        case TYPE_SK6812_RGBW:
+        case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+        case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -490,26 +507,30 @@ public:
         break;
 
         case TYPE_WS2801:
+        case TYPE_WS2801 | 0x80:  //RGBW bit set
           canShow &= ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->CanShow();
         break;
 
         case TYPE_APA102:
-          if (_type==NeoPixelType_Grb) {
             canShow &= ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->CanShow();
-          } else {
+        break;
+
+        case TYPE_APA102 | 0x80:  //RGBW bit set
             canShow &= ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->CanShow();
-          }
         break;
 
         case TYPE_LPD8806:
+        case TYPE_LPD8806 | 0x80: //RGBW bit set
           canShow &= ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->CanShow();
         break;
 
         case TYPE_P9813:
+        case TYPE_P9813 | 0x80:   //RGBW bit set
           canShow &= ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->CanShow();
         break;
 
         case TYPE_TM1814:
+        case TYPE_TM1814 | 0x80:  //RGBW bit set
           canShow &= ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->CanShow();
         break;
 
@@ -531,7 +552,9 @@ public:
     RgbColor rgb = RgbColor(c.R, c.G, c.B);
 
     switch (pixelType[stripIdx]) {
-      case TYPE_WS2812_RGB:
+
+      case TYPE_SK6812_RGBW: //RGBW bit unset
+      case TYPE_WS2812_RGB:  //RGBW bit unset
       {
         #ifdef ARDUINO_ARCH_ESP32
         switch (stripIdx)
@@ -557,7 +580,8 @@ public:
       }
       break;
 
-      case TYPE_SK6812_RGBW:
+      case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+      case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
       {
         #ifdef ARDUINO_ARCH_ESP32
         switch (stripIdx)
@@ -584,26 +608,30 @@ public:
       break;
 
       case TYPE_WS2801:
+      case TYPE_WS2801 | 0x80:  //RGBW bit set
         ((NeoPixelBrightnessBusWS2801*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
       break;
 
       case TYPE_APA102:
-        if (_type==NeoPixelType_Grb) {
           ((NeoPixelBrightnessBusAPA102*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
-        } else {
+      break;
+
+      case TYPE_APA102 | 0x80:  //RGBW bit set
           ((NeoPixelBrightnessBusAPA102W*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c);
-        }
       break;
 
       case TYPE_LPD8806:
+      case TYPE_LPD8806 | 0x80: //RGBW bit set
         ((NeoPixelBrightnessBusLPD8806*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
       break;
 
       case TYPE_P9813:
+      case TYPE_P9813 | 0x80:   //RGBW bit set
         ((NeoPixelBrightnessBusP9813*)_pGRB[stripIdx])->SetPixelColor(indexPixel, rgb);
       break;
 
       case TYPE_TM1814:
+      case TYPE_TM1814 | 0x80:  //RGBW bit set
         ((NeoPixelBrightnessBusTM1814*)_pGRB[stripIdx])->SetPixelColor(indexPixel, c);
       break;
 
@@ -643,7 +671,9 @@ public:
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
       switch (pixelType[idx]) {
-        case TYPE_WS2812_RGB:
+
+        case TYPE_SK6812_RGBW: //RGBW bit unset
+        case TYPE_WS2812_RGB:  //RGBW bit unset
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -669,7 +699,8 @@ public:
         }
         break;
 
-        case TYPE_SK6812_RGBW:
+        case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+        case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -696,26 +727,30 @@ public:
         break;
 
         case TYPE_WS2801:
+        case TYPE_WS2801 | 0x80:  //RGBW bit set
           ((NeoPixelBrightnessBusWS2801*)_pGRB[idx])->SetBrightness(b);
         break;
 
         case TYPE_APA102:
-          if (_type==NeoPixelType_Grb) {
             ((NeoPixelBrightnessBusAPA102*)_pGRB[idx])->SetBrightness(b);
-          } else {
+        break;
+
+        case TYPE_APA102 | 0x80:  //RGBW bit set
             ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx])->SetBrightness(b);
-          }
         break;
 
         case TYPE_LPD8806:
+        case TYPE_LPD8806 | 0x80: //RGBW bit set
           ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx])->SetBrightness(b);
         break;
 
         case TYPE_P9813:
+        case TYPE_P9813 | 0x80:   //RGBW bit set
           ((NeoPixelBrightnessBusP9813*)_pGRB[idx])->SetBrightness(b);
         break;
 
         case TYPE_TM1814:
+        case TYPE_TM1814 | 0x80:  //RGBW bit set
           ((NeoPixelBrightnessBusTM1814*)_pGRB[idx])->SetBrightness(b);
         break;
 
@@ -738,6 +773,9 @@ public:
   // get real (physical) pixel color (including sacrificial pixels)
   RgbwColor GetPixelColorRaw(uint16_t indexPixel)
   {
+    // take into account sacrificial pixels
+    indexPixel = GetRealPixelIndex(indexPixel);
+
     // figure out which strip this pixel index is on
     uint8_t stripIdx = GetStripFromRealPixel(indexPixel);
 
@@ -747,7 +785,9 @@ public:
     if (IS_STRIP_REVERSED(stripIdx)) indexPixel = pixelCounts[stripIdx] - 1 - indexPixel + pixelSkipAmount;
 
     switch (pixelType[stripIdx]) {
-      case TYPE_WS2812_RGB:
+
+      case TYPE_SK6812_RGBW: //RGBW bit unset
+      case TYPE_WS2812_RGB:  //RGBW bit unset
       {
         #ifdef ARDUINO_ARCH_ESP32
         switch (stripIdx)
@@ -773,7 +813,8 @@ public:
       }
       break;
 
-      case TYPE_SK6812_RGBW:
+      case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+      case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
       {
         #ifdef ARDUINO_ARCH_ESP32
         switch (stripIdx)
@@ -800,26 +841,30 @@ public:
       break;
 
       case TYPE_WS2801:
+      case TYPE_WS2801 | 0x80:  //RGBW bit set
         return ((NeoPixelBrightnessBusWS2801*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
       break;
 
       case TYPE_APA102:
-        if (_type==NeoPixelType_Grb) {
           return ((NeoPixelBrightnessBusAPA102*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
-        } else {
+      break;
+
+      case TYPE_APA102 | 0x80:  //RGBW bit set
           return ((NeoPixelBrightnessBusAPA102W*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
-        }
       break;
 
       case TYPE_LPD8806:
+      case TYPE_LPD8806 | 0x80: //RGBW bit set
         return ((NeoPixelBrightnessBusLPD8806*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
       break;
 
       case TYPE_P9813:
+      case TYPE_P9813 | 0x80:   //RGBW bit set
         return ((NeoPixelBrightnessBusP9813*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
       break;
 
       case TYPE_TM1814:
+      case TYPE_TM1814 | 0x80:  //RGBW bit set
         return ((NeoPixelBrightnessBusTM1814*)_pGRB[stripIdx])->GetPixelColor(indexPixel);
       break;
 
@@ -831,11 +876,8 @@ public:
   // here needs to be unique, thus GetPixeColorRgbw
   uint32_t GetPixelColorRgbw(uint16_t indexPixel)
   {
-    // take into account sacrificial pixels
-    indexPixel = GetRealPixelIndex(indexPixel);
-
     RgbwColor col = GetPixelColorRaw(indexPixel);
-    uint8_t co = pixelColorOrder[GetStripFromRealPixel(indexPixel)];
+    uint8_t co = pixelColorOrder[GetStripFromRealPixel(GetRealPixelIndex(indexPixel))];
 
     switch (co)
     {
@@ -901,7 +943,9 @@ private:
     for (uint8_t idx = 0; idx < pixelStrips; idx++)
     {
       switch (pixelType[idx]) {
-        case TYPE_WS2812_RGB:
+
+        case TYPE_SK6812_RGBW: //RGBW bit unset
+        case TYPE_WS2812_RGB:  //RGBW bit unset
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -927,7 +971,8 @@ private:
         }
         break;
 
-        case TYPE_SK6812_RGBW:
+        case TYPE_WS2812_RGB | 0x80:  //RGBW bit set
+        case TYPE_SK6812_RGBW | 0x80: //RGBW bit set
         {
           #ifdef ARDUINO_ARCH_ESP32
           switch (idx)
@@ -954,26 +999,30 @@ private:
         break;
 
         case TYPE_WS2801:
+        case TYPE_WS2801 | 0x80:  //RGBW bit set
           delete ((NeoPixelBrightnessBusWS2801*)_pGRB[idx]); _pGRB[idx] = NULL;
         break;
 
         case TYPE_APA102:
-          if (_type==NeoPixelType_Grb) {
             delete ((NeoPixelBrightnessBusAPA102*)_pGRB[idx]); _pGRB[idx] = NULL;
-          } else {
+        break;
+
+        case TYPE_APA102 | 0x80:  //RGBW bit set
             delete ((NeoPixelBrightnessBusAPA102W*)_pGRB[idx]); _pGRB[idx] = NULL;
-          }
         break;
 
         case TYPE_LPD8806:
+        case TYPE_LPD8806 | 0x80: //RGBW bit set
           delete ((NeoPixelBrightnessBusLPD8806*)_pGRB[idx]); _pGRB[idx] = NULL;
         break;
 
         case TYPE_P9813:
+        case TYPE_P9813 | 0x80:   //RGBW bit set
           delete ((NeoPixelBrightnessBusP9813*)_pGRB[idx]); _pGRB[idx] = NULL;
         break;
 
         case TYPE_TM1814:
+        case TYPE_TM1814 | 0x80:  //RGBW bit set
           delete ((NeoPixelBrightnessBusTM1814*)_pGRB[idx]); _pGRB[idx] = NULL;
         break;
 
