@@ -370,8 +370,9 @@ void WLED::beginStrip()
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
 
-  if (bootPreset > 0) applyPreset(bootPreset);
-  if (!bootPreset && turnOnAtBoot) {
+  if (bootPreset > 0) {
+    applyPreset(bootPreset);
+  } else if (turnOnAtBoot) {
     if (briS > 0) bri = briS;
     else if (bri == 0) bri = 128;
   } else {
