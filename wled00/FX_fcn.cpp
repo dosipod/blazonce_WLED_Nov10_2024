@@ -73,19 +73,7 @@ void WS2812FX::init(bool supportWhite, bool skipFirst)
   deserializeMap();
 
   _length = 0;
-  for (uint8_t i=0; i<numStrips; i++) {
-    _segments[i].start = _length;
-    _length += _stripLen[i];
-    _segments[i].stop = _length;
-    _segments[i].mode = DEFAULT_MODE;
-    _segments[i].colors[0] = DEFAULT_COLOR;
-    _segments[i].speed = DEFAULT_SPEED;
-    _segments[i].intensity = DEFAULT_INTENSITY;
-    _segments[i].grouping = 1;
-    _segments[i].setOption(SEG_OPTION_SELECTED, 1);
-    _segments[i].setOption(SEG_OPTION_ON, 1);
-    _segments[i].opacity = 255;
-  }
+  for (uint8_t i=0; i<numStrips; i++) _length += _stripLen[i];
 
   // we could skip this if we pass "this" pointer to bus->Begin()
   bus->initStrips(numStrips, _stripPin, _stripLen, _stripType, _stripCO, (skipFirst ? LED_SKIP_AMOUNT : 0), _stripReverseMode);
@@ -639,6 +627,24 @@ void WS2812FX::resetSegments() {
     _segment_runtimes[i].reset();
   }
   _segment_runtimes[0].reset();
+}
+
+void WS2812FX::populateDefaultSegments() {
+  uint16_t length = 0;
+  resetSegments();
+  for (uint8_t i=0; i<numStrips; i++) {
+    _segments[i].start = length;
+    length += _stripLen[i];
+    _segments[i].stop = length;
+    _segments[i].mode = DEFAULT_MODE;
+    _segments[i].colors[0] = DEFAULT_COLOR;
+    _segments[i].speed = DEFAULT_SPEED;
+    _segments[i].intensity = DEFAULT_INTENSITY;
+    _segments[i].grouping = 1;
+    _segments[i].setOption(SEG_OPTION_SELECTED, 1);
+    _segments[i].setOption(SEG_OPTION_ON, 1);
+    _segments[i].opacity = 255;
+  }
 }
 
 //After this function is called, setPixelColor() will use that segment (offsets, grouping, ... will apply)

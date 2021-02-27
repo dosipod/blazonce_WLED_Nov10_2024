@@ -367,6 +367,7 @@ void WLED::beginStrip()
   // Initialize NeoPixel Strip and button
 
   strip.init(useRGBW, skipFirstLed);
+  strip.populateDefaultSegments();
   strip.setBrightness(0);
   strip.setShowCallback(handleOverlayDraw);
 

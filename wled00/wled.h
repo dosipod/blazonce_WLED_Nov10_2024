@@ -601,9 +601,9 @@ WLED_GLOBAL PinManagerClass pinManager _INIT(PinManagerClass());
 #define WLED_WIFI_CONFIGURED (strlen(clientSSID) >= 1 && strcmp(clientSSID, DEFAULT_CLIENT_SSID) != 0)
 #define WLED_MQTT_CONNECTED (mqtt != nullptr && mqtt->connected())
 
-#define GET_BIT(var,bit)    ((var>>bit)&0x01)
-#define SET_BIT(var,bit)    (var|=(uint16_t)(0x0001<<bit))
-#define UNSET_BIT(var,bit)  (var&=(~(uint16_t)(0x0001<<bit)))
+#define GET_BIT(var,bit)    (((var)>>(bit))&0x01)
+#define SET_BIT(var,bit)    ((var)|=(uint16_t)(0x0001<<(bit)))
+#define UNSET_BIT(var,bit)  ((var)&=(~(uint16_t)(0x0001<<(bit))))
 
 // append new c string to temp buffer efficiently
 bool oappend(const char* txt);
