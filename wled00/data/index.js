@@ -1694,20 +1694,26 @@ function clean(c) {
 
 function expand(i,a)
 {
+	var seg = d.getElementById('seg' +i);
 	if (!a) expanded[i] = !expanded[i];
-	d.getElementById('seg' +i).style.display = (expanded[i]) ? "block":"none";
+	seg.style.display = (expanded[i]) ? "block":"none";
 	d.getElementById('sege' +i).style.transform = (expanded[i]) ? "rotate(180deg)":"rotate(0deg)";
 	if (i > 100) { //presets
 		var p = i-100;
 		d.getElementById(`p${p}o`).style.background = (expanded[i] || p != currentPreset)?"var(--c-2)":"var(--c-6)";
-		if (d.getElementById('seg' +i).innerHTML == "") {
-      d.getElementById('seg' +i).innerHTML = makeP(p);
-      var papi = papiVal(p);
-      d.getElementById(`p${p}api`).value = papi;
-      if (papi.indexOf("Please") == 0) d.getElementById(`p${p}cstgl`).checked = true;
-      tglCs(p);
+		if (seg.innerHTML == "") {
+			seg.innerHTML = makeP(p);
+			var papi = papiVal(p);
+			d.getElementById(`p${p}api`).value = papi;
+			if (papi.indexOf("Please") == 0) d.getElementById(`p${p}cstgl`).checked = true;
+			tglCs(p);
 		}
+		seg = seg.parentElement;
 	}
+	if (expanded[i]) seg.scrollIntoView({
+		behavior: 'smooth',
+		block: 'center',
+	});
 }
 
 function unfocusSliders() {
