@@ -169,7 +169,6 @@ void handleNotifications()
 
   // WLED nodes info notifications
   if (isSupp && udpIn[0] == 255 && udpIn[1] == 1 && len >= 40) {
-//    IPAddress remoteIP = notifier2Udp.remoteIP();
 
     uint8_t unit = udpIn[39];
     Nodes[unit].age = 0; // Create a new element when not present
@@ -186,6 +185,11 @@ void handleNotifications()
       it->second.nodeName = tmpNodeName;
       it->second.nodeName.trim();
       it->second.nodeType = udpIn[38];
+      uint32_t build = 0;
+      if (len >= 44)
+        for (byte i=0; i<sizeof(uint32_t); i++)
+          build |= udpIn[40+i]<<(8*i);
+      it->second.build    = build;
     }
     return;
   }
@@ -414,7 +418,8 @@ void sendSysInfoUDP(uint8_t repeats)
   //  6: 32 char name
   // 38: 1 byte node type id
   // 39: 1 byte node id
-  // 40 bytes total
+  // 40: 4 byte version ID
+  // 44 bytes total
 
   // send my info to the world...
   for (;repeats--;)
@@ -423,7 +428,7 @@ void sendSysInfoUDP(uint8_t repeats)
     escapedMac  // mac address
     */
 
-    uint8_t data[40] = {0};
+    uint8_t data[44] = {0};
     data[0] = 255;
     data[1] = 1;
     
@@ -440,9 +445,13 @@ void sendSysInfoUDP(uint8_t repeats)
     #endif
     data[39] = ip[3]; // unit ID == last IP number
 
+    uint32_t build = VERSION;
+    for (byte i=0; i<sizeof(uint32_t); i++)
+      data[40+i] = (build>>(8*i)) & 0xFF;
+
     IPAddress broadcastIP(255, 255, 255, 255);
     notifier2Udp.beginPacket(broadcastIP, udpPort2);
-    notifier2Udp.write(data, 40);
+    notifier2Udp.write(data, sizeof(data));
     notifier2Udp.endPacket();
 
     if (repeats) delay(500);
@@ -467,5 +476,6 @@ void sendSysInfoUDP(uint8_t repeats)
     it->second.nodeType = NODE_TYPE_ID_UNDEFINED;
     #endif
     it->second.unit     = ip[3];
+    it->second.build    = VERSION; 
   }
 }
