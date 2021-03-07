@@ -437,6 +437,10 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('i',SET_F("TZ"),currentTimezone);
     sappend('v',SET_F("UO"),utcOffsetSecs);
     char tm[32];
+    dtostrf(longitude,5,2,tm);
+    sappends('s',SET_F("LN"),tm);
+    dtostrf(latitude,5,2,tm);
+    sappends('s',SET_F("LT"),tm);
     getTimeString(tm);
     sappends('m',SET_F("(\"times\")[0]"),tm);
     sappend('i',SET_F("OL"),overlayCurrent);
@@ -465,10 +469,10 @@ void getSettingsJS(byte subPage, char* dest)
 
     char k[4];
     k[2] = 0; //Time macros
-    for (int i = 0; i<8; i++)
+    for (int i = 0; i<10; i++)
     {
       k[1] = 48+i; //ascii 0,1,2,3
-      k[0] = 'H'; sappend('v',k,timerHours[i]);
+      if (i<8) { k[0] = 'H'; sappend('v',k,timerHours[i]); }
       k[0] = 'N'; sappend('v',k,timerMinutes[i]);
       k[0] = 'T'; sappend('v',k,timerMacro[i]);
       k[0] = 'W'; sappend('v',k,timerWeekday[i]);

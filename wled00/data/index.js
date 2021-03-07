@@ -572,7 +572,7 @@ function populateInfo(i)
 	${urows}
 	${inforow("Build",i.vid)}
 	${inforow("Signal strength",i.wifi.signal +"% ("+ i.wifi.rssi, " dBm)")}
-	${inforow("Uptime",getRuntimeStr(i.uptime))}
+	${inforow("Uptime",getRuntimeStr(i.uptime),' <span class="icons">'+(i.isday?'&#xe333;':'&#xe2a2;')+'</span>')}
 	${inforow("Free heap",heap," kB")}
 	${inforow("Estimated current",pwru)}
 	${inforow("MAC address",i.mac)}
@@ -887,12 +887,6 @@ function updateUI(scrollto=false)
 	updateSelectedPalette();
 	updateSelectedFx(scrollto);
 
-//	d.getElementById('fxb' + selectedFx).style.backgroundColor = "var(--c-6)";
-	//if (d.getElementById('fxb' + selectedFx))
-	//{
-	//	d.getElementById('fxb' + selectedFx).style.backgroundColor = "var(--c-6)";
-	//	if (scrollto) d.getElementById('Effects').scrollTop = d.getElementById('fxb' + selectedFx).offsetTop - d.getElementById('Effects').clientHeight/1.8;
-	//}
 	updateTrail(d.getElementById('sliderBri'));
 	updateTrail(d.getElementById('sliderSpeed'));
 	updateTrail(d.getElementById('sliderIntensity'));

@@ -8,7 +8,7 @@
  */
 
 // version code in format yymmddb (b = daily build)
-#define VERSION 2103050
+#define VERSION 2103071
 
 //uncomment this if you have a "my_config.h" file you'd like to use
 //#define WLED_USE_MY_CONFIG
@@ -443,10 +443,10 @@ WLED_GLOBAL bool countdownOverTriggered _INIT(true);
 
 // timer
 WLED_GLOBAL byte lastTimerMinute _INIT(0);
-WLED_GLOBAL byte timerHours[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0 }));
-WLED_GLOBAL byte timerMinutes[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0 }));
-WLED_GLOBAL byte timerMacro[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0 }));
-WLED_GLOBAL byte timerWeekday[] _INIT_N(({ 255, 255, 255, 255, 255, 255, 255, 255 }));        // weekdays to activate on
+WLED_GLOBAL byte timerHours[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+WLED_GLOBAL int8_t timerMinutes[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+WLED_GLOBAL byte timerMacro[] _INIT_N(({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+WLED_GLOBAL byte timerWeekday[] _INIT_N(({ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 }));        // weekdays to activate on
 // bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
 
 // blynk
@@ -507,6 +507,11 @@ WLED_GLOBAL unsigned long ntpPacketSentTime _INIT(999000000L);
 WLED_GLOBAL IPAddress ntpServerIP;
 WLED_GLOBAL uint16_t ntpLocalPort _INIT(2390);
 WLED_GLOBAL uint16_t rolloverMillis _INIT(0);
+WLED_GLOBAL bool daytime _INIT(false);
+WLED_GLOBAL float longitude _INIT(0.0);
+WLED_GLOBAL float latitude _INIT(0.0);
+WLED_GLOBAL time_t sunrise _INIT(0);
+WLED_GLOBAL time_t sunset _INIT(0);
 
 // Temp buffer
 WLED_GLOBAL char* obuf;
@@ -572,7 +577,7 @@ WLED_GLOBAL PinManagerClass pinManager _INIT(PinManagerClass());
 #else
   #define DEBUG_PRINT(x)
   #define DEBUG_PRINTLN(x)
-  #define DEBUG_PRINTF(x)
+  #define DEBUG_PRINTF(x...)
 #endif
 
 #ifdef WLED_DEBUG_FS
