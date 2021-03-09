@@ -441,6 +441,10 @@ void getSettingsJS(byte subPage, char* dest)
     sappends('s',SET_F("LN"),tm);
     dtostrf(latitude,4,2,tm);
     sappends('s',SET_F("LT"),tm);
+    if ((int)(longitude*10.) || (int)(latitude*10.)) {
+      sprintf_P(tm, PSTR("Sunrise: %02d:%02d Sunset: %02d:%02d"), hour(sunrise), minute(sunrise), hour(sunset), minute(sunset));
+      sappends('m',SET_F("(\"times\")[1]"),tm);
+    }
     getTimeString(tm);
     sappends('m',SET_F("(\"times\")[0]"),tm);
     sappend('i',SET_F("OL"),overlayCurrent);
