@@ -533,6 +533,21 @@ function populatePresets(fromls)
 	populateQL();
 }
 
+function btype(b) {
+	switch (b) {
+		case 2:
+		case 32: return "ESP32";
+		case 1:
+		case 82: return "ESP8266";
+	}
+	return "?";
+}
+
+function bname(o) {
+	if (o.name=="WLED") return o.ip;
+	return o.name;
+}
+
 function populateInfo(i)
 {
 	var cn="";
@@ -549,8 +564,8 @@ function populateInfo(i)
 		{
 			var o = i.nodes[x];
 			if (o.name) {
-				var url = `<button class="btn btna-icon tab" onclick="location.assign('http://${o.ip}');">${o.name}</button>`;
-				urows += inforow(url,`${o.type}<br><i>${o.build==0?"N/A":o.build}</i>`);
+				var url = `<button class="btn btna-icon tab" onclick="location.assign('http://${o.ip}');">${bname(o)}</button>`;
+				urows += inforow(url,`${btype(o.type)}<br><i>${o.build==0?"N/A":o.build}</i>`);
 			}
 		}
 	}

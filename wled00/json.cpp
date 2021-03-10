@@ -553,7 +553,7 @@ void serializeInfo(JsonObject root)
 
       JsonObject node = nodes.createNestedObject();
       node[F("name")] = it->second.nodeName;
-      node[F("type")] = getNodeTypeDisplayString(it->second.nodeType);
+      node[F("type")] = it->second.nodeType;
       node[F("ip")]   = it->second.ip.toString();
       node[F("age")]  = it->second.age;
       node[F("build")] = it->second.build;
