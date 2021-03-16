@@ -10,8 +10,8 @@
 
 
 #define NODE_TYPE_ID_UNDEFINED          0
-#define NODE_TYPE_ID_ESP8266            1
-#define NODE_TYPE_ID_ESP32              2
+#define NODE_TYPE_ID_ESP8266           82
+#define NODE_TYPE_ID_ESP32             32
 
 String getNodeTypeDisplayString(uint8_t nodeType);
 
