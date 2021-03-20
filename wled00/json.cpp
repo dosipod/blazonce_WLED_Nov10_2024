@@ -202,8 +202,8 @@ bool deserializeState(JsonObject root)
   receiveNotifications = udpn[F("recv")] | receiveNotifications;
   bool noNotification  = udpn[F("nn")]; //send no notification just for this request
 
-  unsigned long timein = root[F("time")] | -1;
-  if (timein != -1) {
+  unsigned long timein = root[F("time")] | UINT32_MAX;
+  if (timein != UINT32_MAX) {
     if (millis() - ntpLastSyncTime > 50000000L) setTime(timein);
     if (presetsModifiedTime == 0) presetsModifiedTime = timein;
   }
@@ -281,7 +281,8 @@ bool deserializeState(JsonObject root)
 
   JsonObject playlist = root[F("playlist")];
   if (!playlist.isNull()) {
-    loadPlaylist(playlist); // return stateResponse;
+    loadPlaylist(playlist);
+    noNotification = true; //do not notify both for this request and the first playlist entry
   }
 
   colorUpdated(noNotification ? NOTIFIER_CALL_MODE_NO_NOTIFY : NOTIFIER_CALL_MODE_DIRECT_CHANGE);
@@ -610,25 +611,19 @@ void serializePalettes(JsonObject root, AsyncWebServerRequest* request)
   int itemPerPage = 8;
   #endif
 
-  int page;
+  int page = 0;
   if (request->hasParam("page")) {
     page = request->getParam("page")->value().toInt();
-  } else {
-    page = 1;
   }
 
   int palettesCount = strip.getPaletteCount();
 
-  int maxPage = ceil((float)palettesCount / (float)itemPerPage);
-  if (page > maxPage) {
-    page = maxPage;
-  }
+  int maxPage = (palettesCount -1) / itemPerPage;
+  if (page > maxPage) page = maxPage;
 
-  int start = itemPerPage * (page - 1);
+  int start = itemPerPage * page;
   int end = start + itemPerPage;
-  if (end > palettesCount - 1) {
-    end = palettesCount;
-  }
+  if (end >= palettesCount) end = palettesCount;
 
   root[F("m")] = maxPage;
   JsonObject palettes  = root.createNestedObject("p");
@@ -647,15 +642,6 @@ void serializePalettes(JsonObject root, AsyncWebServerRequest* request)
           curPalette.add(F("r"));
           curPalette.add(F("r"));
           curPalette.add(F("r"));
-          /**setPaletteColors(
-            curPalette, 
-            CRGBPalette16(
-              CHSV(random8(), 255, random8(128, 255)),
-              CHSV(random8(), 255, random8(128, 255)),
-              CHSV(random8(), 192, random8(128, 255)),
-              CHSV(random8(), 255, random8(128, 255))
-            )
-          );**/
         break;
       case 2: //primary color only
         curPalette.add(F("c1"));
@@ -780,13 +766,13 @@ void serveJson(AsyncWebServerRequest* request)
 
 bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
 {
+  #ifdef WLED_ENABLE_WEBSOCKETS
   AsyncWebSocketClient * wsc;
   if (!request) { //not HTTP, use Websockets
-    #ifdef WLED_ENABLE_WEBSOCKETS
     wsc = ws.client(wsClient);
     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
-    #endif
   }
+  #endif
 
   uint16_t used = ledCount;
   uint16_t n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
@@ -797,7 +783,7 @@ bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
 
   for (uint16_t i= 0; i < used; i += n)
   {
-    olen += sprintf(obuf + olen, "\"%06X\",", strip.getPixelColor(i));
+    olen += sprintf(obuf + olen, "\"%06X\",", strip.getPixelColor(i) & 0xFFFFFF);
   }
   olen -= 1;
   oappend((const char*)F("],\"n\":"));

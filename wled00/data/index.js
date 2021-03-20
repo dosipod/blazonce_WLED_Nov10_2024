@@ -220,6 +220,14 @@ function onLoad() {
 		sl.addEventListener('touchstart', toggleBubble);
 		sl.addEventListener('touchend', toggleBubble);
 	}
+
+	// Creatte UI update WS handler
+	var mySocket = new WebSocket('ws://'+(loc?locip:window.location.hostname)+'/ws');
+	mySocket.onmessage = function(event) {
+		var json = JSON.parse(event.data);
+		//console.log(json);
+		if (handleJson(json.state)) updateUI(true);
+	}
 }
 
 function updateTablinks(tabI)
@@ -810,10 +818,10 @@ function genPalPrevCss(id)
 function generateListItemHtml(listName, id, name, clickAction, extraHtml = '')
 {
     return `<div class="lstI" data-id="${id}">
-			<label class="check schkl">
+			<label class="radio schkl">
 				&nbsp;
 				<input type="radio" value="${id}" name="${listName}" onChange="${clickAction}()">
-				<span class="checkmark schk"></span>
+				<span class="radiomark schk"></span>
 			</label>
 			<div class="lstIcontent" onClick="${clickAction}(${id})">
 				<span class="lstIname">
@@ -874,7 +882,7 @@ function updateLen(s)
 	d.getElementById(`seg${s}len`).innerHTML = out;
 }
 
-function updatePA()
+function updatePA(scrollto=false)
 {
 	var ps = d.getElementsByClassName("seg");
 	for (let i = 0; i < ps.length; i++) {
@@ -886,8 +894,16 @@ function updatePA()
 	}
 	if (currentPreset > 0) {
 		var acv = d.getElementById(`p${currentPreset}o`);
-		if (acv && !expanded[currentPreset+100])
+		if (acv && !expanded[currentPreset+100]) {
 			acv.style.background = "var(--c-6)";
+			if (scrollto) {
+				// scroll selected preset into view (on WS refresh)
+				acv.scrollIntoView({
+					behavior: 'smooth',
+					block: 'center',
+				});
+			}
+		}
 		acv = d.getElementById(`p${currentPreset}qlb`);
 		if (acv) acv.style.background = "var(--c-6)";
 	}
@@ -899,7 +915,7 @@ function updateUI(scrollto=false)
 	d.getElementById('buttonNl').className = (nlA) ? "active":"";
 	d.getElementById('buttonSync').className = (syncSend) ? "active":"";
 
-	updateSelectedPalette();
+	updateSelectedPalette(scrollto);
 	updateSelectedFx(scrollto);
 
 	updateTrail(d.getElementById('sliderBri'));
@@ -908,7 +924,7 @@ function updateUI(scrollto=false)
 	updateTrail(d.getElementById('sliderW'));
 	if (isRgbw) d.getElementById('wwrap').style.display = "block";
 
-	updatePA();
+	updatePA(scrollto);
 	updateHex();
 	updateRgb();
 }
@@ -928,6 +944,14 @@ function updateSelectedPalette()
 	if (selectedPalette) {
 		parent.querySelector(`.lstI[data-id="${selectedPal}"]`).classList.add('selected');
 	}
+/*
+	if (scrollto && selectedPalette) {
+		selectedPalette.scrollIntoView({
+			behavior: 'smooth',
+			block: 'center',
+		});
+	}
+*/
 }
 
 function updateSelectedFx(scrollto=false)
@@ -966,6 +990,52 @@ function displayRover(i,s)
 function cmpP(a, b) {
 	if (!a[1].n) return (a[0] > b[0]);
   return a[1].n.localeCompare(b[1].n,undefined, {numeric: true});
+}
+
+function handleJson(s)
+{
+	if (!s) return false;
+
+	isOn = s.on;
+	d.getElementById('sliderBri').value= s.bri;
+	nlA = s.nl.on;
+	nlDur = s.nl.dur;
+	nlTar = s.nl.tbri;
+	nlFade = s.nl.fade;
+	syncSend = s.udpn.send;
+	currentPreset = s.ps;
+	d.getElementById('cyToggle').checked = (s.pl >= 0);
+	d.getElementById('cycs').value = s.ccnf.min;
+	d.getElementById('cyce').value = s.ccnf.max;
+	d.getElementById('cyct').value = s.ccnf.time/10;
+	d.getElementById('cyctt').value = s.transition/10;
+
+	var selc=0; var ind=0;
+	populateSegments(s);
+	for (let i = 0; i < (s.seg||[]).length; i++)
+	{
+		if(s.seg[i].sel) {selc = ind; break;} ind++;
+	}
+	var i=s.seg[selc];
+	if (!i) return false; // no segments!
+	
+	selColors = i.col;
+	var cd = d.getElementById('csl').children;
+	for (let e = 2; e >= 0; e--)
+	{
+		cd[e].style.backgroundColor = "rgb(" + i.col[e][0] + "," + i.col[e][1] + "," + i.col[e][2] + ")";
+		if (isRgbw) whites[e] = parseInt(i.col[e][3]);
+		selectSlot(csel);
+	}
+	d.getElementById('sliderSpeed').value = whites[csel];
+
+	d.getElementById('sliderSpeed').value = i.sx;
+	d.getElementById('sliderIntensity').value = i.ix;
+
+	selectedPal = i.pal;
+	selectedFx = i.fx;
+
+	return true;
 }
 
 var jsonTimeout;
@@ -1012,14 +1082,14 @@ function requestJson(command, rinfo = true, verbose = true, callback = null) {
 		if (!json) {
 			showToast('Empty response', true);
 		}
+		if (json.error && json.error != 0) { showToast('Out of memory!', true); return; }
 		if (json.success) {
 			if (callback) {
 				callback();
 			}
 			return;
 		}
-		var s = json;
-		
+		var s = json.state ? json.state : json;
 		if (!command || rinfo) {
 			if (!rinfo) {
 				pmt = json.info.fs.pmt;
@@ -1053,55 +1123,15 @@ function requestJson(command, rinfo = true, verbose = true, callback = null) {
 			if (isInfo) {
 				populateInfo(info);
 			}
-				s = json.state;
-				displayRover(info, s);
+			displayRover(info, s);
 		}
 
-		isOn = s.on;
-		d.getElementById('sliderBri').value= s.bri;
-		nlA = s.nl.on;
-		nlDur = s.nl.dur;
-		nlTar = s.nl.tbri;
-		nlFade = s.nl.fade;
-		syncSend = s.udpn.send;
-		currentPreset = s.ps;
-		d.getElementById('cyToggle').checked = (s.pl >= 0);
-		d.getElementById('cycs').value = s.ccnf.min;
-		d.getElementById('cyce').value = s.ccnf.max;
-		d.getElementById('cyct').value = s.ccnf.time /10;
-		d.getElementById('cyctt').value = s.transition /10;
-
-		var selc=0; var ind=0;
-		populateSegments(s);
-		for (let i = 0; i < (s.seg||[]).length; i++)
-		{
-			if(s.seg[i].sel) {selc = ind; break;} ind++;
-		}
-		var i=s.seg[selc];
-		if (!i) {
+		if (!handleJson(s)) {
 			showToast('No Segments!', true);
 			updateUI(false);
-			if (callback) {
-				callback();
-			}
+			if (callback) callback();
 			return;
 		}
-		
-		selColors = i.col;
-		var cd = d.getElementById('csl').children;
-		for (let e = 2; e >= 0; e--)
-		{
-			cd[e].style.backgroundColor = "rgb(" + i.col[e][0] + "," + i.col[e][1] + "," + i.col[e][2] + ")";
-			if (isRgbw) whites[e] = parseInt(i.col[e][3]);
-			selectSlot(csel);
-		}
-		d.getElementById('sliderSpeed').value = whites[csel];
-
-		d.getElementById('sliderSpeed').value = i.sx;
-		d.getElementById('sliderIntensity').value = i.ix;
-
-		selectedPal = i.pal;
-		selectedFx = i.fx;
 
 		if (s.error && s.error != 0) {
       		var errstr = "";

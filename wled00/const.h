@@ -185,7 +185,7 @@
   #ifndef MAX_LEDS
     #define MAX_LEDS 1500
   #endif
-  #define JSON_BUFFER_SIZE 10240
+  #define JSON_BUFFER_SIZE 9216
 #else
   #ifndef MAX_LEDS
     #define MAX_LEDS 4000

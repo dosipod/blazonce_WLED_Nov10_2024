@@ -274,13 +274,14 @@ void getSettingsJS(byte subPage, char* dest)
           }
         }
       }
-      #ifdef WLED_DEBUG
-      if (i==0)
-        oappend(SET_F("1"));
-      else
-        oappend(SET_F(",1"));
+      if (i) oappend(SET_F(","));
+      oappend(SET_F("6,7,8,9,10,11")); // flash memory pins
+      #ifdef WLED_ENABLE_DMX
+        oappend(SET_F(",2")); // DMX hardcoded pin
       #endif
-      oappend(SET_F("];"));
+      #ifdef WLED_DEBUG
+        oappend(SET_F(",1")); // debug output (TX) pin
+      #endif
     }
 
     #ifdef ESP8266
